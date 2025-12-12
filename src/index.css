@@ -445,8 +445,8 @@ section {
     mask: linear-gradient(#0000, #0000),
     conic-gradient(
             from calc((var(--start) - 15) * 1deg),
-            #ffffff1f 0deg,
-            white,
+            rgba(10, 40, 231, 0.12) 0deg,
+            blue,
             #ffffff00 100deg
     );
     mask-composite: intersect;

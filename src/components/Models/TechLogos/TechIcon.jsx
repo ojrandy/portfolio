@@ -3,7 +3,7 @@ import { Canvas } from "@react-three/fiber";
 import { useEffect } from "react";
 import * as THREE from "three";
 
-const TechIconCardExperience = ({ model }) => {
+const TechIcon = ({ model }) => {
     const scene = useGLTF(model.modelPath);
 
     useEffect(() => {
@@ -41,4 +41,4 @@ const TechIconCardExperience = ({ model }) => {
     );
 };
 
-export default TechIconCardExperience;
+export default TechIcon;

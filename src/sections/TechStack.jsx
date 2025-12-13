@@ -1,5 +1,6 @@
 import TitleHeader  from "../components/TitleHeader.jsx";
-import {techStackIcons, techStackImgs} from "../constants/index.js";
+import {techStackIcons} from "../constants/index.js";
+// import {techStackImgs} from "../constants/index.js";
 import TechIcon from "../components/Models/TechLogos/TechIcon.jsx";
 import {useGSAP} from "@gsap/react";
 import {gsap} from 'gsap'
@@ -49,11 +50,11 @@ const TechStack = () => {
                     ))}
 
                     {/* Adding images instead of glb models */}
-                    {/* 
+                    {/*
                         techStackImgs.map((icon) =>(
                             <div key={icon.name} className="tech-card-content card-border overflow-hidden group xl:rounded-full rounded-lg ">
                                 <div className="tech-card-animated-bg" />
-                                
+
                                 <div className="tech-card-content">
                                     <div className="tech-icon-wrapper">
                                         <img src={icon.imgPath} alt={icon.name} />

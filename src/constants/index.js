@@ -147,10 +147,10 @@ const techStackIcons = [
 
 const expCards = [
     {
-        review: "Adrian brought creativity and technical expertise to the team, significantly improving our frontend performance. His work has been invaluable in delivering faster experiences.",
+        review: "OJ brought creativity and technical expertise to the team, significantly improving our frontend performance. His work has been invaluable in delivering faster experiences.",
         imgPath: "/images/exp1.png",
         logoPath: "/images/logo1.png",
-        title: "Frontend Developer",
+        title: "Frontend Developer at Bethuel Tech",
         date: "January 2023 - Present",
         responsibilities: [
             "Developed and maintained user-facing features for the Hostinger website.",
@@ -158,22 +158,23 @@ const expCards = [
             "Optimized web applications for maximum speed and scalability.",
         ],
     },
+
     {
-        review: "Adrian’s contributions to Docker's web applications have been outstanding. He approaches challenges with a problem-solving mindset.",
+        review: "Randy’s contributions to Flutter applications have been outstanding. He approaches challenges with a problem-solving mindset.",
         imgPath: "/images/exp2.png",
-        logoPath: "/images/logo2.png",
-        title: "Full Stack Developer",
-        date: "June 2020 - December 2023",
+        logoPath: "/images/logo3.png",
+        title: "FLutter Developer",
+        date: "June 2024 - Present",
         responsibilities: [
-            "Led the development of Docker's web applications, focusing on scalability.",
+            "Led the development of Flutter based applications, focusing on scalability.",
             "Worked with backend engineers to integrate APIs seamlessly with the frontend.",
             "Contributed to open-source projects that were used with the Docker ecosystem.",
         ],
     },
     {
-        review: "Adrian’s work on Appwrite’s mobile app brought a high level of quality and efficiency. He delivered solutions that enhanced our mobile experience & meet our product goals.",
+        review: "Randy’s work on Appwrite’s mobile app brought a high level of quality and efficiency. He delivered solutions that enhanced our mobile experience & meet our product goals.",
         imgPath: "/images/exp3.png",
-        logoPath: "/images/logo3.png",
+        logoPath: "/images/logo2.png",
         title: "React Native Developer",
         date: "March 2019 - May 2020",
         responsibilities: [
@@ -201,48 +202,105 @@ const expLogos = [
 
 const testimonials = [
     {
-        name: "Esther Howard",
-        mentions: "@estherhoward",
+        name: "Alicia Morgan",
+        mentions: "@aliciamorgan",
         review:
-            "I can’t say enough good things about Adrian. He was able to take our complex project requirements and turn them into a seamless, functional website. His problem-solving abilities are outstanding.",
+            "Randy did an incredible job designing and developing our website using WordPress and custom JavaScript. The layout was clean, responsive, and perfectly matched our brand. His ability to combine design and development skills made the process smooth.",
         imgPath: "/images/client1.png",
     },
     {
-        name: "Wade Warren",
-        mentions: "@wadewarren",
+        name: "Joshua Reed",
+        mentions: "@joshreed",
         review:
-            "Working with Adrian was a fantastic experience. He transformed our outdated website into a modern, user-friendly platform. His attention to detail and commitment to quality are unmatched. Highly recommend him for any web dev projects.",
+            "Working with Randy was a great experience. He built a fast and modern React website for our business and paid close attention to performance and user experience. His HTML and CSS skills really helped bring the design to life.",
         imgPath: "/images/client3.png",
     },
     {
-        name: "Guy Hawkins",
-        mentions: "@guyhawkins",
+        name: "Nina Patel",
+        mentions: "@ninapatel",
         review:
-            "Collaborating with Adrian was an absolute pleasure. His professionalism, promptness, and dedication to delivering exceptional results were evident throughout our project. Adrian's enthusiasm for every facet of development truly stands out. If you're seeking to elevate your website and elevate your brand, Adrian is the ideal partner.",
+            "Randy designed our mobile app UI in Figma and handled the branding in Photoshop. The visuals were clean, professional, and user-friendly. He clearly understands how design impacts user engagement.",
         imgPath: "/images/client2.png",
     },
     {
-        name: "Marvin McKinney",
-        mentions: "@marvinmckinney",
+        name: "Samuel Brooks",
+        mentions: "@samuelbrooks",
         review:
-            "Adrian was a pleasure to work with. He turned our outdated website into a fresh, intuitive platform that’s both modern and easy to navigate. Fantastic work overall.",
+            "Randy built our landing pages from scratch using HTML, CSS, and JavaScript. The pages load fast, look great on all devices, and convert well. His attention to detail really stands out.",
         imgPath: "/images/client5.png",
     },
     {
-        name: "Floyd Miles",
-        mentions: "@floydmiles",
+        name: "Laura Kim",
+        mentions: "@laurakim",
         review:
-            "Adrian’s expertise in web development is truly impressive. He delivered a robust and scalable solution for our e-commerce site, and our online sales have significantly increased since the launch. He’s a true professional!",
+            "We hired Randy to develop a Flutter app and design the UI. He delivered a polished product with smooth navigation and a consistent design system. Communication was clear throughout the project.",
         imgPath: "/images/client4.png",
     },
     {
-        name: "Albert Flores",
-        mentions: "@albertflores",
+        name: "David Okoye",
+        mentions: "@davidokoye",
         review:
-            "Adrian was a pleasure to work with. He understood our requirements perfectly and delivered a website that exceeded our expectations. His skills in both frontend and backend dev are top-notch.",
+            "Randy handled both our website redesign and brand visuals. Using WordPress, Figma, and Photoshop, he created a modern digital presence that truly represents our business. Highly professional and reliable.",
         imgPath: "/images/client6.png",
     },
+    {
+        name: "Olivia Martinez",
+        mentions: "@oliviamartinez",
+        review:
+            "Randy created a beautiful and responsive website for our brand using WordPress and custom CSS. He understood our goals clearly and delivered a clean, professional result ahead of schedule.",
+        imgPath: "/images/client1.png",
+    },
+    {
+        name: "Ethan Williams",
+        mentions: "@ethanwilliams",
+        review:
+            "Randy built our web application using React and JavaScript, and the performance improvements were noticeable immediately. The UI is smooth, intuitive, and works perfectly across devices.",
+        imgPath: "/images/client3.png",
+    },
+    {
+        name: "Grace Chen",
+        mentions: "@gracechen",
+        review:
+            "From Figma wireframes to final delivery, Randy handled our app design with precision. The UI/UX flow was well thought out, and the branding done in Photoshop gave our product a premium feel.",
+        imgPath: "/images/client2.png",
+    },
+    {
+        name: "Patrick Mensah",
+        mentions: "@patrickmensah",
+        review:
+            "Randy developed our company website using pure HTML, CSS, and JavaScript. The site is lightweight, fast, and exactly what we needed for our online presence. His technical skills are impressive.",
+        imgPath: "/images/client5.png",
+    },
+    {
+        name: "Isabella Rossi",
+        mentions: "@isabellarossi",
+        review:
+            "Randy designed and developed our Flutter mobile app with great attention to detail. The interface is clean, user-friendly, and consistent with our brand identity.",
+        imgPath: "/images/client4.png",
+    },
+    {
+        name: "Benjamin Clarke",
+        mentions: "@benjaminclarke",
+        review:
+            "We worked with Randy on a full website rebrand. Using WordPress, Figma, and Photoshop, he delivered a modern look that significantly improved our online credibility and user engagement.",
+        imgPath: "/images/client6.png",
+    },
+    {
+        name: "Fatima Bello",
+        mentions: "@fatimabello",
+        review:
+            "Randy’s ability to combine frontend development with strong visual design is rare. Our landing pages built with HTML, CSS, and JavaScript look amazing and convert very well.",
+        imgPath: "/images/client1.png",
+    },
+    {
+        name: "Lucas Brown",
+        mentions: "@lucasbrown",
+        review:
+            "Randy handled both the design and development of our React-based website. The result was a fast, scalable, and visually appealing platform that exceeded our expectations.",
+        imgPath: "/images/client3.png",
+    },
 ];
+
 
 const socialImgs = [
     {

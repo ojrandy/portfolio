@@ -22,3 +22,8 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment (real values live in local .env and hPanel only)
+.env
+.env.*
+!.env.example

@@ -1,7 +1,7 @@
 // Constrained orbit + fly-to driven by useCityStore (P1-05). Rules in src/lib/camera.js.
 // Mouse: drag rotates, right-drag moves, wheel zooms. Touch: one finger rotates, pinch zooms, two-finger drag moves.
 // Keyboard (on `keyTarget`, the focusable element around the canvas): arrows/WASD move, Q/E rotate, +/- zoom,
-// Tab/Shift+Tab visit buildings, Esc/Home return to the start view.
+// Tab/Shift+Tab visit buildings, Enter opens the project panel, Esc closes it, then returns to the start view.
 import { useEffect, useMemo, useRef } from 'react';
 import { useFrame, useThree } from '@react-three/fiber';
 import { CameraControls } from '@react-three/drei';
@@ -67,6 +67,13 @@ const CameraRig = ({ layout, keyTarget }) => {
             if (e.key === 'Tab') {
                 // Past the last (or first) building, let Tab leave the canvas: no keyboard trap.
                 if (store.step(e.shiftKey ? -1 : 1)) e.preventDefault();
+            } else if (e.key === 'Enter' && store.focus) {
+                e.preventDefault();
+                store.openProject(store.focus);
+            } else if (e.key === 'Escape' && store.openSlug) {
+                // First Esc closes the panel, the next one returns to the start view.
+                e.preventDefault();
+                store.closeProject();
             } else if (e.key === 'Escape' || e.key === 'Home') {
                 e.preventDefault();
                 store.goHome();

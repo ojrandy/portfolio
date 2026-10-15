@@ -17,6 +17,29 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-15 — Building interaction
+**Tasks:** P1-06 (done)
+**Done:**
+- Hover (mouse/pen): accent highlight via instance colour, pointer cursor, floating label (name + up to 3 stack items, "+n more"). Click/tap: fly + open the panel; drags over 4 px are ignored. Tab flies + labels, Enter opens, Esc closes then goes home.
+- `src/components/ProjectPanel.jsx`: placeholder panel with only real data (status, stack, numbers labelled "from GitHub" / "from Owner estimate", missing ones hidden, demo badge, https-only links, empty case-study box for P3-01). Right-hand sheet on desktop, bottom sheet on phones, GSAP fade-in (off with reduced motion), non-modal dialog with focus in/out.
+- `src/components/CityProjectList.jsx`: every building as a button outside the canvas in Tab order, hidden until focused (skip-link style).
+- `src/lib/projectSummary.js`, `src/lib/picking.js` (pure); store gains `hovered`, `openSlug`, `setHovered`, `openProject`, `closeProject`; `Buildings.jsx` gets `highlighted`/`onHover`/`onSelect`; `src/city/BuildingLabel.jsx` (drei `<Html>`).
+- `.gitattributes` (`* text=auto eol=lf`): the `main` checkout had turned every file into CRLF (`core.autocrlf=true`), which broke the byte-for-byte content test. Working copies were converted back to LF; no content changed.
+- Docs: interaction rules in design_system.md, API in architecture.md.
+**Checks:** `npm test` 73/73 (8 new: https-only links, label shortening, stats + sources + missing values, owner estimate, status/demo, every real project, picking, store actions) · ESLint clean on changed files · `npm run build` passes, P1-06 code not in `dist/` · Playwright (Chromium, GPU) on `/?city`: hover label + pointer, drag doesn't open, click flies + opens with focus on the heading, Esc closes with focus back on the city, Tab + Enter, list Tab/Enter with focus back on the button, Pixel 7 tap opens the bottom sheet; **13 draw calls** (unchanged), clean console.
+**Decisions (plan approved by owner):** project list hidden until focused; right sheet / bottom sheet; Tab flies + labels, Enter opens.
+**Problems / notes:**
+- **Local `.env` was deleted by the fast-forward of `main` last session** (old `main` still tracked it; the P0-01 commit untracks it). It was restored from history (same content) and stays git-ignored. Anyone else with an old checkout will see the same when they pull: keep a backup of `.env` first.
+- The template's global `section { width: 100dvw }` overrides Tailwind classes; the panel is an `<aside>` for that reason (P0-06 should remove the rule with the template).
+- GSAP `autoAlpha` sets `visibility: hidden`, which stops focus moving into the panel; the panel animates `opacity` only.
+- On phones the bottom sheet covers the lower half, so the flown-to building sits in the upper half; consider offsetting the camera in P5-07.
+- Owner asked for demo stacks: 13 of the 14 GitHub stub projects now have a `[DEMO]` stack read from their own repo (`package.json` / `pubspec.yaml` / firmware includes), with an italic source note in `docs/projects.md`. `coretexcore` stays blank: its repo only has a README. More stack items make some footprints bigger (logistics apps are now large buildings); all camera tests still pass.
+- The panel's "Demo content" badge only covers whole-block demos; field-level `[DEMO]` values (like these stacks) aren't marked in the UI. The strict launch gate still catches them.
+**Next:**
+- P1-07 Loading screen (plan first; check approved motifs, ADR-009) or P1-08 performance pass.
+
+---
+
 ## 2026-10-15 — Camera rig
 **Tasks:** P1-05 (done)
 **Done:**

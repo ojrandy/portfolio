@@ -72,6 +72,14 @@ Placement is **deterministic** (seeded by slug), so the city looks the same for 
 - Mouse: drag rotates, right-drag moves, wheel zooms. Touch: one finger rotates, pinch zooms, two-finger drag moves. Page scrolling is blocked only over the canvas.
 - Keyboard (when the city is focused): arrows/WASD move (by physical key, so AZERTY works), Q/E rotate, +/− zoom, Esc/Home return to the start view. Tab/Shift+Tab visit buildings front row first, west to east. Entering from the start view, Shift+Tab goes to the last building. Past either end, Tab leaves the canvas (no keyboard trap).
 
+**Building interaction (P1-06):**
+- Hover (mouse/pen only): the body takes 40 % of its accent colour (instance colour, no extra draw call), the cursor becomes a pointer, and a label floats 1.4 above the roof: name + up to 3 stack items, then "+n more" (drei `<Html>`, plain DOM, `aria-hidden`).
+- The focused building (Tab, list or click) gets the same highlight and label. Hover wins the label when both exist.
+- Click / tap: fly to the building and open its panel. Pointer travel over 4 px is a camera drag, not a click. Only building bodies are pickable, and the nearest hit wins.
+- Keyboard: Tab flies + labels, Enter opens the panel, Esc closes it (a second Esc returns to the start view).
+- Project panel (placeholder until P3-01): district, name, status, a "Demo content" badge for `demo` projects, stack, numbers with their source ("from GitHub" / "from Owner estimate", missing ones hidden), an empty case-study box, and https-only Live site / Code links (new tab). Right-hand sheet (22rem) from `md`, bottom sheet (max 60vh) on phones. Fades/slides in 300 ms `power2.out`, instant with reduced motion. Non-modal dialog: focus moves to its heading and returns to the opener on close.
+- Project list: every building as a button outside the canvas, in Tab order. Hidden until it has keyboard focus (like a skip link); focusing a button flies there, pressing it opens the panel.
+
 **Final constants (P1-02, `src/lib/buildings.js`):**
 - Height: `k = 1.6`, floor height `0.6`, snapped to whole floors, 3–20 floors (1.8–12 units). Owner `effort` uses the same log2 scale: `effort × 0.7` (effort 10 ≈ 128 commits), so self-rated projects never outgrow measured ones. `stats.source: none` → 3 floors.
 - Footprint (scope): `stack` items ≤ 2 small (1.6, 2 window columns), 3–4 medium (2.2, 3), 5+ large (3.0, 4). With an empty stack, the number of GitHub languages ≥ 5 % is used.

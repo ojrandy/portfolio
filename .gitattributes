@@ -1,0 +1,3 @@
+# LF everywhere, also on Windows checkouts: content:check compares generated JSON byte for byte,
+# and the server (Hostinger) is Linux. Binary files are detected automatically.
+* text=auto eol=lf

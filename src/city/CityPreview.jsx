@@ -2,9 +2,12 @@
 import { useMemo, useRef, useState } from 'react';
 import { Canvas, useFrame } from '@react-three/fiber';
 import Buildings from './Buildings.jsx';
+import BuildingLabel from './BuildingLabel.jsx';
 import CityLayout from './CityLayout.jsx';
 import Backdrop from './Backdrop.jsx';
 import CameraRig from './CameraRig.jsx';
+import ProjectPanel from '../components/ProjectPanel.jsx';
+import CityProjectList from '../components/CityProjectList.jsx';
 import useCityData from '../hooks/useCityData.js';
 import { toBuildings } from '../lib/buildings.js';
 import { layoutCity, DISTRICT_PLOTS } from '../lib/layout.js';
@@ -29,13 +32,22 @@ const CityPreview = () => {
     const [stats, setStats] = useState({ calls: 0, camera: '' });
     const viewport = useRef(null);
     const focus = useCityStore((s) => s.focus);
+    const hovered = useCityStore((s) => s.hovered);
+    const openSlug = useCityStore((s) => s.openSlug);
+    const { setHovered, openProject, closeProject } = useCityStore.getState();
 
     const layout = useMemo(
         () => (data ? layoutCity(toBuildings(data.projects, { now: fetchedAt })) : null),
         [data, fetchedAt],
     );
+    const projects = useMemo(() => new Map((data?.projects ?? []).map((p) => [p.slug, p])), [data]);
+    const lots = useMemo(() => new Map((layout?.lots ?? []).map((l) => [l.slug, l])), [layout]);
+    const highlighted = useMemo(() => [...new Set([hovered, focus].filter(Boolean))], [hovered, focus]);
+
     const bounds = layout?.bounds ?? FALLBACK_BOUNDS;
-    const focusName = focus && data?.projects.find((p) => p.slug === focus)?.name;
+    const labelSlug = hovered ?? focus;
+    const focusName = projects.get(focus)?.name;
+    const openProjectData = projects.get(openSlug);
 
     return (
         <div className="fixed inset-0 bg-basalt">
@@ -44,8 +56,9 @@ const CityPreview = () => {
                 tabIndex={0}
                 role="application"
                 aria-roledescription="3D city"
-                aria-label="OJ City. Tab visits each building, arrow keys or WASD move, Q and E rotate, plus and minus zoom, Escape returns to the start."
+                aria-label="OJ City. Tab visits each building and Enter opens it. Arrow keys or WASD move, Q and E rotate, plus and minus zoom, Escape returns to the start."
                 className="absolute inset-0 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-window"
+                style={{ cursor: hovered ? 'pointer' : undefined }}
             >
                 <Canvas dpr={[1, 1.5]} shadows camera={{ position: [0, 24, 78], fov: CAMERA.fov, near: CAMERA.near, far: CAMERA.far }}>
                     <ambientLight intensity={0.6} color={COLORS.mist} />
@@ -56,16 +69,24 @@ const CityPreview = () => {
                     {layout && (
                         <>
                             <CityLayout layout={layout} />
-                            <Buildings placed={layout.lots} />
+                            <Buildings placed={layout.lots} highlighted={highlighted} onHover={setHovered} onSelect={openProject} />
+                            {lots.get(labelSlug) && projects.get(labelSlug) && (
+                                <BuildingLabel lot={lots.get(labelSlug)} project={projects.get(labelSlug)} />
+                            )}
                             <CameraRig layout={layout} keyTarget={viewport} />
                         </>
                     )}
                     <Stats onChange={setStats} />
                 </Canvas>
             </div>
-            <p className="sr-only" aria-live="polite">{focusName ?? 'Start view, looking up Career Road towards Fako'}</p>
+            <p className="sr-only" aria-live="polite">
+                {focusName ? `${focusName}. Press Enter to open.` : 'Start view, looking up Career Road towards Fako'}
+            </p>
 
-            <div className="pointer-events-none absolute left-4 top-4 rounded bg-black/60 px-3 py-2 font-mono text-xs text-mist">
+            {data && <CityProjectList projects={data.projects} />}
+            {openProjectData && <ProjectPanel key={openSlug} project={openProjectData} onClose={closeProject} />}
+
+            <div className="pointer-events-none absolute left-4 top-4 z-10 rounded bg-black/60 px-3 py-2 font-mono text-xs text-mist">
                 <p>City preview (dev only)</p>
                 {status === 'loading' && <p>Loading /api/city…</p>}
                 {status === 'error' && <p className="text-ember">/api/city failed: {error.message}. Is `npm run dev:server` running?</p>}
@@ -79,7 +100,7 @@ const CityPreview = () => {
                         </p>
                         <p>stats: {data.statsUpdatedAt ?? 'no GitHub data yet'}</p>
                         <p>focus: {focusName ?? 'start view'} · camera {stats.camera}</p>
-                        <p className="text-mist/70">click the city, then Tab / ⇧Tab buildings · WASD/arrows move · Q/E rotate · +/− zoom · Esc home</p>
+                        <p className="text-mist/70">hover / click buildings · Tab / ⇧Tab + Enter · WASD/arrows move · Q/E rotate · +/− zoom · Esc</p>
                     </>
                 )}
             </div>

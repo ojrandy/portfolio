@@ -33,7 +33,7 @@ Each task ID matches a prompt in `/prompt.md`. Commit messages start with the ta
 - [x] **P1-03** City layout: Downtown grid + district plots + roads; deterministic placement (same data ⇒ same city)
 - [x] **P1-04** Fako (Mount Cameroon) backdrop + ground + sky dome
 - [x] **P1-05** Camera rig: constrained orbit, fly-to-building, keyboard navigation, touch gestures
-- [ ] **P1-06** Building interaction: hover label, click → project panel (placeholder content)
+- [x] **P1-06** Building interaction: hover label, click → project panel (placeholder content)
 - [ ] **P1-07** Loading screen (progress + Bayangi-inspired loader once ADR-009 motifs are confirmed)
 - [ ] **P1-08** Performance pass: instancing, merged geometry, DPR clamp, draw-call count, lazy-load 3D chunk
 

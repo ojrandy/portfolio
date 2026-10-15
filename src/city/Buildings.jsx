@@ -6,12 +6,14 @@ import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
 import { FACES, FLOOR_HEIGHT } from '../lib/buildings.js';
 import { COLORS, mixHex } from '../lib/palette.js';
 import { createRandom } from '../lib/random.js';
+import { canHover, isClick, slugAt } from '../lib/picking.js';
 import useReducedMotion from '../hooks/useReducedMotion.js';
 import Part from './InstancedPart.jsx';
 
 const UNLIT_WINDOW = '#1B1F2A';
 const DIM_WINDOW = mixHex(COLORS.window, UNLIT_WINDOW, 0.45);
 const ROOF_HEIGHT = 0.12;
+const NONE = [];
 
 const withColor = (geometry, hex) => {
     const c = new THREE.Color(hex);
@@ -37,13 +39,22 @@ const flagGeometry = mergeGeometries([
     withColor(new THREE.BoxGeometry(0.42, 0.26, 0.015).translate(0.21, 0.75, 0), COLORS.ember), // cloth
 ]);
 
-/** Building data + grid position → per-part instance lists. */
+// Hovered / focused bodies take on their accent so the building stands out without extra draw calls.
+const HIGHLIGHT = 0.4;
+
+/** Bodies in `placed` order (the instance id is the index), highlighted ones tinted. */
+const toBodies = (placed, highlighted) => placed.map(({ building: b, x, z }) => ({
+    position: [x, 0, z],
+    scale: [b.width, b.height, b.depth],
+    color: highlighted.includes(b.slug) ? mixHex(b.bodyColor, b.accentColor, HIGHLIGHT) : b.bodyColor,
+}));
+
+/** Building data + grid position → per-part instance lists (bodies are separate, see toBodies). */
 const toInstances = (placed) => {
-    const parts = { bodies: [], roofs: [], windows: [], cranes: [], beacons: [], flags: [] };
+    const parts = { roofs: [], windows: [], cranes: [], beacons: [], flags: [] };
 
     for (const { building: b, x, z } of placed) {
         const { width: w, depth: d, height: h, floors, columns } = b;
-        parts.bodies.push({ position: [x, 0, z], scale: [w, h, d], color: b.bodyColor });
         parts.roofs.push({ position: [x, h, z], scale: [w * 1.04, ROOF_HEIGHT, d * 1.04], color: b.accentColor });
 
         // Same index order as litWindows in src/lib/buildings.js: face → floor → column.
@@ -95,13 +106,35 @@ const Beacons = ({ items }) => {
     );
 };
 
-/** @param {{ placed: { building: object, x: number, z: number }[] }} props */
-const Buildings = ({ placed }) => {
+/**
+ * @param {{
+ *   placed: { slug: string, building: object, x: number, z: number }[],
+ *   highlighted?: string[],
+ *   onHover?: (slug: string | null) => void,
+ *   onSelect?: (slug: string) => void,
+ * }} props
+ */
+const Buildings = ({ placed, highlighted = NONE, onHover, onSelect }) => {
     const parts = useMemo(() => toInstances(placed), [placed]);
+    const bodies = useMemo(() => toBodies(placed, highlighted), [placed, highlighted]);
+
+    // Only the bodies are pickable; the nearest hit wins, so a tall building in front catches the pointer.
+    const events = {
+        onPointerMove: (e) => {
+            e.stopPropagation();
+            if (onHover && canHover(e.nativeEvent.pointerType)) onHover(slugAt(placed, e.instanceId));
+        },
+        onPointerOut: () => onHover?.(null),
+        onClick: (e) => {
+            e.stopPropagation();
+            const slug = slugAt(placed, e.instanceId);
+            if (slug && onSelect && isClick(e.delta)) onSelect(slug);
+        },
+    };
 
     return (
         <group>
-            <Part items={parts.bodies} geometry={boxGeometry} castShadow receiveShadow>
+            <Part items={bodies} geometry={boxGeometry} castShadow receiveShadow {...events}>
                 <meshStandardMaterial roughness={0.85} metalness={0.05} />
             </Part>
             <Part items={parts.roofs} geometry={boxGeometry}>

@@ -1,0 +1,1172 @@
+{
+    "$generated": "Generated from docs/projects.md by `npm run content:build`. Do not edit by hand.",
+    "projects": [
+        {
+            "slug": "sns-glam",
+            "name": "Sns Glam",
+            "district": "downtown",
+            "featured": true,
+            "status": "live",
+            "live": "https://snsglamshairmakeupstudio.com/",
+            "repo": "https://github.com/ojrandy/sns-glam",
+            "builtFor": "company",
+            "role": "solo",
+            "teamSize": 1,
+            "dates": {
+                "start": "2026-10",
+                "end": "2026-10"
+            },
+            "stack": [
+                "React",
+                "Node"
+            ],
+            "category": [
+                "web"
+            ],
+            "caseStudy": {
+                "problem": "A hair and makeup studio in Buea relied on WhatsApp and walk-ins; it needed a site that shows its work and turns visitors into bookings.",
+                "hardestPart": "the toughest bug or decision was getting the best design and blend the colors",
+                "decision": "I use an Online Pallete the get the best color combination",
+                "result": "users: 100+, speed 100%,",
+                "resultSource": "TODO(content)"
+            },
+            "xray": {
+                "ui": "React, Tailwind CSS, responsive gallery",
+                "api": "Node.js (Express) booking/contact endpoint",
+                "data": "none / form submissions by email",
+                "infra": "Hostinger"
+            },
+            "stats": {
+                "effort": null
+            },
+            "media": "public/previews/sns-glam.webp (captured by P3-02)",
+            "iframe": true,
+            "demo": false,
+            "demoFields": [
+                "teamSize",
+                "caseStudy.problem",
+                "xray.ui",
+                "xray.api",
+                "xray.data",
+                "media"
+            ]
+        },
+        {
+            "slug": "vital-pulse",
+            "name": "Vital Pulse",
+            "district": "downtown",
+            "featured": true,
+            "status": "live",
+            "live": "TODO(content)",
+            "repo": "private",
+            "builtFor": "own product",
+            "role": "founder & lead developer",
+            "teamSize": 2,
+            "dates": {
+                "start": "2025-02",
+                "end": "present"
+            },
+            "stack": [
+                "React Native (Expo)",
+                "Node.js",
+                "Express",
+                "PostgreSQL",
+                "Firebase Cloud Messaging"
+            ],
+            "category": [
+                "mobile"
+            ],
+            "caseStudy": {
+                "problem": "Patients managing long-term conditions (hypertension, diabetes) in Cameroon log readings on paper, if at all, so doctors see a few numbers per visit instead of a trend.",
+                "hardestPart": "Keeping readings safe and in sync when patients are offline for days on weak mobile networks.",
+                "decision": "Offline-first: readings are saved on the phone and synced with conflict-safe timestamps when a connection returns, instead of requiring a live connection.",
+                "result": "300+ patients logging readings weekly; doctors get a 30-day trend chart before each visit",
+                "resultSource": "app analytics"
+            },
+            "xray": {
+                "ui": "React Native screens, charts, reminders",
+                "api": "Node.js + Express REST API, JWT auth, rate-limited",
+                "data": "PostgreSQL (readings, users), on-device SQLite cache",
+                "infra": "VPS + Firebase Cloud Messaging for reminders"
+            },
+            "stats": {
+                "effort": 9
+            },
+            "media": "TODO(content)",
+            "iframe": false,
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "slug": "smart-meal",
+            "name": "Smart Meal",
+            "district": "downtown",
+            "featured": true,
+            "status": "in-progress",
+            "live": "TODO(content)",
+            "repo": "private",
+            "builtFor": "own product",
+            "role": "founder & lead developer",
+            "teamSize": 1,
+            "dates": {
+                "start": "2025-09",
+                "end": "present"
+            },
+            "stack": [
+                "Next.js",
+                "Node.js",
+                "MongoDB",
+                "Claude API",
+                "MTN MoMo / Orange Money payments"
+            ],
+            "category": [
+                "web"
+            ],
+            "caseStudy": {
+                "problem": "Students and young workers in Buea spend too much on food and eat badly because planning meals around a small budget is tedious.",
+                "hardestPart": "Producing meal plans from local ingredients and real market prices, not generic Western recipes.",
+                "decision": "A curated local ingredient and price list that the AI must plan from, so suggestions are realistic and cheap.",
+                "result": "Beta with 50 testers; average weekly food spend down 20% in the first month",
+                "resultSource": "tester survey"
+            },
+            "xray": {
+                "ui": "Next.js, Tailwind CSS",
+                "api": "Next.js API routes, AI meal-plan generator",
+                "data": "MongoDB (users, plans, local price list)",
+                "infra": "Hostinger Node.js"
+            },
+            "stats": {
+                "effort": 8
+            },
+            "media": "TODO(content)",
+            "iframe": true,
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "slug": "oj-city",
+            "name": "OJ City (this portfolio)",
+            "district": "downtown",
+            "featured": false,
+            "status": "in-progress",
+            "live": "https://ojongrandy.com",
+            "repo": "https://github.com/ojrandy/portfolio",
+            "builtFor": "personal",
+            "role": "solo",
+            "teamSize": 1,
+            "dates": {
+                "start": "2026-10",
+                "end": "present"
+            },
+            "stack": [
+                "React",
+                "Three.js (React Three Fiber)",
+                "GSAP",
+                "Tailwind CSS",
+                "Node.js",
+                "Express",
+                "Claude API"
+            ],
+            "category": [
+                "web",
+                "3d"
+            ],
+            "caseStudy": {
+                "problem": "A list of projects doesn't show how a developer thinks. I wanted a portfolio people explore, built from real data.",
+                "hardestPart": "Rendering a whole city at 60 fps on mid-range phones.",
+                "decision": "Instanced meshes and a lazy-loaded 3D scene, plus a fast text-only Recruiter mode.",
+                "result": "The city you are standing in. Buildings, weather and lighting come from live GitHub and Buea data.",
+                "resultSource": null
+            },
+            "xray": {
+                "ui": "React Three Fiber, drei, GSAP",
+                "api": "Express (`/api/city`, `/api/buea`, `/api/chat`)",
+                "data": "GitHub API, Open-Meteo, content JSON",
+                "infra": "Hostinger Node.js"
+            },
+            "stats": {
+                "effort": 9
+            },
+            "media": null,
+            "iframe": false,
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "slug": "trek-cameroon",
+            "name": "Trek Cameroon",
+            "district": "downtown",
+            "featured": false,
+            "status": "live",
+            "live": "TODO(content)",
+            "repo": "private",
+            "builtFor": "client (via Web Spectron Ltd)",
+            "role": "lead frontend developer",
+            "teamSize": 3,
+            "dates": {
+                "start": "2026-06",
+                "end": "2026-08"
+            },
+            "stack": [
+                "Next.js",
+                "Tailwind CSS",
+                "Node.js",
+                "MySQL",
+                "Stripe"
+            ],
+            "category": [
+                "web"
+            ],
+            "caseStudy": {
+                "problem": "A Mount Cameroon trekking operator took bookings by email and WhatsApp, which lost international visitors who wanted to book and pay online.",
+                "hardestPart": "A booking calendar that respects guide availability and group limits per route.",
+                "decision": "Server-side availability checks and short-lived seat holds during checkout, so two people can't book the last place.",
+                "result": "Online bookings live for the 2026 season; enquiries handled on the site instead of WhatsApp",
+                "resultSource": "client"
+            },
+            "xray": {
+                "ui": "Next.js, interactive route maps",
+                "api": "Node.js booking API, Stripe checkout",
+                "data": "MySQL (routes, guides, bookings)",
+                "infra": "Hostinger"
+            },
+            "stats": {
+                "effort": 7
+            },
+            "media": "TODO(content)",
+            "iframe": true,
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "slug": "pickup-app",
+            "name": "PICKUP App",
+            "district": "downtown",
+            "featured": false,
+            "status": "live",
+            "live": "TODO(content)",
+            "repo": "private",
+            "builtFor": "company (Turko Banix Inc)",
+            "role": "mobile developer",
+            "teamSize": 5,
+            "dates": {
+                "start": "2024-11",
+                "end": "2025-08"
+            },
+            "stack": [
+                "Flutter",
+                "Firebase (Auth, Firestore, Cloud Functions)",
+                "Google Maps API"
+            ],
+            "category": [
+                "mobile"
+            ],
+            "caseStudy": {
+                "problem": "Customers needed to request a package pickup and track the rider live, instead of calling back and forth.",
+                "hardestPart": "Smooth live rider tracking without draining the rider's battery.",
+                "decision": "Adaptive location updates: frequent while a pickup is active, rare when the rider is idle.",
+                "result": "Shipped to Android and iOS; I owned live tracking and the rider app",
+                "resultSource": "company"
+            },
+            "xray": {
+                "ui": "Flutter (customer + rider apps)",
+                "api": "Firebase Cloud Functions",
+                "data": "Firestore",
+                "infra": "Firebase, Google Maps Platform"
+            },
+            "stats": {
+                "effort": 8
+            },
+            "media": "TODO(content)",
+            "iframe": false,
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "slug": "hospital-management-system",
+            "name": "Hospital Management System",
+            "district": "downtown",
+            "featured": false,
+            "status": "live",
+            "live": null,
+            "repo": "private",
+            "builtFor": "client",
+            "role": "full-stack developer",
+            "teamSize": 2,
+            "dates": {
+                "start": "2023-01",
+                "end": "2023-09"
+            },
+            "stack": [
+                "React",
+                "Node.js",
+                "Express",
+                "MySQL"
+            ],
+            "category": [
+                "web"
+            ],
+            "caseStudy": {
+                "problem": "A private clinic kept patient records, appointments and billing on paper and in spreadsheets, so files went missing and bills were wrong.",
+                "hardestPart": "Role-based access: reception, nurses, doctors and the cashier must each see only what they need.",
+                "decision": "Permissions enforced on the server for every request, never just hidden in the UI.",
+                "result": "Records, appointments and billing in one system; staff trained in a week",
+                "resultSource": "client"
+            },
+            "xray": {
+                "ui": "React dashboard",
+                "api": "Express REST API with role-based access control",
+                "data": "MySQL (patients, visits, invoices)",
+                "infra": "on-premise server + nightly backups"
+            },
+            "stats": {
+                "effort": 8
+            },
+            "media": "TODO(content), anonymised screenshots only",
+            "iframe": false,
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "slug": "multi-vendor-ecommerce",
+            "name": "Multi-vendor E-commerce",
+            "district": "downtown",
+            "featured": false,
+            "status": "live",
+            "live": "TODO(content)",
+            "repo": "private",
+            "builtFor": "client (Revival IT Centre, Buea)",
+            "role": "full-stack developer",
+            "teamSize": 2,
+            "dates": {
+                "start": "2022-06",
+                "end": "2023-02"
+            },
+            "stack": [
+                "Next.js",
+                "Node.js",
+                "MongoDB",
+                "MTN MoMo / Orange Money payments"
+            ],
+            "category": [
+                "web"
+            ],
+            "caseStudy": {
+                "problem": "Small shops in Buea had no affordable way to sell online and accept mobile money.",
+                "hardestPart": "Splitting one customer order across several vendors, with each vendor paid correctly.",
+                "decision": "Orders split into per-vendor sub-orders with their own status and payout records.",
+                "result": "Marketplace launched with local vendors; orders paid by mobile money",
+                "resultSource": "client"
+            },
+            "xray": {
+                "ui": "Next.js storefront + vendor dashboard",
+                "api": "Node.js, payment webhooks",
+                "data": "MongoDB",
+                "infra": "VPS"
+            },
+            "stats": {
+                "effort": 8
+            },
+            "media": "TODO(content)",
+            "iframe": "TODO(content)",
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "slug": "learn-contri-talk",
+            "name": "Learn Contri Talk",
+            "district": "downtown",
+            "featured": false,
+            "status": "archived",
+            "live": null,
+            "repo": "private",
+            "builtFor": "company",
+            "role": "backend contributor",
+            "teamSize": 4,
+            "dates": {
+                "start": "2021-06",
+                "end": "2022-03"
+            },
+            "stack": [
+                "PHP (native)",
+                "MySQL",
+                "JavaScript"
+            ],
+            "category": [
+                "web"
+            ],
+            "caseStudy": {
+                "problem": "A learning community needed a place for learners to post questions, share notes and join discussions.",
+                "hardestPart": "Keeping a hand-written PHP codebase secure against SQL injection and XSS.",
+                "decision": "Moved every query to prepared statements and escaped all output.",
+                "result": "Contributed discussion and notes features",
+                "resultSource": "company"
+            },
+            "xray": {
+                "ui": "server-rendered PHP + JavaScript",
+                "api": "PHP endpoints",
+                "data": "MySQL",
+                "infra": "shared hosting"
+            },
+            "stats": {
+                "effort": 6
+            },
+            "media": null,
+            "iframe": false,
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "slug": "analytics-dashboard",
+            "name": "Business Analytics Dashboard",
+            "district": "downtown",
+            "featured": false,
+            "status": "live",
+            "live": null,
+            "repo": "private",
+            "builtFor": "company",
+            "role": "frontend developer",
+            "teamSize": 3,
+            "dates": {
+                "start": "2022-01",
+                "end": "2022-05"
+            },
+            "stack": [
+                "React",
+                "Next.js",
+                "Recharts",
+                "REST API"
+            ],
+            "category": [
+                "web"
+            ],
+            "caseStudy": {
+                "problem": "Managers waited for weekly spreadsheet reports to see sales and stock.",
+                "hardestPart": "Fast charts over large date ranges.",
+                "decision": "Pre-aggregated daily totals on the server; the browser only draws charts.",
+                "result": "Live sales and stock dashboard replaced the weekly spreadsheet",
+                "resultSource": "company"
+            },
+            "xray": {
+                "ui": "Next.js, Recharts",
+                "api": "REST API (company backend)",
+                "data": "SQL database (company)",
+                "infra": "company server"
+            },
+            "stats": {
+                "effort": 5
+            },
+            "media": "TODO(content), anonymised",
+            "iframe": false,
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "slug": "computer-solution",
+            "name": "Computer Solution Website",
+            "district": "downtown",
+            "featured": false,
+            "status": "live",
+            "live": "TODO(content)",
+            "repo": "private",
+            "builtFor": "client (via Web Spectron Ltd)",
+            "role": "developer",
+            "teamSize": 2,
+            "dates": {
+                "start": "2026-07",
+                "end": "2026-07"
+            },
+            "stack": [
+                "React",
+                "Tailwind CSS",
+                "Google Maps embed"
+            ],
+            "category": [
+                "web"
+            ],
+            "caseStudy": {
+                "problem": "A computer sales and repair shop needed to be found on Google and show its services and location.",
+                "hardestPart": "Ranking locally for \"computer repair Buea\".",
+                "decision": "Local SEO: Google Business Profile, LocalBusiness schema and a Maps embed.",
+                "result": "Live, listed on Google Maps",
+                "resultSource": "client"
+            },
+            "xray": {
+                "ui": "React, Tailwind CSS",
+                "api": "contact form endpoint",
+                "data": null,
+                "infra": "Hostinger"
+            },
+            "stats": {
+                "effort": 4
+            },
+            "media": "TODO(content)",
+            "iframe": true,
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "slug": "banking-landing-page",
+            "name": "Banking Landing Page",
+            "district": "downtown",
+            "featured": false,
+            "status": "live",
+            "live": "TODO(content)",
+            "repo": "TODO(content)",
+            "builtFor": "client (via Web Spectron Ltd)",
+            "role": "frontend developer",
+            "teamSize": 1,
+            "dates": {
+                "start": "2026-08",
+                "end": "2026-08"
+            },
+            "stack": [
+                "React",
+                "Tailwind CSS",
+                "GSAP"
+            ],
+            "category": [
+                "web"
+            ],
+            "caseStudy": {
+                "problem": "A financial services brand needed a landing page that builds trust and drives sign-ups.",
+                "hardestPart": "Rich animation without hurting load time on mobile.",
+                "decision": "GSAP animations that start only when sections scroll into view, and that respect reduced-motion settings.",
+                "result": "Lighthouse Performance 95+ on mobile",
+                "resultSource": "Lighthouse report"
+            },
+            "xray": {
+                "ui": "React, Tailwind CSS, GSAP",
+                "api": null,
+                "data": null,
+                "infra": "TODO(content)"
+            },
+            "stats": {
+                "effort": 3
+            },
+            "media": "TODO(content)",
+            "iframe": true,
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "slug": "anointed-plc",
+            "name": "Anointed PLC Website",
+            "district": "downtown",
+            "featured": false,
+            "status": "live",
+            "live": "TODO(content)",
+            "repo": "private",
+            "builtFor": "client (Yaoundé)",
+            "role": "solo",
+            "teamSize": 1,
+            "dates": {
+                "start": "TODO(content)",
+                "end": "TODO(content)"
+            },
+            "stack": [
+                "WordPress",
+                "Elementor"
+            ],
+            "category": [
+                "web"
+            ],
+            "caseStudy": {
+                "problem": "A Yaoundé company needed a professional bilingual (English/French) site it could update itself.",
+                "hardestPart": "Bilingual content without doubling the editing work.",
+                "decision": "WordPress with a translation plugin and a short training session for the client.",
+                "result": "Client updates the site without a developer",
+                "resultSource": "client"
+            },
+            "xray": {
+                "ui": "WordPress theme + Elementor",
+                "api": null,
+                "data": "WordPress (MySQL)",
+                "infra": "TODO(content)"
+            },
+            "stats": {
+                "effort": 4
+            },
+            "media": "TODO(content)",
+            "iframe": "TODO(content)",
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "slug": "wordpress-sites",
+            "name": "WordPress Client Sites",
+            "district": "downtown",
+            "featured": false,
+            "status": "live",
+            "live": "TODO(content)",
+            "repo": null,
+            "builtFor": "freelance clients",
+            "role": "solo",
+            "teamSize": 1,
+            "dates": {
+                "start": "2021",
+                "end": "present"
+            },
+            "stack": [
+                "WordPress",
+                "WooCommerce",
+                "Elementor"
+            ],
+            "category": [
+                "web"
+            ],
+            "caseStudy": {
+                "problem": "Small businesses in Buea needed affordable websites they could manage themselves.",
+                "hardestPart": "Keeping many client sites fast and secure after handover.",
+                "decision": "A standard setup: caching, security hardening, automatic backups and updates.",
+                "result": "Several business sites live and maintained",
+                "resultSource": "owner (TODO(content): exact count)"
+            },
+            "xray": {
+                "ui": "WordPress themes",
+                "api": null,
+                "data": "MySQL",
+                "infra": "Hostinger"
+            },
+            "stats": {
+                "effort": 5
+            },
+            "media": "TODO(content)",
+            "iframe": "TODO(content)",
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "slug": "navoraglobalfreight",
+            "name": "navoraglobalfreight",
+            "district": "downtown",
+            "featured": false,
+            "status": "TODO(content)",
+            "live": "TODO(content)",
+            "repo": "https://github.com/ojrandy/navoraglobalfreight",
+            "builtFor": "TODO(content)",
+            "role": "TODO(content)",
+            "teamSize": "TODO(content)",
+            "dates": {
+                "start": "TODO(content)",
+                "end": "TODO(content)"
+            },
+            "stack": "TODO(content)",
+            "category": "TODO(content)",
+            "caseStudy": {
+                "problem": "TODO(content)",
+                "hardestPart": "TODO(content)",
+                "decision": "TODO(content)",
+                "result": "TODO(content)",
+                "resultSource": null
+            },
+            "xray": {
+                "ui": "TODO(content)",
+                "api": "TODO(content)",
+                "data": "TODO(content)",
+                "infra": "TODO(content)"
+            },
+            "stats": {
+                "effort": null
+            },
+            "media": "TODO(content)",
+            "iframe": "TODO(content)",
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "slug": "advancedglobal",
+            "name": "advancedGlobal",
+            "district": "downtown",
+            "featured": false,
+            "status": "TODO(content)",
+            "live": "TODO(content)",
+            "repo": "https://github.com/ojrandy/advancedGlobal",
+            "builtFor": "TODO(content)",
+            "role": "TODO(content)",
+            "teamSize": "TODO(content)",
+            "dates": {
+                "start": "TODO(content)",
+                "end": "TODO(content)"
+            },
+            "stack": "TODO(content)",
+            "category": "TODO(content)",
+            "caseStudy": {
+                "problem": "TODO(content)",
+                "hardestPart": "TODO(content)",
+                "decision": "TODO(content)",
+                "result": "TODO(content)",
+                "resultSource": null
+            },
+            "xray": {
+                "ui": "TODO(content)",
+                "api": "TODO(content)",
+                "data": "TODO(content)",
+                "infra": "TODO(content)"
+            },
+            "stats": {
+                "effort": null
+            },
+            "media": "TODO(content)",
+            "iframe": "TODO(content)",
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "slug": "wvl",
+            "name": "WVL",
+            "district": "downtown",
+            "featured": false,
+            "status": "TODO(content)",
+            "live": "TODO(content)",
+            "repo": "https://github.com/ojrandy/WVL",
+            "builtFor": "TODO(content)",
+            "role": "TODO(content)",
+            "teamSize": "TODO(content)",
+            "dates": {
+                "start": "TODO(content)",
+                "end": "TODO(content)"
+            },
+            "stack": "TODO(content)",
+            "category": "TODO(content)",
+            "caseStudy": {
+                "problem": "TODO(content)",
+                "hardestPart": "TODO(content)",
+                "decision": "TODO(content)",
+                "result": "TODO(content)",
+                "resultSource": null
+            },
+            "xray": {
+                "ui": "TODO(content)",
+                "api": "TODO(content)",
+                "data": "TODO(content)",
+                "infra": "TODO(content)"
+            },
+            "stats": {
+                "effort": null
+            },
+            "media": "TODO(content)",
+            "iframe": "TODO(content)",
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "slug": "coretexcore",
+            "name": "coretexcore",
+            "district": "downtown",
+            "featured": false,
+            "status": "TODO(content)",
+            "live": "TODO(content)",
+            "repo": "https://github.com/ojrandy/coretexcore",
+            "builtFor": "TODO(content)",
+            "role": "TODO(content)",
+            "teamSize": "TODO(content)",
+            "dates": {
+                "start": "TODO(content)",
+                "end": "TODO(content)"
+            },
+            "stack": "TODO(content)",
+            "category": "TODO(content)",
+            "caseStudy": {
+                "problem": "TODO(content)",
+                "hardestPart": "TODO(content)",
+                "decision": "TODO(content)",
+                "result": "TODO(content)",
+                "resultSource": null
+            },
+            "xray": {
+                "ui": "TODO(content)",
+                "api": "TODO(content)",
+                "data": "TODO(content)",
+                "infra": "TODO(content)"
+            },
+            "stats": {
+                "effort": null
+            },
+            "media": "TODO(content)",
+            "iframe": "TODO(content)",
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "slug": "food-app-website",
+            "name": "food_app_website",
+            "district": "downtown",
+            "featured": false,
+            "status": "TODO(content)",
+            "live": "TODO(content)",
+            "repo": "https://github.com/ojrandy/food_app_website",
+            "builtFor": "TODO(content)",
+            "role": "TODO(content)",
+            "teamSize": "TODO(content)",
+            "dates": {
+                "start": "TODO(content)",
+                "end": "TODO(content)"
+            },
+            "stack": "TODO(content)",
+            "category": "TODO(content)",
+            "caseStudy": {
+                "problem": "TODO(content)",
+                "hardestPart": "TODO(content)",
+                "decision": "TODO(content)",
+                "result": "TODO(content)",
+                "resultSource": null
+            },
+            "xray": {
+                "ui": "TODO(content)",
+                "api": "TODO(content)",
+                "data": "TODO(content)",
+                "infra": "TODO(content)"
+            },
+            "stats": {
+                "effort": null
+            },
+            "media": "TODO(content)",
+            "iframe": "TODO(content)",
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "slug": "food-recipe2",
+            "name": "food_recipe2",
+            "district": "downtown",
+            "featured": false,
+            "status": "TODO(content)",
+            "live": "TODO(content)",
+            "repo": "https://github.com/ojrandy/food_recipe2",
+            "builtFor": "TODO(content)",
+            "role": "TODO(content)",
+            "teamSize": "TODO(content)",
+            "dates": {
+                "start": "TODO(content)",
+                "end": "TODO(content)"
+            },
+            "stack": "TODO(content)",
+            "category": "TODO(content)",
+            "caseStudy": {
+                "problem": "TODO(content)",
+                "hardestPart": "TODO(content)",
+                "decision": "TODO(content)",
+                "result": "TODO(content)",
+                "resultSource": null
+            },
+            "xray": {
+                "ui": "TODO(content)",
+                "api": "TODO(content)",
+                "data": "TODO(content)",
+                "infra": "TODO(content)"
+            },
+            "stats": {
+                "effort": null
+            },
+            "media": "TODO(content)",
+            "iframe": "TODO(content)",
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "slug": "expense-tracker",
+            "name": "expense-Tracker",
+            "district": "downtown",
+            "featured": false,
+            "status": "TODO(content)",
+            "live": "TODO(content)",
+            "repo": "https://github.com/ojrandy/expense-Tracker",
+            "builtFor": "TODO(content)",
+            "role": "TODO(content)",
+            "teamSize": "TODO(content)",
+            "dates": {
+                "start": "TODO(content)",
+                "end": "TODO(content)"
+            },
+            "stack": "TODO(content)",
+            "category": "TODO(content)",
+            "caseStudy": {
+                "problem": "TODO(content)",
+                "hardestPart": "TODO(content)",
+                "decision": "TODO(content)",
+                "result": "TODO(content)",
+                "resultSource": null
+            },
+            "xray": {
+                "ui": "TODO(content)",
+                "api": "TODO(content)",
+                "data": "TODO(content)",
+                "infra": "TODO(content)"
+            },
+            "stats": {
+                "effort": null
+            },
+            "media": "TODO(content)",
+            "iframe": "TODO(content)",
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "slug": "threejs",
+            "name": "threejs",
+            "district": "downtown",
+            "featured": false,
+            "status": "TODO(content)",
+            "live": "TODO(content)",
+            "repo": "https://github.com/ojrandy/threejs",
+            "builtFor": "TODO(content)",
+            "role": "TODO(content)",
+            "teamSize": "TODO(content)",
+            "dates": {
+                "start": "TODO(content)",
+                "end": "TODO(content)"
+            },
+            "stack": "TODO(content)",
+            "category": "TODO(content)",
+            "caseStudy": {
+                "problem": "TODO(content)",
+                "hardestPart": "TODO(content)",
+                "decision": "TODO(content)",
+                "result": "TODO(content)",
+                "resultSource": null
+            },
+            "xray": {
+                "ui": "TODO(content)",
+                "api": "TODO(content)",
+                "data": "TODO(content)",
+                "infra": "TODO(content)"
+            },
+            "stats": {
+                "effort": null
+            },
+            "media": "TODO(content)",
+            "iframe": "TODO(content)",
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "slug": "polished-portfolio-pro",
+            "name": "polished-portfolio-pro",
+            "district": "downtown",
+            "featured": false,
+            "status": "TODO(content)",
+            "live": "TODO(content)",
+            "repo": "https://github.com/mazunita237-netizen/polished-portfolio-pro",
+            "builtFor": "TODO(content)",
+            "role": "TODO(content)",
+            "teamSize": "TODO(content)",
+            "dates": {
+                "start": "TODO(content)",
+                "end": "TODO(content)"
+            },
+            "stack": "TODO(content)",
+            "category": "TODO(content)",
+            "caseStudy": {
+                "problem": "TODO(content)",
+                "hardestPart": "TODO(content)",
+                "decision": "TODO(content)",
+                "result": "TODO(content)",
+                "resultSource": null
+            },
+            "xray": {
+                "ui": "TODO(content)",
+                "api": "TODO(content)",
+                "data": "TODO(content)",
+                "infra": "TODO(content)"
+            },
+            "stats": {
+                "effort": null
+            },
+            "media": "TODO(content)",
+            "iframe": "TODO(content)",
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "slug": "afplc-connect",
+            "name": "afplc-connect",
+            "district": "downtown",
+            "featured": false,
+            "status": "TODO(content)",
+            "live": "TODO(content)",
+            "repo": "https://github.com/mazunita237-netizen/afplc-connect",
+            "builtFor": "TODO(content)",
+            "role": "TODO(content)",
+            "teamSize": "TODO(content)",
+            "dates": {
+                "start": "TODO(content)",
+                "end": "TODO(content)"
+            },
+            "stack": "TODO(content)",
+            "category": "TODO(content)",
+            "caseStudy": {
+                "problem": "TODO(content)",
+                "hardestPart": "TODO(content)",
+                "decision": "TODO(content)",
+                "result": "TODO(content)",
+                "resultSource": null
+            },
+            "xray": {
+                "ui": "TODO(content)",
+                "api": "TODO(content)",
+                "data": "TODO(content)",
+                "infra": "TODO(content)"
+            },
+            "stats": {
+                "effort": null
+            },
+            "media": "TODO(content)",
+            "iframe": "TODO(content)",
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "slug": "iot-sentinelf",
+            "name": "iot-sentinelf",
+            "district": "downtown",
+            "featured": false,
+            "status": "TODO(content)",
+            "live": "TODO(content)",
+            "repo": "https://github.com/mazunita237-netizen/iot-sentinelf",
+            "builtFor": "TODO(content)",
+            "role": "TODO(content)",
+            "teamSize": "TODO(content)",
+            "dates": {
+                "start": "TODO(content)",
+                "end": "TODO(content)"
+            },
+            "stack": "TODO(content)",
+            "category": "TODO(content)",
+            "caseStudy": {
+                "problem": "TODO(content)",
+                "hardestPart": "TODO(content)",
+                "decision": "TODO(content)",
+                "result": "TODO(content)",
+                "resultSource": null
+            },
+            "xray": {
+                "ui": "TODO(content)",
+                "api": "TODO(content)",
+                "data": "TODO(content)",
+                "infra": "TODO(content)"
+            },
+            "stats": {
+                "effort": null
+            },
+            "media": "TODO(content)",
+            "iframe": "TODO(content)",
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "slug": "novatransport",
+            "name": "novaTransport",
+            "district": "downtown",
+            "featured": false,
+            "status": "TODO(content)",
+            "live": "TODO(content)",
+            "repo": "https://github.com/webspectron/novaTransport",
+            "builtFor": "TODO(content)",
+            "role": "TODO(content)",
+            "teamSize": "TODO(content)",
+            "dates": {
+                "start": "TODO(content)",
+                "end": "TODO(content)"
+            },
+            "stack": "TODO(content)",
+            "category": "TODO(content)",
+            "caseStudy": {
+                "problem": "TODO(content)",
+                "hardestPart": "TODO(content)",
+                "decision": "TODO(content)",
+                "result": "TODO(content)",
+                "resultSource": null
+            },
+            "xray": {
+                "ui": "TODO(content)",
+                "api": "TODO(content)",
+                "data": "TODO(content)",
+                "infra": "TODO(content)"
+            },
+            "stats": {
+                "effort": null
+            },
+            "media": "TODO(content)",
+            "iframe": "TODO(content)",
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "slug": "novaf",
+            "name": "novaF",
+            "district": "downtown",
+            "featured": false,
+            "status": "TODO(content)",
+            "live": "TODO(content)",
+            "repo": "https://github.com/webspectron/novaF",
+            "builtFor": "TODO(content)",
+            "role": "TODO(content)",
+            "teamSize": "TODO(content)",
+            "dates": {
+                "start": "TODO(content)",
+                "end": "TODO(content)"
+            },
+            "stack": "TODO(content)",
+            "category": "TODO(content)",
+            "caseStudy": {
+                "problem": "TODO(content)",
+                "hardestPart": "TODO(content)",
+                "decision": "TODO(content)",
+                "result": "TODO(content)",
+                "resultSource": null
+            },
+            "xray": {
+                "ui": "TODO(content)",
+                "api": "TODO(content)",
+                "data": "TODO(content)",
+                "infra": "TODO(content)"
+            },
+            "stats": {
+                "effort": null
+            },
+            "media": "TODO(content)",
+            "iframe": "TODO(content)",
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "slug": "worldl",
+            "name": "worldL",
+            "district": "downtown",
+            "featured": false,
+            "status": "TODO(content)",
+            "live": "TODO(content)",
+            "repo": "https://github.com/webspectron/worldL",
+            "builtFor": "TODO(content)",
+            "role": "TODO(content)",
+            "teamSize": "TODO(content)",
+            "dates": {
+                "start": "TODO(content)",
+                "end": "TODO(content)"
+            },
+            "stack": "TODO(content)",
+            "category": "TODO(content)",
+            "caseStudy": {
+                "problem": "TODO(content)",
+                "hardestPart": "TODO(content)",
+                "decision": "TODO(content)",
+                "result": "TODO(content)",
+                "resultSource": null
+            },
+            "xray": {
+                "ui": "TODO(content)",
+                "api": "TODO(content)",
+                "data": "TODO(content)",
+                "infra": "TODO(content)"
+            },
+            "stats": {
+                "effort": null
+            },
+            "media": "TODO(content)",
+            "iframe": "TODO(content)",
+            "demo": false,
+            "demoFields": []
+        }
+    ]
+}

@@ -27,6 +27,16 @@ section {
     --color-black-200: #282732;
     --color-blue-50: #839cb5;
     --color-blue-100: #2d2d38;
+
+    /* OJ City tokens (docs/design_system.md, mirrored in src/lib/palette.js) */
+    --color-basalt: #15161a;
+    --color-ash: #2a2c33;
+    --color-mist: #c9d3da;
+    --color-fako-green: #2f6b4f;
+    --color-indigo: #2b3a8c;
+    --color-window: #ffc56b;
+    --color-ember: #e2552b;
+    --color-paper: #f4f1ea;
 }
 
 @layer utilities {

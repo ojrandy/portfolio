@@ -1,0 +1,386 @@
+{
+    "$generated": "Generated from docs/projects.md by `npm run content:build`. Do not edit by hand.",
+    "name": "Ojong Randy",
+    "title": "Software engineer building fast, secure web and mobile products from Buea, Cameroon",
+    "location": "Buea, Cameroon",
+    "culture": "Bayangi / Orocko",
+    "availability": {
+        "freelance": true,
+        "fullTime": true,
+        "contract": true,
+        "remote": true
+    },
+    "email": "contact@ojongrandy.com",
+    "links": {
+        "github": "https://github.com/ojrandy",
+        "githubUsername": "ojrandy",
+        "linkedin": "https://www.linkedin.com/in/ojong-randy/",
+        "x": null,
+        "youtube": "https://www.youtube.com/@ojongrandy2580"
+    },
+    "cv": "/cv/ojong-randy-cv.pdf",
+    "yearsCoding": "5+",
+    "languages": [
+        "English (fluent)",
+        "French (working)",
+        "Pidgin (fluent)"
+    ],
+    "degree": "B.Tech/B.Eng Software Engineering, First Class — <institution>, <year>",
+    "bio": "I so much believe that with 0 & 1, we can together make the world a better if not the best place. I have a degree in Software Engineering with a 1st Class degree. have build countless projects but yet keeping a simple and easy life. I am much like a techpreneur with my biggest brake throught project being Vital Pulse and Smart Meal",
+    "origin": "i see coding as a source of strength as most of my friends and always say, my powers are in my fingers. I also take security seriously and never trust anything coming from the client side.",
+    "services": [
+        "Web & Mobile Development",
+        "Video editing",
+        "CCTV Camera installation",
+        "Graphics design with Figma and Adobe XD",
+        "Leverage the use of AI for the best study experience",
+        "SEO and Google map integration",
+        "Experince Lecturer in Computer science and related IT cources"
+    ],
+    "hobbies": [
+        {
+            "name": "Coding",
+            "text": "Using JS, Familiar with React, React Native, NextJs and love coding with Threejs and Flutter"
+        },
+        {
+            "name": "Video editing",
+            "text": "use tools like premier pro, Capcut"
+        },
+        {
+            "name": "Gaming",
+            "text": "Love FIFA, GTA and Acion games"
+        },
+        {
+            "name": "Teaching",
+            "text": "currently teaching at Trustech University Institue of Buea (TUIB)"
+        },
+        {
+            "name": "Football",
+            "text": "Am a proud FCB fan, I play Gk and simetime RB."
+        }
+    ],
+    "motifs": [],
+    "experience": [
+        {
+            "role": "Software Developer",
+            "company": "Web Spectron Ltd",
+            "dates": {
+                "start": "2026-06",
+                "end": "present"
+            },
+            "location": "Remote",
+            "did": [
+                "Software development",
+                "Work as the HR, where i use Chantt chart to asign task"
+            ],
+            "proudest": "Build the Trek Cameroon web app, Build the Computer Solution website, Build a banking langing page, Build vital Pulse App, Build Sns Glam and many more",
+            "demo": false,
+            "demoFields": [
+                "role"
+            ]
+        },
+        {
+            "role": "Software Developer",
+            "company": "Turko banix Inc",
+            "dates": {
+                "start": "2024-11",
+                "end": "2025"
+            },
+            "location": "Remote",
+            "did": [
+                "Software development",
+                "Work as the HR, where i use Chantt chart to asign task"
+            ],
+            "proudest": "Build multiple and contribute in the PICKUP App",
+            "demo": false,
+            "demoFields": [
+                "role"
+            ]
+        },
+        {
+            "role": "Full-stack Developer & IT Technician",
+            "company": "TODO(content)",
+            "dates": {
+                "start": "2021-03",
+                "end": "2024-09"
+            },
+            "location": "Buea Cameroon",
+            "did": [
+                "Use React and nextJs to build interative dashboards",
+                "Also use native PHP to contribute in the APP development of Learn Contri talk.",
+                "Did networking and camera installing"
+            ],
+            "proudest": "Build a hospital management system, build a multi ecommerce app, for Revival IT centre buea, Build multiple wordpress site for frenlance clients",
+            "demo": false,
+            "demoFields": [
+                "role"
+            ]
+        }
+    ],
+    "teaching": [
+        {
+            "title": "Introduction to Programming (JavaScript)",
+            "venue": "Trustech University Institute of Buea (TUIB)",
+            "audience": "first-year students",
+            "courses": null,
+            "date": "TODO(content) → present",
+            "link": null,
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "title": "Web Development (HTML, CSS, React)",
+            "venue": "TUIB",
+            "audience": "second-year students",
+            "courses": null,
+            "date": "TODO(content) → present",
+            "link": null,
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "title": "Database Systems (SQL)",
+            "venue": "TUIB",
+            "audience": "second-year students",
+            "courses": null,
+            "date": "TODO(content) → present",
+            "link": null,
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "title": "Networking & IT Support basics",
+            "venue": "TUIB",
+            "audience": "IT diploma students",
+            "courses": null,
+            "date": "TODO(content)",
+            "link": null,
+            "demo": true,
+            "demoFields": []
+        }
+    ],
+    "video": [
+        {
+            "title": "YouTube channel",
+            "link": "https://www.youtube.com/@ojongrandy2580",
+            "role": "filming and editing",
+            "tools": [
+                "Premiere Pro",
+                "CapCut"
+            ],
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "title": "Showreel 2026",
+            "link": "TODO(content)",
+            "role": "edit, colour, sound",
+            "tools": [
+                "Premiere Pro"
+            ],
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "title": "Event highlight film",
+            "link": "TODO(content)",
+            "role": "edit, motion titles",
+            "tools": [
+                "Premiere Pro",
+                "CapCut"
+            ],
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "title": "Product promo for a client",
+            "link": "TODO(content)",
+            "role": "script and edit",
+            "tools": [
+                "CapCut"
+            ],
+            "demo": true,
+            "demoFields": []
+        }
+    ],
+    "testimonials": [
+        {
+            "quote": "Ojong Randy Provides exxeptional services. He uses Tactile teaching methods to ensure every student in class understand and get the best out of themselves at all times",
+            "name": "TODO(content)",
+            "link": null,
+            "permission": false,
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "quote": "TODO(content)",
+            "name": "<Name>, Owner, SNS Glam Hair & Makeup Studio",
+            "link": null,
+            "permission": false,
+            "demo": true,
+            "demoFields": [
+                "name"
+            ]
+        },
+        {
+            "quote": "TODO(content)",
+            "name": "<Name>, <role>, Web Spectron Ltd",
+            "link": null,
+            "permission": false,
+            "demo": true,
+            "demoFields": [
+                "name"
+            ]
+        }
+    ],
+    "stats": [
+        {
+            "label": "Projects shipped",
+            "value": "100",
+            "source": "TODO(content)",
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "label": "Users served",
+            "value": "100",
+            "source": "TODO(content)",
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "label": "Years coding",
+            "value": "5+",
+            "source": "owner (start year: TODO(content))",
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "label": "Public repos",
+            "value": "auto",
+            "source": "GitHub API (P1-01)",
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "label": "Projects in OJ City",
+            "value": "auto",
+            "source": "count of section 3",
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "label": "Courses taught",
+            "value": "auto",
+            "source": "count of section 4",
+            "demo": true,
+            "demoFields": []
+        }
+    ],
+    "tools": {
+        "summary": "Best with IDEs like VScode, Webstorm. Am a JS person but am willing and always available to learn new language inorder to complete a task",
+        "groups": [
+            {
+                "name": "Languages & frameworks",
+                "items": [
+                    "JavaScript",
+                    "React",
+                    "Next.js",
+                    "React Native",
+                    "Three.js",
+                    "Flutter",
+                    "Node.js",
+                    "PHP"
+                ],
+                "demo": true,
+                "demoFields": []
+            },
+            {
+                "name": "Design & media",
+                "items": [
+                    "Figma",
+                    "Adobe XD",
+                    "Premiere Pro",
+                    "CapCut"
+                ],
+                "demo": true,
+                "demoFields": []
+            },
+            {
+                "name": "Hosting & tools",
+                "items": [
+                    "Git/GitHub",
+                    "Hostinger",
+                    "WordPress",
+                    "VS Code",
+                    "WebStorm"
+                ],
+                "demo": true,
+                "demoFields": []
+            }
+        ]
+    },
+    "clients": [
+        {
+            "text": "have worked with WebSpectron LTD Buea.",
+            "logoPermission": true
+        },
+        {
+            "text": "Teaching at Trustech University Buea",
+            "logoPermission": true
+        },
+        {
+            "text": "Work at Bethuel Tech Buea",
+            "logoPermission": true
+        },
+        {
+            "text": "Work for a client in yaounde (Anionted PLC)",
+            "logoPermission": true
+        }
+    ],
+    "faq": [
+        {
+            "q": "What's your rate / how do you price?",
+            "a": "Simple website can start from 75,000FCFA, A Complex Webapp can range from 150-500K FCFA based  on the type, Also Mobile Apps too prices ranges",
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "q": "What's your availability / notice period?",
+            "a": "Am Available 24/7. I may delay to reply you but will always withing hours",
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "q": "Do you work with international clients / time zones?",
+            "a": "I Work with all times of clients both local and internations",
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "q": "What don't you do?",
+            "a": "I don't start work without a 50% initail deposit",
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "q": "How do you handle security?",
+            "a": "I never trust input from the browser: every form and API is validated on the server, secrets stay on the server, and sites ship over HTTPS.",
+            "demo": true,
+            "demoFields": []
+        },
+        {
+            "q": "What happens after launch?",
+            "a": "TODO(content): support period, maintenance pricing, handover.",
+            "demo": true,
+            "demoFields": []
+        }
+    ],
+    "demoFields": [
+        "title",
+        "availability",
+        "cv",
+        "languages",
+        "degree"
+    ]
+}

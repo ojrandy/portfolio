@@ -17,6 +17,26 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-15 — Loading screen
+**Tasks:** P1-07 (done)
+**Done:**
+- `src/lib/loading.js` (pure): `STEPS`, `loadingState()` (3 real steps counted in order: 3D code → `/api/city` → first frame with the buildings; webgl/data errors), `skyline(lots)` (front elevation of the real city). Timing constants.
+- `src/components/LoadingScreen.jsx`: Fako ridge + ground line, the real skyline rising west → east once the data arrives (GSAP), step label + 3 dots, "Try again" on a failed fetch, a plain no-WebGL message. Hidden if ready within 300 ms of navigation; fade-out waits for the rise to finish. Used both as the `Suspense` fallback in `App.jsx` and inside `CityPreview`, so it's one screen throughout (the fade-in plays once).
+- `src/city/FirstFrame.jsx`: fires after the frame that drew the buildings (mounted with them, so a sky-only frame doesn't count).
+- `useCityData()` gains `retry()`. `CityPreview`: WebGL check, `aria-busy` until drawn, HUD "Loading /api/city" line removed.
+- Docs: loader rules in design_system.md, API in architecture.md.
+**Checks:** `npm test` 77/77 (4 new: step order, frame-before-data doesn't count, errors, skyline geometry + real city) · ESLint clean on changed files · `npm run build` passes, loader not in `dist/` · Playwright (Chromium, GPU) on `/?city` with `/api/city` delayed 1.5 s: labels in order, overlay gone, `aria-busy=false`, **13 draw calls** (unchanged); reduced motion: no fade; `/api/city` 500 → message + Try again → city loads; Pixel 7 size checked; console clean apart from the deliberate 500.
+**Decisions (owner):** skyline loader instead of a cultural motif until one is confirmed (ADR-009 still applies); the fade waits for the rise (≤ 0.9 s) so fast devices see the skyline too.
+**Problems / notes:**
+- No percentage on purpose: there are no assets to count, so a % would be invented.
+- The loader only covers the time after the main JS runs. A shell in `index.html` for the very first paint belongs with P1-08 (lazy 3D chunk).
+- In front elevation, buildings in the same column overlap, so the 3 × 3 city reads as ~7 slabs. Fine for a loader.
+- The C: drive (system temp) is full; shell output and Playwright needed `TEMP` pointed at D:. Worth freeing space.
+**Next:**
+- P1-08 performance pass.
+
+---
+
 ## 2026-10-15 — Building interaction
 **Tasks:** P1-06 (done)
 **Done:**

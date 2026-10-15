@@ -9,6 +9,7 @@ import TechStack from "./sections/TechStack.jsx";
 import Testimonial from "./sections/Testimonial.jsx";
 import Contact from "./sections/Contact.jsx";
 import Footer from "./sections/Footer.jsx";
+import LoadingScreen from "./components/LoadingScreen.jsx";
 
 // Dev-only building preview (/?city); compiled out of production builds.
 const CityPreview = import.meta.env.DEV ? lazy(() => import("./city/CityPreview.jsx")) : null;
@@ -17,7 +18,7 @@ const showCityPreview = CityPreview && new URLSearchParams(window.location.searc
 const App = () => {
     if (showCityPreview) {
         return (
-            <Suspense fallback={null}>
+            <Suspense fallback={<LoadingScreen />}>
                 <CityPreview />
             </Suspense>
         );

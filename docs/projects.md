@@ -465,7 +465,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** 
+- **Stack:** [DEMO] React, TypeScript, Vite, Node.js, Express, Leaflet maps
+_Stack read from the repo's package.json on 2026-10-15; confirm or edit, then remove [DEMO]._
 - **Category:** 
 - **Problem:** 
 - **Hardest part:** 
@@ -491,7 +492,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** 
+- **Stack:** [DEMO] React, TypeScript, Vite, Node.js, Express, Leaflet maps
+_Stack read from the repo's package.json on 2026-10-15; confirm or edit, then remove [DEMO]._
 - **Category:** 
 - **Problem:** 
 - **Hardest part:** 
@@ -517,7 +519,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** 
+- **Stack:** [DEMO] React, TypeScript, Vite, Node.js, Express, Leaflet maps
+_Stack read from the repo's package.json on 2026-10-15; confirm or edit, then remove [DEMO]._
 - **Category:** 
 - **Problem:** 
 - **Hardest part:** 
@@ -569,7 +572,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** 
+- **Stack:** [DEMO] Next.js, TypeScript, Tailwind CSS, Three.js (React Three Fiber), GSAP, Framer Motion
+_Stack read from the repo's package.json on 2026-10-15; confirm or edit, then remove [DEMO]._
 - **Category:** 
 - **Problem:** 
 - **Hardest part:** 
@@ -595,7 +599,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** 
+- **Stack:** [DEMO] Flutter, Dart
+_Stack read from the repo's pubspec.yaml on 2026-10-15; confirm or edit, then remove [DEMO]._
 - **Category:** 
 - **Problem:** 
 - **Hardest part:** 
@@ -621,7 +626,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** 
+- **Stack:** [DEMO] Flutter, Dart
+_Stack read from the repo's pubspec.yaml on 2026-10-15; confirm or edit, then remove [DEMO]._
 - **Category:** 
 - **Problem:** 
 - **Hardest part:** 
@@ -647,7 +653,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** 
+- **Stack:** [DEMO] React, Three.js (React Three Fiber), Node.js, Express, MongoDB, OpenAI API
+_Stack read from the repo's client/ and server/ package.json on 2026-10-15; confirm or edit, then remove [DEMO]._
 - **Category:** 
 - **Problem:** 
 - **Hardest part:** 
@@ -673,7 +680,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** 
+- **Stack:** [DEMO] React, TypeScript, TanStack Start, Tailwind CSS, shadcn/ui (Radix), Lovable
+_Stack read from the repo's package.json + README on 2026-10-15; confirm or edit, then remove [DEMO]._
 - **Category:** 
 - **Problem:** 
 - **Hardest part:** 
@@ -699,7 +707,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** 
+- **Stack:** [DEMO] React, TypeScript, TanStack Start, Tailwind CSS, shadcn/ui (Radix), Lovable
+_Stack read from the repo's package.json + README on 2026-10-15; confirm or edit, then remove [DEMO]._
 - **Category:** 
 - **Problem:** 
 - **Hardest part:** 
@@ -725,7 +734,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** 
+- **Stack:** [DEMO] Arduino (C++ firmware), MQTT, Node.js, Express, MongoDB, Socket.IO, React
+_Stack read from the repo's firmware/, backend/ and frontend/ package.json on 2026-10-15; confirm or edit, then remove [DEMO]._
 - **Category:** 
 - **Problem:** 
 - **Hardest part:** 
@@ -751,7 +761,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** 
+- **Stack:** [DEMO] React, TypeScript, Vite, Node.js, Express, Leaflet maps
+_Stack read from the repo's package.json on 2026-10-15; confirm or edit, then remove [DEMO]._
 - **Category:** 
 - **Problem:** 
 - **Hardest part:** 
@@ -777,7 +788,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** 
+- **Stack:** [DEMO] React, TypeScript, Vite, Node.js, Express, Leaflet maps
+_Stack read from the repo's package.json on 2026-10-15; confirm or edit, then remove [DEMO]._
 - **Category:** 
 - **Problem:** 
 - **Hardest part:** 
@@ -803,7 +815,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** 
+- **Stack:** [DEMO] React, TypeScript, Vite, Node.js, Express, Leaflet maps
+_Stack read from the repo's package.json on 2026-10-15; confirm or edit, then remove [DEMO]._
 - **Category:** 
 - **Problem:** 
 - **Hardest part:** 

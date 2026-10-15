@@ -651,7 +651,14 @@
                 "start": "TODO(content)",
                 "end": "TODO(content)"
             },
-            "stack": "TODO(content)",
+            "stack": [
+                "React",
+                "TypeScript",
+                "Vite",
+                "Node.js",
+                "Express",
+                "Leaflet maps"
+            ],
             "category": "TODO(content)",
             "caseStudy": {
                 "problem": "TODO(content)",
@@ -672,7 +679,9 @@
             "media": "TODO(content)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": []
+            "demoFields": [
+                "stack"
+            ]
         },
         {
             "slug": "advancedglobal",
@@ -689,7 +698,14 @@
                 "start": "TODO(content)",
                 "end": "TODO(content)"
             },
-            "stack": "TODO(content)",
+            "stack": [
+                "React",
+                "TypeScript",
+                "Vite",
+                "Node.js",
+                "Express",
+                "Leaflet maps"
+            ],
             "category": "TODO(content)",
             "caseStudy": {
                 "problem": "TODO(content)",
@@ -710,7 +726,9 @@
             "media": "TODO(content)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": []
+            "demoFields": [
+                "stack"
+            ]
         },
         {
             "slug": "wvl",
@@ -727,7 +745,14 @@
                 "start": "TODO(content)",
                 "end": "TODO(content)"
             },
-            "stack": "TODO(content)",
+            "stack": [
+                "React",
+                "TypeScript",
+                "Vite",
+                "Node.js",
+                "Express",
+                "Leaflet maps"
+            ],
             "category": "TODO(content)",
             "caseStudy": {
                 "problem": "TODO(content)",
@@ -748,7 +773,9 @@
             "media": "TODO(content)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": []
+            "demoFields": [
+                "stack"
+            ]
         },
         {
             "slug": "coretexcore",
@@ -803,7 +830,14 @@
                 "start": "TODO(content)",
                 "end": "TODO(content)"
             },
-            "stack": "TODO(content)",
+            "stack": [
+                "Next.js",
+                "TypeScript",
+                "Tailwind CSS",
+                "Three.js (React Three Fiber)",
+                "GSAP",
+                "Framer Motion"
+            ],
             "category": "TODO(content)",
             "caseStudy": {
                 "problem": "TODO(content)",
@@ -824,7 +858,9 @@
             "media": "TODO(content)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": []
+            "demoFields": [
+                "stack"
+            ]
         },
         {
             "slug": "food-recipe2",
@@ -841,7 +877,10 @@
                 "start": "TODO(content)",
                 "end": "TODO(content)"
             },
-            "stack": "TODO(content)",
+            "stack": [
+                "Flutter",
+                "Dart"
+            ],
             "category": "TODO(content)",
             "caseStudy": {
                 "problem": "TODO(content)",
@@ -862,7 +901,9 @@
             "media": "TODO(content)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": []
+            "demoFields": [
+                "stack"
+            ]
         },
         {
             "slug": "expense-tracker",
@@ -879,7 +920,10 @@
                 "start": "TODO(content)",
                 "end": "TODO(content)"
             },
-            "stack": "TODO(content)",
+            "stack": [
+                "Flutter",
+                "Dart"
+            ],
             "category": "TODO(content)",
             "caseStudy": {
                 "problem": "TODO(content)",
@@ -900,7 +944,9 @@
             "media": "TODO(content)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": []
+            "demoFields": [
+                "stack"
+            ]
         },
         {
             "slug": "threejs",
@@ -917,7 +963,14 @@
                 "start": "TODO(content)",
                 "end": "TODO(content)"
             },
-            "stack": "TODO(content)",
+            "stack": [
+                "React",
+                "Three.js (React Three Fiber)",
+                "Node.js",
+                "Express",
+                "MongoDB",
+                "OpenAI API"
+            ],
             "category": "TODO(content)",
             "caseStudy": {
                 "problem": "TODO(content)",
@@ -938,7 +991,9 @@
             "media": "TODO(content)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": []
+            "demoFields": [
+                "stack"
+            ]
         },
         {
             "slug": "polished-portfolio-pro",
@@ -955,7 +1010,14 @@
                 "start": "TODO(content)",
                 "end": "TODO(content)"
             },
-            "stack": "TODO(content)",
+            "stack": [
+                "React",
+                "TypeScript",
+                "TanStack Start",
+                "Tailwind CSS",
+                "shadcn/ui (Radix)",
+                "Lovable"
+            ],
             "category": "TODO(content)",
             "caseStudy": {
                 "problem": "TODO(content)",
@@ -976,7 +1038,9 @@
             "media": "TODO(content)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": []
+            "demoFields": [
+                "stack"
+            ]
         },
         {
             "slug": "afplc-connect",
@@ -993,7 +1057,14 @@
                 "start": "TODO(content)",
                 "end": "TODO(content)"
             },
-            "stack": "TODO(content)",
+            "stack": [
+                "React",
+                "TypeScript",
+                "TanStack Start",
+                "Tailwind CSS",
+                "shadcn/ui (Radix)",
+                "Lovable"
+            ],
             "category": "TODO(content)",
             "caseStudy": {
                 "problem": "TODO(content)",
@@ -1014,7 +1085,9 @@
             "media": "TODO(content)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": []
+            "demoFields": [
+                "stack"
+            ]
         },
         {
             "slug": "iot-sentinelf",
@@ -1031,7 +1104,15 @@
                 "start": "TODO(content)",
                 "end": "TODO(content)"
             },
-            "stack": "TODO(content)",
+            "stack": [
+                "Arduino (C++ firmware)",
+                "MQTT",
+                "Node.js",
+                "Express",
+                "MongoDB",
+                "Socket.IO",
+                "React"
+            ],
             "category": "TODO(content)",
             "caseStudy": {
                 "problem": "TODO(content)",
@@ -1052,7 +1133,9 @@
             "media": "TODO(content)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": []
+            "demoFields": [
+                "stack"
+            ]
         },
         {
             "slug": "novatransport",
@@ -1069,7 +1152,14 @@
                 "start": "TODO(content)",
                 "end": "TODO(content)"
             },
-            "stack": "TODO(content)",
+            "stack": [
+                "React",
+                "TypeScript",
+                "Vite",
+                "Node.js",
+                "Express",
+                "Leaflet maps"
+            ],
             "category": "TODO(content)",
             "caseStudy": {
                 "problem": "TODO(content)",
@@ -1090,7 +1180,9 @@
             "media": "TODO(content)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": []
+            "demoFields": [
+                "stack"
+            ]
         },
         {
             "slug": "novaf",
@@ -1107,7 +1199,14 @@
                 "start": "TODO(content)",
                 "end": "TODO(content)"
             },
-            "stack": "TODO(content)",
+            "stack": [
+                "React",
+                "TypeScript",
+                "Vite",
+                "Node.js",
+                "Express",
+                "Leaflet maps"
+            ],
             "category": "TODO(content)",
             "caseStudy": {
                 "problem": "TODO(content)",
@@ -1128,7 +1227,9 @@
             "media": "TODO(content)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": []
+            "demoFields": [
+                "stack"
+            ]
         },
         {
             "slug": "worldl",
@@ -1145,7 +1246,14 @@
                 "start": "TODO(content)",
                 "end": "TODO(content)"
             },
-            "stack": "TODO(content)",
+            "stack": [
+                "React",
+                "TypeScript",
+                "Vite",
+                "Node.js",
+                "Express",
+                "Leaflet maps"
+            ],
             "category": "TODO(content)",
             "caseStudy": {
                 "problem": "TODO(content)",
@@ -1166,7 +1274,9 @@
             "media": "TODO(content)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": []
+            "demoFields": [
+                "stack"
+            ]
         }
     ]
 }

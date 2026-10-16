@@ -376,6 +376,16 @@
             "demoFields": []
         }
     ],
+    "github": {
+        "accounts": [
+            "ojrandy",
+            "mazunita237-netizen",
+            "webspectron"
+        ],
+        "hide": [
+            "mazunita237-netizen/iot-sentinel-f-b"
+        ]
+    },
     "demoFields": [
         "title",
         "availability",

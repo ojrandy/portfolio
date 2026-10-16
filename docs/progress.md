@@ -17,6 +17,28 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-16 — GitHub auto-discovery
+**Tasks:** P1-09 (new, owner-requested; done)
+**Done:**
+- `server/lib/github.js`: `listRepos(account)` (paged `GET /users/{account}/repos`, github.com URLs only, invalid names rejected) and `discover(accounts, previous)` (a failing account keeps its last list; all failing throws).
+- `server/lib/city.js`: `selectRepos` (skips private, forks, empty, profile-README repo, `.github`, hidden), `repoStatus`, `languageStack` (≥ 5 %, minus build tooling and Flutter runner code), `prettyName`, and `buildCity(projects, { stats, listing }, { hide, now })`, which adds a building per discovered repo. Content blocks win for the same repo. Same name on two accounts → `owner-repo` slug. New response fields `description` and `source`.
+- `server/routes/city.js`: one cached refresh = list accounts → stats for content + selected repos. New cache file `github-city.json`. Early refresh when the accounts change or a repo has no stats.
+- `projects.md` profile fields **GitHub accounts for the city** (`ojrandy, mazunita237-netizen, webspectron`) and **Hide these repos** (none yet) → `profile.json` `github: { accounts, hide }`; parser + schema + tests.
+- Panel: "From GitHub" badge, the repo description, and a case-study note for auto buildings.
+- ADR-012; architecture.md (API shape, refresh rules).
+**Real run (token in `.env`):** 35 public repos listed (ojrandy 26, mazunita237-netizen 6, webspectron 3); 6 skipped (5 empty + the `ojrandy` profile repo). **42 buildings** (28 content + 14 from GitHub), 30 with GitHub stats, none private/missing. Downtown moved up to the next size step (ADR-011 reshuffle).
+**Checks:** `npm test` 88/88 (8 new: listing/paging, discover fallback, filters, status/name, stack, merge + slugs + hide, route end to end, panel summary) · ESLint clean on changed files · `npm run build` passes · `npm run perf` with 42 buildings: **13 draw calls**, 16k triangles; desktop 60 fps idle + flight (3 of 4 runs; one first-run dip to 53 fps), phone emulation 60 fps · panel screenshot of an auto building (Sdl Global) · no console errors.
+**Decisions (owner):** scan all three accounts; all public repos minus a hide list; keep the existing stub blocks for now.
+**Owner follow-up (same session):**
+- Duplicates fixed: [DEMO] Smart Meal → repo `ojrandy/smart_meal`, [DEMO] Vital Pulse → repo `ojrandy/vitalpulse-mobile` (were "private"; the blocks now get GitHub numbers, demo text kept as the owner asked). `mazunita237-netizen/iot-sentinel-F-B` hidden: a one-commit earlier upload of IoT Sentinel (`iot-sentinelf` block).
+- Practice repos stay in the city (owner's choice). Not duplicates, so kept as separate buildings: `food_recipe` / `food_recipe2`, `travel_app` / `travel_app_react`.
+- Old `server/.cache/github-stats.json` deleted.
+- Result: **39 buildings** (28 content + 11 from GitHub), 29 with GitHub stats.
+- Heads-up: the Smart Meal demo text says Next.js, but the repo is a Flutter/Dart app. Fix it when you replace the [DEMO] block.
+**Next:** P0-06, or Phase 2 (P2-01).
+
+---
+
 ## 2026-10-16 — Performance pass
 **Tasks:** P1-08 (done)
 **Done:**

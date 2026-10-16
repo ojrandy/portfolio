@@ -63,7 +63,15 @@ const ProjectPanel = ({ project, onClose }) => {
             <div className="mt-3 flex flex-wrap gap-2 text-xs">
                 {s.status && <span className="rounded-full bg-mist/10 px-2.5 py-1">{s.status}</span>}
                 {s.demo && <span className="rounded-full bg-ember/20 px-2.5 py-1 text-ember">Demo content</span>}
+                {s.fromGitHub && <span className="rounded-full bg-indigo/40 px-2.5 py-1">From GitHub</span>}
             </div>
+
+            {s.description && (
+                <p className="mt-3 text-sm text-mist/85">
+                    {s.description}
+                    {s.fromGitHub && <span className="text-mist/50"> · repo description</span>}
+                </p>
+            )}
 
             {s.stack.length > 0 && (
                 <div className="mt-4">
@@ -90,7 +98,11 @@ const ProjectPanel = ({ project, onClose }) => {
 
             <div className="mt-4 rounded-lg border border-dashed border-mist/20 p-3 text-sm text-mist/60">
                 <h3 className="text-xs uppercase tracking-wider">Case study</h3>
-                <p className="mt-1">Problem, hardest part, decision and result will appear here.</p>
+                <p className="mt-1">
+                    {s.fromGitHub
+                        ? 'Added automatically from GitHub. A case study appears once this project gets its own entry.'
+                        : 'Problem, hardest part, decision and result will appear here.'}
+                </p>
             </div>
 
             {s.links.length > 0 && (

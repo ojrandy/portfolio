@@ -343,8 +343,10 @@ export const parseProjectsMd = (md, file = 'docs/projects.md') => {
         tools: { summary: TODO, groups: [] },
         clients: [],
         faq: [],
+        github: { accounts: [], hide: [] },
         demoFields: [],
     };
+    let githubAccountsSet = false;
 
     {
         const { preamble, blocks } = splitBlocks(sections.profile.lines);
@@ -379,7 +381,32 @@ export const parseProjectsMd = (md, file = 'docs/projects.md') => {
                 }
                 if (demo) profile.demoFields.push('links.github');
             },
+            // ADR-012: public repos of these accounts become buildings automatically.
+            'github accounts for the city': (value, item, ctx) => {
+                githubAccountsSet = true;
+                const { v } = readValue(value);
+                if (v === '' || isNone(v) || isTodo(v)) return;
+                for (const raw of splitList(v)) {
+                    const name = raw.replace(/^https?:\/\/(?:www\.)?github\.com\//i, '').replace(/\/+$/, '');
+                    if (/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/.test(name)) {
+                        if (!profile.github.accounts.some((a) => a.toLowerCase() === name.toLowerCase())) profile.github.accounts.push(name);
+                    } else {
+                        ctx.err(`expected a GitHub account name or https://github.com/<account>, got "${raw}"`);
+                    }
+                }
+            },
+            'hide these repos': (value, item, ctx) => {
+                const { v } = readValue(value);
+                if (v === '' || isNone(v) || isTodo(v)) return;
+                for (const raw of splitList(v)) {
+                    const name = raw.replace(/^https?:\/\/(?:www\.)?github\.com\//i, '').replace(/\/+$/, '');
+                    if (/^[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/.test(name)) profile.github.hide.push(name.toLowerCase());
+                    else ctx.err(`expected owner/repo or a github.com repo URL, got "${raw}"`);
+                }
+            },
         });
+        // Without the field, scan the main account only.
+        if (!githubAccountsSet && profile.links.githubUsername !== TODO) profile.github.accounts.push(profile.links.githubUsername);
 
         for (const block of blocks) {
             const title = block.title.toLowerCase();

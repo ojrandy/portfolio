@@ -19,7 +19,7 @@ const positions = (layout) => new Map(layout.lots.map((l) => [l.slug, `${l.x},${
 
 const realBuildings = () => {
     const stats = JSON.parse(readFileSync(new URL('./fixtures/github-stats.json', import.meta.url), 'utf8'));
-    return toBuildings(buildCity(loadProjects(), stats), { now: NOW });
+    return toBuildings(buildCity(loadProjects(), { stats }), { now: NOW });
 };
 
 test('tiers: smallest downtown that fits, error past the largest', () => {

@@ -22,6 +22,9 @@ const projectSchema = z.looseObject({
     primaryLanguage: z.string().nullable(),
     effort: z.number().int().min(1).max(10).nullable(),
     stats: statsSchema,
+    // ADR-012: 'github' = discovered on GitHub, no owner-written entry; description is the repo's own.
+    description: z.string().nullable().default(null),
+    source: z.enum(['content', 'github']).default('content'),
 });
 
 export const cityResponseSchema = z.looseObject({

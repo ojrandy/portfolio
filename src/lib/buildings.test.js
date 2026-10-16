@@ -157,7 +157,7 @@ test('every real project becomes a valid building', () => {
     const response = parseCityResponse({
         generatedAt: new Date(NOW).toISOString(),
         statsUpdatedAt: null,
-        projects: buildCity(loadProjects(), stats),
+        projects: buildCity(loadProjects(), { stats }),
     });
     const buildings = toBuildings(response.projects, { now: NOW });
     assert.equal(buildings.length, response.projects.length);

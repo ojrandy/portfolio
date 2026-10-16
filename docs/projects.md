@@ -28,6 +28,10 @@
 - **Available for:** [DEMO] freelance ☑ · full-time ☑ · contract ☑ · remote ☑
 - **Email (public):** contact@ojongrandy.com
 - **GitHub username:** OJONG RANDY IKOKE https://github.com/ojrandy
+- **GitHub accounts for the city:** ojrandy, mazunita237-netizen, webspectron
+- **Hide these repos:** mazunita237-netizen/iot-sentinel-F-B
+_iot-sentinel-F-B is an earlier one-commit upload of IoT Sentinel (the iot-sentinelf block below), hidden so the project appears once._
+_Every public repo of these accounts becomes a building automatically, using real GitHub data (name, description, homepage, languages, commits, stars, last push). Forks, empty repos and profile-README repos are skipped; private repos never appear. To hide one, list it as owner/repo, comma-separated (e.g. ojrandy/threejs). A repo that also has a block in section 3 uses that block instead (ADR-012)._
 - **LinkedIn:** Ojong Randy https://www.linkedin.com/in/ojong-randy/
 - **X / Twitter:** 
 - **YouTube / video reel:** https://www.youtube.com/@ojongrandy2580
@@ -134,7 +138,7 @@ _Effort (1–10) sets height when the repo is private or has no GitHub stats._
 - **Featured:** yes
 - **Status:** live
 - **Live URL:** TODO(content)
-- **Repo URL:** private
+- **Repo URL:** https://github.com/ojrandy/vitalpulse-mobile
 - **Built for:** own product
 - **Your role:** founder & lead developer
 - **Team size:** 2
@@ -159,7 +163,7 @@ _Effort (1–10) sets height when the repo is private or has no GitHub stats._
 - **Featured:** yes
 - **Status:** in-progress
 - **Live URL:** TODO(content)
-- **Repo URL:** private
+- **Repo URL:** https://github.com/ojrandy/smart_meal
 - **Built for:** own product
 - **Your role:** founder & lead developer
 - **Team size:** 1

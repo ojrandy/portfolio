@@ -6,7 +6,7 @@ import path from 'node:path';
 import { createApp } from './app.js';
 import { createCache } from './lib/cache.js';
 import { parseRepoUrl, languageShares, commitCount, createGitHubClient } from './lib/github.js';
-import { buildCity, loadProjects } from './lib/city.js';
+import { buildCity, languageStack, loadProjects, prettyName, repoStatus, selectRepos } from './lib/city.js';
 import { createCityRouter } from './routes/city.js';
 
 const quiet = { warn() {}, error() {} };
@@ -122,7 +122,7 @@ test('buildCity merges GitHub stats and falls back to owner effort', () => {
         project({ slug: 'todo', repo: 'TODO(content)', status: 'TODO(content)', stack: 'TODO(content)', live: 'TODO(content)', category: 'TODO(content)' }),
         project({ slug: 'gone', repo: 'https://github.com/oj/gone' }),
         project({ slug: 'unchecked', repo: 'https://github.com/oj/new' }),
-    ], { 'oj/app': ghStats, 'oj/gone': { available: false } });
+    ], { stats: { 'oj/app': ghStats, 'oj/gone': { available: false } } });
     const by = Object.fromEntries(city.map((p) => [p.slug, p]));
 
     assert.deepEqual(by.gh.stats, { source: 'github', commits: 412, stars: 3, lastPush: '2026-10-01T00:00:00Z', languages: { JavaScript: 0.8, CSS: 0.2 } });
@@ -146,9 +146,132 @@ test('buildCity merges GitHub stats and falls back to owner effort', () => {
 test('buildCity output for the real content has no case-study text or TODO markers', () => {
     const city = buildCity(loadProjects());
     assert.ok(city.length > 0);
-    const keys = ['slug', 'name', 'district', 'featured', 'status', 'category', 'stack', 'live', 'repo', 'primaryLanguage', 'effort', 'stats', 'preview', 'demo'];
+    const keys = ['slug', 'name', 'district', 'featured', 'status', 'category', 'stack', 'live', 'repo', 'primaryLanguage', 'effort', 'stats', 'description', 'source', 'preview', 'demo'];
     for (const p of city) assert.deepEqual(Object.keys(p), keys);
     assert.ok(!JSON.stringify(city).includes('TODO(content)'));
+});
+
+// --- discovery (ADR-012) ---
+
+const NOW = Date.parse('2026-10-16T12:00:00Z');
+const listed = (owner, name, over = {}) => ({
+    name, html_url: `https://github.com/${owner}/${name}`, owner: { login: owner },
+    private: false, fork: false, archived: false, size: 120, description: null, homepage: null, topics: [],
+    pushed_at: '2026-01-01T00:00:00Z', created_at: '2025-01-01T00:00:00Z', ...over,
+});
+const repo = (owner, name, over = {}) => ({
+    ...parseRepoUrl(`https://github.com/${owner}/${name}`), url: `https://github.com/${owner}/${name}`,
+    private: false, fork: false, archived: false, size: 120, description: null, homepage: null, topics: [],
+    pushedAt: '2026-01-01T00:00:00Z', createdAt: '2025-01-01T00:00:00Z', ...over,
+});
+
+test('listRepos pages through an account, keeps only github.com repo URLs; a missing account is []', async () => {
+    const page1 = Array.from({ length: 100 }, (_, i) => listed('oj', `r${i}`));
+    const fetch = fakeFetch({
+        '/users/oj/repos?type=owner&sort=pushed&per_page=100&page=1': json(page1),
+        '/users/oj/repos?type=owner&sort=pushed&per_page=100&page=2': json([
+            listed('oj', 'last', { description: '  A thing  ', homepage: '' }),
+            listed('oj', 'odd', { html_url: 'https://evil.example/oj/odd' }),
+        ]),
+    });
+    const gh = createGitHubClient({ fetch });
+    const repos = await gh.listRepos('oj');
+    assert.equal(repos.length, 101);
+    const last = repos.at(-1);
+    assert.deepEqual([last.key, last.description, last.homepage], ['oj/last', 'A thing', null]);
+    assert.ok(fetch.calls.every((c) => c.url.startsWith('https://api.github.com/users/oj/repos')));
+
+    assert.deepEqual(await createGitHubClient({ fetch: fakeFetch({}) }).listRepos('nobody'), []);
+    await assert.rejects(gh.listRepos('../etc'), /invalid account/);
+});
+
+test('discover keeps the previous list for a failing account and throws when all fail', async () => {
+    const fetch = fakeFetch({
+        '/users/a/repos?type=owner&sort=pushed&per_page=100&page=1': json([listed('a', 'one')]),
+        '/users/b/repos?type=owner&sort=pushed&per_page=100&page=1': json({ message: 'rate limited' }, { status: 403 }),
+    });
+    const origWarn = console.warn;
+    console.warn = () => {};
+    try {
+        const gh = createGitHubClient({ fetch });
+        const out = await gh.discover(['A', 'b', 'a'], { b: [repo('b', 'kept')] });
+        assert.deepEqual(Object.keys(out), ['a', 'b']);
+        assert.equal(out.a[0].key, 'a/one');
+        assert.equal(out.b[0].key, 'b/kept');
+        const down = createGitHubClient({ fetch: async () => { throw new Error('ECONNRESET'); } });
+        await assert.rejects(down.discover(['a', 'b']), /all GitHub account listings failed/);
+    } finally {
+        console.warn = origWarn;
+    }
+});
+
+test('selectRepos skips private, forks, empty, profile README, .github and hidden repos', () => {
+    const listing = {
+        oj: [
+            repo('oj', 'zeta'), repo('oj', 'App'),
+            repo('oj', 'secret', { private: true }), repo('oj', 'forked', { fork: true }), repo('oj', 'empty', { size: 0 }),
+            repo('oj', 'OJ'), repo('oj', '.github'), repo('oj', 'Old-Demo'),
+        ],
+    };
+    assert.deepEqual(selectRepos(listing, { hide: ['OJ/old-demo'] }).map((r) => r.key), ['oj/app', 'oj/zeta']);
+});
+
+test('languageStack: ≥ 5 %, no build tooling, no Flutter runner languages', () => {
+    assert.deepEqual(languageStack({ Go: 0.9, Shell: 0.07, Makefile: 0.03 }), ['Go', 'Shell']);
+    assert.deepEqual(languageStack({ 'C++': 0.4, Dart: 0.3, CMake: 0.2, Swift: 0.06, HTML: 0.04 }), ['Dart']);
+    assert.deepEqual(languageStack({ 'C++': 0.7, CMake: 0.3 }), ['C++'], 'C++ stays when it is not a Flutter app');
+    assert.deepEqual(languageStack({}), []);
+});
+
+test('prettyName and repoStatus', () => {
+    assert.equal(prettyName('food_recipe2'), 'Food Recipe2');
+    assert.equal(prettyName('novaTransport'), 'Nova Transport');
+    assert.equal(prettyName('WVL'), 'WVL');
+    assert.equal(prettyName('sns-glam'), 'Sns Glam');
+    assert.equal(repoStatus(repo('o', 'r', { archived: true, homepage: 'https://x.dev' }), NOW), 'archived');
+    assert.equal(repoStatus(repo('o', 'r', { homepage: 'x.dev' }), NOW), 'live');
+    assert.equal(repoStatus(repo('o', 'r', { homepage: 'http://x.dev' }), NOW), null, 'http homepages are not live links');
+    assert.equal(repoStatus(repo('o', 'r', { pushedAt: '2026-09-01T00:00:00Z' }), NOW), 'in-progress');
+    assert.equal(repoStatus(repo('o', 'r', { pushedAt: '2025-01-01T00:00:00Z' }), NOW), null);
+});
+
+test('buildCity adds discovered repos; content entries win; same names on two accounts get distinct slugs', () => {
+    const listing = {
+        oj: [
+            repo('oj', 'app', { description: 'From GitHub' }),
+            repo('oj', 'tool', { description: 'A CLI tool', homepage: 'tool.dev', topics: ['cli'] }),
+            repo('oj', 'secret', { private: true }),
+        ],
+        other: [repo('other', 'tool'), repo('other', 'gone')],
+    };
+    const stats = {
+        'oj/app': ghStats,
+        'oj/tool': { ...ghStats, primaryLanguage: 'Go', languages: { Go: 0.9, Shell: 0.07, Makefile: 0.03 } },
+        'other/gone': { available: false },
+    };
+    const city = buildCity([project({ slug: 'app', name: 'My App', repo: 'https://github.com/OJ/app', featured: true })], { stats, listing }, { now: NOW });
+    const by = Object.fromEntries(city.map((p) => [p.slug, p]));
+
+    assert.deepEqual(city.map((p) => p.slug), ['app', 'tool', 'gone', 'other-tool']);
+    assert.equal(by.app.name, 'My App', 'the content entry wins');
+    assert.equal(by.app.source, 'content');
+    assert.equal(by.app.featured, true);
+    assert.equal(by.app.description, 'From GitHub');
+
+    assert.deepEqual(
+        [by.tool.source, by.tool.name, by.tool.status, by.tool.live, by.tool.stack, by.tool.description, by.tool.featured, by.tool.effort, by.tool.demo],
+        ['github', 'Tool', 'live', 'https://tool.dev/', ['Go', 'Shell'], 'A CLI tool', false, null, false],
+    );
+    assert.equal(by.tool.stats.source, 'github');
+    assert.equal(by.tool.primaryLanguage, 'Go');
+
+    assert.equal(by['other-tool'].stats.source, 'none', 'no stats fetched yet');
+    assert.equal(by['other-tool'].repo, 'https://github.com/other/tool');
+    assert.equal(by.gone.repo, null, 'a repo GitHub says is gone is not linked');
+    assert.ok(!city.some((p) => p.slug === 'secret'));
+
+    const hidden = buildCity([], { stats, listing }, { hide: ['oj/tool'], now: NOW });
+    assert.ok(!hidden.some((p) => p.repo === 'https://github.com/oj/tool'));
 });
 
 // --- cache.js ---
@@ -253,8 +376,15 @@ test('GET /api/city returns merged data, and still works when GitHub is down', a
     const dir = await tempDir();
     const projects = [project({ slug: 'gh', repo: 'https://github.com/oj/app' }), project({ slug: 'priv', repo: 'private' })];
 
-    const up = createCityRouter({ projects, cacheDir: path.join(dir, 'up'), github: { allStats: async () => ({ 'oj/app': ghStats }) } });
-    const down = createCityRouter({ projects, cacheDir: path.join(dir, 'down'), coldWaitMs: 50, github: { allStats: async () => { throw new Error('down'); } } });
+    const config = { accounts: ['oj'], hide: ['oj/hidden'] };
+    const seen = {};
+    const upGitHub = {
+        discover: async (accounts) => { seen.accounts = accounts; return { oj: [repo('oj', 'app'), repo('oj', 'extra'), repo('oj', 'hidden')] }; },
+        allStats: async (refs) => { seen.refs = refs.map((r) => r.key); return { 'oj/app': ghStats, 'oj/extra': ghStats }; },
+    };
+    const up = createCityRouter({ projects, config, cacheDir: path.join(dir, 'up'), github: upGitHub });
+    const fail = async () => { throw new Error('down'); };
+    const down = createCityRouter({ projects, config, cacheDir: path.join(dir, 'down'), coldWaitMs: 50, github: { discover: fail, allStats: fail } });
     const origError = console.error;
     console.error = () => {};
     const a = await listen(createApp({ distDir: dir, routes: [up] }));
@@ -267,6 +397,10 @@ test('GET /api/city returns merged data, and still works when GitHub is down', a
         assert.ok(body.generatedAt && body.statsUpdatedAt);
         assert.equal(body.projects[0].stats.commits, 412);
         assert.equal(body.projects[1].stats.source, 'owner');
+        assert.deepEqual(body.projects.map((p) => p.slug), ['gh', 'priv', 'extra'], 'discovered repo added, hidden one left out');
+        assert.equal(body.projects[2].source, 'github');
+        assert.deepEqual(seen.accounts, ['oj']);
+        assert.deepEqual(seen.refs, ['oj/app', 'oj/app', 'oj/extra'], 'stats are fetched for content + selected repos only');
 
         const res2 = await fetch(`${b.url}/api/city`);
         assert.equal(res2.status, 200);

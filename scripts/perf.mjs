@@ -42,7 +42,8 @@ const sizes = () => {
 
 // The production app in this process, with GitHub stubbed out: perf runs use the cached stats as they are and
 // never spend the GitHub rate limit (a failed refresh keeps the last good data and writes nothing).
-const offline = { allStats: () => Promise.reject(new Error('GitHub disabled for perf runs')) };
+const off = () => Promise.reject(new Error('GitHub disabled for perf runs'));
+const offline = { discover: off, allStats: off };
 const quiet = { ...console, error: () => {}, warn: () => {} };
 
 const startServer = async () => {

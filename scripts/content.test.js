@@ -195,3 +195,20 @@ test('FAQ answers with or without "A:" and teaching/video lines', () => {
     assert.equal(profile.video[0].link, 'https://youtu.be/x');
     assert.deepEqual(profile.video[0].tools, ['Premiere Pro', 'CapCut']);
 });
+
+test('GitHub accounts for the city: defaults to the username; lists, URLs and hides are read; bad names are errors', () => {
+    assert.deepEqual(parseProjectsMd(doc()).profile.github, { accounts: ['tester'], hide: [] });
+
+    const { errors, profile } = parseProjectsMd(doc({
+        profile: '- **GitHub accounts for the city:** tester, https://github.com/Second-Acct, tester\n- **Hide these repos:** tester/old-demo, https://github.com/Second-Acct/Scratch',
+    }));
+    assert.deepEqual(errors, []);
+    assert.deepEqual(profile.github, { accounts: ['tester', 'Second-Acct'], hide: ['tester/old-demo', 'second-acct/scratch'] });
+
+    assert.deepEqual(parseProjectsMd(doc({ profile: '- **GitHub accounts for the city:** —' })).profile.github.accounts, []);
+
+    const bad = parseProjectsMd(doc({ profile: '- **GitHub accounts for the city:** not a name!\n- **Hide these repos:** just-a-repo' }));
+    assert.equal(bad.errors.length, 2);
+    assert.match(bad.errors.join('\n'), /GitHub account name/);
+    assert.match(bad.errors.join('\n'), /owner\/repo/);
+});

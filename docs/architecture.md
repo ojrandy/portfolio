@@ -64,7 +64,7 @@ All responses are JSON unless noted. All inputs are validated with zod. All endp
 | Method | Path | Purpose | Cache |
 |---|---|---|---|
 | GET | `/api/health` | uptime check | none |
-| GET | `/api/city` | projects + GitHub stats → building data | 6 h, stale-while-revalidate, file-persisted |
+| GET | `/api/city` | content projects + public repos discovered on GitHub + GitHub stats → building data (ADR-012) | 6 h, stale-while-revalidate, file-persisted |
 | GET | `/api/buea` | `{ localTime, tz, sunrise, sunset, weather: { code, tempC, cloud, rain, wind } }` | 15 min |
 | POST | `/api/chat` | `{ messages: [{role, content}] }` → **SSE stream** of text + tool calls | none |
 | POST | `/api/contact` | `{ name, email, message, turnstileToken, website(honeypot) }` | none |
@@ -82,6 +82,8 @@ All responses are JSON unless noted. All inputs are validated with zod. All endp
     "primaryLanguage": "TypeScript | null",
     "effort": 9,
     "stats": { "source": "github | owner | none", "commits": 48, "stars": 1, "lastPush": "ISO", "languages": { "TypeScript": 0.98 } },
+    "description": "the repo's GitHub description | null",
+    "source": "content | github",
     "preview": null,
     "demo": false
   }]
@@ -90,7 +92,8 @@ All responses are JSON unless noted. All inputs are validated with zod. All endp
 - `stats.source` says where a building's numbers come from: `github` (public repo), `owner` (effort 1–10 from content; GitHub fields are null), `none` (no data: minimum building).
 - `TODO(content)` values become `null` (or `[]`); `repo` is never `"private"` and is dropped when GitHub says the repo is missing/private. Case-study text is not included (P3-01).
 - `commits` = all commits on the default branch (any author).
-- Implementation: `server/lib/github.js` (REST: repo, languages, commit count via the `Link` header), `server/lib/cache.js`, `server/lib/city.js` (pure merge), `server/routes/city.js`.
+- `source: "github"` = discovered on one of the profile's GitHub accounts with no block in `projects.md` (rules in ADR-012): `featured` false, district downtown, `effort` null, `category` [], `stack` from GitHub languages, `status` derived, no case study. `source: "content"` = a `projects.md` block; its `description` is the GitHub description when the repo is public.
+- Implementation: `server/lib/github.js` (REST: `listRepos(account)` / `discover(accounts, previous)` via `GET /users/{account}/repos`, paged; `repoStats` = repo, languages, commit count via the `Link` header), `server/lib/cache.js`, `server/lib/city.js` (pure: `selectRepos`, `repoStatus`, `languageStack`, `prettyName`, `buildCity(projects, { stats, listing }, { hide, now })`), `server/routes/city.js`. Accounts and the hide list come from `content/profile.json` → `github: { accounts, hide }` (profile fields "GitHub accounts for the city" and "Hide these repos" in `projects.md`; without the first, only the GitHub username is scanned).
 
 ## AI chat design
 - **Knowledge:** the full content is small, so the whole `knowledge.md` goes in the system prompt with **prompt caching**. No vector DB/RAG.
@@ -99,7 +102,7 @@ All responses are JSON unless noted. All inputs are validated with zod. All endp
 - **Limits:** max 12 messages per conversation, 600 chars per user message, max output tokens capped, per-IP rate limit, daily global budget counter; when the budget runs out, the chat shows "the guide is resting, here's the contact form".
 
 ## Data refresh
-- GitHub: fetched at server start and again after 6 h (stale-while-revalidate: old data is served while one background refresh runs). Stats are cached per repo; content is merged on every request, so a content deploy shows up immediately and a repo added to content triggers an early refresh. The last good copy is kept on disk (`server/.cache/github-stats.json`, git-ignored) so a GitHub outage or restart never breaks the city. A repo that fails keeps its previous stats; failed refreshes retry after 5 min. A cold start waits at most 4 s before answering with owner stats.
+- GitHub: fetched at server start and again after 6 h (stale-while-revalidate: old data is served while one background refresh runs). One refresh lists the accounts' repos, then fetches stats for content repos + selected discovered repos (~2–3 requests per repo; needs `GITHUB_TOKEN`). Content and the hide list are applied on every request, so a content deploy shows up immediately; a changed account list, or a repo added to content / un-hidden without stats, triggers an early refresh. A failing account keeps its previous repo list. The last good copy is kept on disk (`server/.cache/github-city.json`, git-ignored; the older `github-stats.json` is no longer read and can be deleted) so a GitHub outage or restart never breaks the city. A repo that fails keeps its previous stats; failed refreshes retry after 5 min. A cold start waits at most 4 s before answering with owner stats.
 - Previews: captured locally with `npm run previews` (Playwright) and committed as optimised `.webp`/`.webm`. No runtime screenshot API.
 
 ## Environment variables

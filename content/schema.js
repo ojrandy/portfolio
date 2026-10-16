@@ -148,6 +148,11 @@ export const profileSchema = z.strictObject({
         groups: z.array(z.strictObject({ name: text, items: z.array(text).min(1), ...demoMeta })),
     }),
     clients: z.array(z.strictObject({ text, logoPermission: z.boolean() })),
+    // GitHub accounts whose public repos become buildings, and 'owner/repo' entries to leave out (ADR-012).
+    github: z.strictObject({
+        accounts: z.array(z.string().regex(/^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/, 'expected a GitHub account name')),
+        hide: z.array(z.string().regex(/^[A-Za-z0-9-]+\/[A-Za-z0-9._-]+$/, 'expected owner/repo')),
+    }),
     faq: z.array(z.strictObject({ q: text, a: text, ...demoMeta })),
     demoFields: z.array(z.string()),
 });

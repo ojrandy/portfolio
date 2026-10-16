@@ -37,6 +37,8 @@ Each task ID matches a prompt in `/prompt.md`. Commit messages start with the ta
 - [x] **P1-07** Loading screen (progress + Bayangi-inspired loader once ADR-009 motifs are confirmed). Done with a skyline loader; a confirmed motif can replace it later.
 - [x] **P1-08** Performance pass: instancing, merged geometry, DPR clamp, draw-call count, lazy-load 3D chunk. The 3D chunk is lazy (53 KB gzip). Initial JS is still 421 KB because of the template; P0-06 fixes it.
 
+- [x] **P1-09** GitHub auto-discovery: every public repo of the owner's accounts becomes a building; `projects.md` adds to and overrides them (ADR-012)
+
 **Done when:** the city builds itself from real data and hits the performance budget.
 *Status (2026-10-16):* all tasks done and fps/draw-call budgets met (`npm run perf`). The initial JS budget (< 200 KB gzip) is still missed because of the old template, so this waits on P0-06.
 

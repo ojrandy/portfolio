@@ -107,7 +107,7 @@ test('building view rises over a taller building in front, and keeps the default
 
 test('real content: every building has a clear view', () => {
     const stats = JSON.parse(readFileSync(new URL('./fixtures/github-stats.json', import.meta.url), 'utf8'));
-    const layout = layoutCity(toBuildings(buildCity(loadProjects(), stats), { now: NOW }));
+    const layout = layoutCity(toBuildings(buildCity(loadProjects(), { stats }), { now: NOW }));
     for (const lot of layout.lots) {
         const view = buildingView(lot, layout.lots);
         assertWithinLimits(view, layout, lot.slug);

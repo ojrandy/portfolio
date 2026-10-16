@@ -21,6 +21,24 @@ const repoSchema = z.object({
     language: z.string().nullable(),
 });
 const languagesSchema = z.record(z.string(), z.number().min(0));
+// One entry of GET /users/{owner}/repos.
+const listedRepoSchema = z.object({
+    name: z.string(),
+    html_url: z.string(),
+    owner: z.object({ login: z.string() }),
+    private: z.boolean(),
+    fork: z.boolean(),
+    archived: z.boolean(),
+    size: z.int().min(0),
+    description: z.string().nullable(),
+    homepage: z.string().nullable().optional(),
+    topics: z.array(z.string()).optional(),
+    pushed_at: z.string().nullable(),
+    created_at: z.string().nullable(),
+});
+
+export const ACCOUNT_RE = /^[A-Za-z0-9](?:[A-Za-z0-9-]{0,38})$/;
+const MAX_PAGES = 10; // 1,000 repos per account is plenty
 
 class GitHubError extends Error {}
 
@@ -116,5 +134,61 @@ export const createGitHubClient = ({ token, fetch = globalThis.fetch, timeoutMs 
         return out;
     };
 
-    return { repoStats, allStats };
+    /**
+     * Public repos of one account (user or organisation), as plain records. A missing account is [];
+     * anything transient throws. Entries whose URL isn't a plain github.com repo URL are dropped.
+     */
+    const listRepos = async (account) => {
+        if (!ACCOUNT_RE.test(account)) throw new GitHubError(`invalid account name "${account}"`);
+        const repos = [];
+        for (let page = 1; page <= MAX_PAGES; page++) {
+            const res = await get(`/users/${encodeURIComponent(account)}/repos?type=owner&sort=pushed&per_page=100&page=${page}`);
+            if (res.status === 404) return [];
+            const list = await json(res, z.array(listedRepoSchema), `${account} repos`);
+            for (const r of list) {
+                const ref = parseRepoUrl(r.html_url);
+                if (!ref) continue;
+                repos.push({
+                    ...ref,
+                    url: r.html_url,
+                    private: r.private,
+                    fork: r.fork,
+                    archived: r.archived,
+                    size: r.size,
+                    description: r.description?.trim() || null,
+                    homepage: r.homepage?.trim() || null,
+                    topics: r.topics ?? [],
+                    pushedAt: r.pushed_at,
+                    createdAt: r.created_at,
+                });
+            }
+            if (list.length < 100) break;
+        }
+        return repos;
+    };
+
+    /**
+     * Repo lists for several accounts, keyed by lowercase account. A failing account keeps its previous
+     * list (or is left out); if every account fails, this throws so the cache keeps the last good copy.
+     */
+    const discover = async (accounts, previous = {}) => {
+        const unique = [...new Set(accounts.map((a) => a.toLowerCase()))];
+        const results = await Promise.allSettled(unique.map((a) => listRepos(a)));
+        const out = {};
+        let failures = 0;
+        results.forEach((result, i) => {
+            const account = unique[i];
+            if (result.status === 'fulfilled') {
+                out[account] = result.value;
+            } else {
+                failures += 1;
+                console.warn(`[github] ${account} repo list: ${result.reason?.message ?? result.reason}`);
+                if (previous[account]) out[account] = previous[account];
+            }
+        });
+        if (unique.length && failures === unique.length) throw new GitHubError('all GitHub account listings failed');
+        return out;
+    };
+
+    return { repoStats, allStats, listRepos, discover };
 };

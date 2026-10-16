@@ -59,9 +59,18 @@ test('summary: status words, safe links only, demo flag', () => {
     assert.equal(projectSummary(project({ status: null })).status, null);
 });
 
+test('summary: GitHub-discovered projects carry their repo description and say so', () => {
+    const s = projectSummary(project({ source: 'github', description: '  A CLI tool  ' }));
+    assert.equal(s.fromGitHub, true);
+    assert.equal(s.description, 'A CLI tool');
+    const c = projectSummary(project({ description: '   ' }));
+    assert.equal(c.fromGitHub, false);
+    assert.equal(c.description, null);
+});
+
 test('summary works for every real project', () => {
     const stats = JSON.parse(readFileSync(new URL('./fixtures/github-stats.json', import.meta.url), 'utf8'));
-    for (const p of buildCity(loadProjects(), stats)) {
+    for (const p of buildCity(loadProjects(), { stats })) {
         const s = projectSummary(p);
         assert.ok(s.name, p.slug);
         s.links.forEach((l) => assert.ok(l.href.startsWith('https://'), `${p.slug}: ${l.href}`));

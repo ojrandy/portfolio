@@ -65,6 +65,8 @@ export const projectSummary = (project) => {
         stack: project.stack ?? [],
         links,
         stats: projectStats(project),
+        description: typeof project.description === 'string' && project.description.trim() ? project.description.trim() : null,
+        fromGitHub: project.source === 'github',
         demo: project.demo === true,
     };
 };

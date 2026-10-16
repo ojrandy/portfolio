@@ -70,6 +70,8 @@ export const createApp = ({ distDir = DEFAULT_DIST, env = process.env, routes = 
             return;
         }
         res.set('Cache-Control', 'no-cache');
+        // The 3D city is unlinked until it becomes the homepage (P5-02); keep it out of search results.
+        if (req.query.city !== undefined) res.set('X-Robots-Tag', 'noindex');
         res.sendFile(indexHtml);
     });
 

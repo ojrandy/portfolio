@@ -41,7 +41,7 @@ const ProjectPanel = ({ project, onClose }) => {
             role="dialog"
             aria-labelledby={titleId}
             onKeyDown={onKeyDown}
-            className="fixed inset-x-0 bottom-0 z-30 max-h-[60vh] overflow-y-auto rounded-t-2xl border-t border-mist/15 bg-basalt/95 p-5 text-mist shadow-2xl backdrop-blur md:inset-x-auto md:bottom-4 md:right-4 md:top-4 md:max-h-none md:w-[22rem] md:rounded-2xl md:border"
+            className="fixed inset-x-0 bottom-0 z-30 max-h-[60vh] overflow-y-auto rounded-t-2xl border-t border-mist/15 bg-basalt/95 p-5 text-mist md:inset-x-auto md:bottom-4 md:right-4 md:top-4 md:max-h-none md:w-[22rem] md:rounded-2xl md:border"
         >
             <div className="flex items-start justify-between gap-3">
                 <div>

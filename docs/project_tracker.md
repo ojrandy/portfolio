@@ -35,9 +35,10 @@ Each task ID matches a prompt in `/prompt.md`. Commit messages start with the ta
 - [x] **P1-05** Camera rig: constrained orbit, fly-to-building, keyboard navigation, touch gestures
 - [x] **P1-06** Building interaction: hover label, click → project panel (placeholder content)
 - [x] **P1-07** Loading screen (progress + Bayangi-inspired loader once ADR-009 motifs are confirmed). Done with a skyline loader; a confirmed motif can replace it later.
-- [ ] **P1-08** Performance pass: instancing, merged geometry, DPR clamp, draw-call count, lazy-load 3D chunk
+- [x] **P1-08** Performance pass: instancing, merged geometry, DPR clamp, draw-call count, lazy-load 3D chunk. The 3D chunk is lazy (53 KB gzip). Initial JS is still 421 KB because of the template; P0-06 fixes it.
 
 **Done when:** the city builds itself from real data and hits the performance budget.
+*Status (2026-10-16):* all tasks done and fps/draw-call budgets met (`npm run perf`). The initial JS budget (< 200 KB gzip) is still missed because of the old template, so this waits on P0-06.
 
 ## Phase 2 — Live Buea
 - [ ] **P2-01** `/api/buea`: Buea local time + Open-Meteo weather, cached 15 min, safe fallback

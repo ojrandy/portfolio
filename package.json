@@ -15,7 +15,8 @@
     "test": "node --test \"scripts/**/*.test.js\" \"server/**/*.test.js\" \"src/**/*.test.js\"",
     "dev:server": "node --watch --env-file-if-exists=.env server/dev.js",
     "dev:all": "concurrently -k -n web,api -c cyan,magenta \"npm:dev\" \"npm:dev:server\"",
-    "start": "node server/index.js"
+    "start": "node server/index.js",
+    "perf": "node scripts/perf.mjs"
   },
   "dependencies": {
     "@emailjs/browser": "^4.4.1",

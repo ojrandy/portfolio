@@ -11,15 +11,17 @@ import Contact from "./sections/Contact.jsx";
 import Footer from "./sections/Footer.jsx";
 import LoadingScreen from "./components/LoadingScreen.jsx";
 
-// Dev-only building preview (/?city); compiled out of production builds.
-const CityPreview = import.meta.env.DEV ? lazy(() => import("./city/CityPreview.jsx")) : null;
-const showCityPreview = CityPreview && new URLSearchParams(window.location.search).has("city");
+// The 3D city on /?city (unlinked, noindex) until P5-02's mode router. Dev adds the HUD.
+const City = import.meta.env.DEV
+    ? lazy(() => import("./city/CityPreview.jsx"))
+    : lazy(() => import("./city/CityExperience.jsx"));
+const showCity = new URLSearchParams(window.location.search).has("city");
 
 const App = () => {
-    if (showCityPreview) {
+    if (showCity) {
         return (
             <Suspense fallback={<LoadingScreen />}>
-                <CityPreview />
+                <City />
             </Suspense>
         );
     }

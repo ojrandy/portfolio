@@ -87,6 +87,14 @@ Placement is **deterministic** (seeded by slug), so the city looks the same for 
 - Errors: failed fetch → "Couldn't fetch the projects." + "Try again" (refetches). No WebGL → a plain message; the Recruiter mode fallback comes with P5-02.
 - Accessibility: `role="status"` + `aria-live="polite"` with "Step n of 3"; the city wrapper is `aria-busy` until drawn; the screen never takes focus.
 
+**Performance (P1-08, `src/lib/quality.js`):**
+- 13 draw calls for today's city (budget 100): instanced building parts, merged layout surfaces, 4 backdrop meshes.
+- Quality levels change only DPR and shadow-map size, never which shaders exist (turning shadows off recompiles every material, a long freeze on a phone): low = DPR 1 + 512 map, medium = 1.25 + 1024, high = 1.5 + 2048. DPR never exceeds 1.5.
+- Starting level from the device: ≤ 2 cores or ≤ 2 GB → low; ≤ 4 cores or ≤ 4 GB → medium (low on touch); otherwise high (medium on touch). Unknown values (no `deviceMemory` in Safari/Firefox) don't count against the device.
+- After the first frame, drei `PerformanceMonitor` steps down one level after ~5 s mostly under 40 fps. It never steps back up: each change resizes the canvas and redraws shadows, so flip-flopping costs more than it saves.
+- Shadows are static: the light and buildings don't move, so the shadow map is drawn only when the layout or quality changes. P2-02's moving sun will redraw it every few seconds, not every frame.
+- No `backdrop-filter` blur or blurred `box-shadow` on UI over the canvas. A blur is recomputed every frame the canvas changes, and the label's first shadow cost a ~150 ms frame. Use opaque-ish backgrounds and 1 px borders/rings.
+
 **Final constants (P1-02, `src/lib/buildings.js`):**
 - Height: `k = 1.6`, floor height `0.6`, snapped to whole floors, 3–20 floors (1.8–12 units). Owner `effort` uses the same log2 scale: `effort × 0.7` (effort 10 ≈ 128 commits), so self-rated projects never outgrow measured ones. `stats.source: none` → 3 floors.
 - Footprint (scope): `stack` items ≤ 2 small (1.6, 2 window columns), 3–4 medium (2.2, 3), 5+ large (3.0, 4). With an empty stack, the number of GitHub languages ≥ 5 % is used.

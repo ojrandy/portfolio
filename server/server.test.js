@@ -139,7 +139,9 @@ test('SPA fallback serves index.html; missing files are 404s; assets are cached'
         assert.equal(res.status, 200, p);
         assert.match(await res.text(), /<title>OJ City<\/title>/);
         assert.equal(res.headers.get('cache-control'), 'no-cache');
+        assert.equal(res.headers.get('x-robots-tag'), null, p);
     }
+    assert.equal((await fetch(`${prod.url}/?city`)).headers.get('x-robots-tag'), 'noindex');
     assert.equal((await fetch(`${prod.url}/assets/missing.js`)).status, 404);
     const asset = await fetch(`${prod.url}/assets/app-abc123.js`);
     assert.equal(asset.status, 200);

@@ -57,11 +57,12 @@ const fragmentShader = /* glsl */ `
 const Fako = ({ placement, mistColor, mist = 1 }) => {
     const reducedMotion = useReducedMotion();
     const material = useRef(null);
-    const uniforms = useMemo(() => ({
-        color: { value: new THREE.Color() },
-        opacity: { value: 0 },
-        time: { value: 0 },
-    }), []);
+    // Memoised args: a new args object makes R3F rebuild the material, which frees and recompiles its shader.
+    const args = useMemo(() => [{
+        uniforms: { color: { value: new THREE.Color() }, opacity: { value: 0 }, time: { value: 0 } },
+        vertexShader,
+        fragmentShader,
+    }], []);
 
     useLayoutEffect(() => {
         const { uniforms: u } = material.current;
@@ -79,7 +80,7 @@ const Fako = ({ placement, mistColor, mist = 1 }) => {
                 <meshStandardMaterial vertexColors flatShading roughness={1} />
             </mesh>
             <mesh geometry={mistGeometry} position-y={band.y} scale={band.scale} renderOrder={1}>
-                <shaderMaterial ref={material} args={[{ uniforms, vertexShader, fragmentShader }]}
+                <shaderMaterial ref={material} args={args}
                     transparent depthWrite={false} side={THREE.DoubleSide} fog={false} toneMapped={false} />
             </mesh>
         </group>

@@ -17,6 +17,41 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-16 — Performance pass
+**Tasks:** P1-08 (done)
+**Done:**
+- `/?city` in production: `src/city/CityExperience.jsx` (the city without the dev HUD) is lazy-loaded on `?city` in every build; `CityPreview.jsx` is now that plus the HUD (dev only). Unlinked, with `noindex` sent as both an `X-Robots-Tag` header (server, tested) and a `<meta>`.
+- Adaptive quality: `src/lib/quality.js` (levels change DPR + shadow-map size only), `useDeviceTier` (first guess from cores/memory/touch), drei `PerformanceMonitor` as a step-down-only safety net.
+- `src/city/Sun.jsx`: static shadow map, redrawn only when the layout or quality changes.
+- **Bug fixed:** sky and mist `shaderMaterial`s were rebuilt (shader freed and recompiled) on every hover or focus change, because their `args` object was new on each render. Now memoised. This was the main cause of a ~250 ms hitch on the first flight.
+- Removed the blurred `box-shadow` (label, panel) and `backdrop-blur` (label, panel) over the canvas. The label's first shadow alone cost a ~150 ms frame (Chrome compiling its raster shaders).
+- `npm run perf` (`scripts/perf.mjs`) + `src/city/PerfProbe.jsx` (`?perf` only).
+- Docs: performance rules in design_system.md; perf script, new components and the R3F `args` gotcha in architecture.md.
+**Measurements** (`npm run perf --repeat=2`, Chromium, real GPU, production build):
+
+| | before | after |
+|---|---|---|
+| Desktop 1280×800 idle | 60 fps | 60 fps (p95 18 ms) |
+| Desktop first flight | 47–50 fps, worst frame ~250–420 ms | 58–60 fps, worst 19–76 ms |
+| Phone emulation (Pixel 7, 4× CPU) idle | 56 fps at DPR 1.5, p95 47 ms | 60 fps at DPR 1 (low), p95 18 ms |
+| Phone emulation flight | 54 fps, p95 44 ms | 58–59 fps, p95 18 ms |
+| Draw calls / triangles | 13 / 13.7k | 13 / 13.8k |
+| City chunk | not built (dev-only) | 53 KB gzip, lazy |
+| Initial JS | 421 KB gzip | 421 KB gzip (template, P0-06) |
+
+Phone numbers vary run to run (the emulation shares this machine's CPU); the phone GPU can't be emulated, so a real Android test is still P5-07.
+**Checks:** `npm test` 80/80 (3 new quality tests + the noindex header) · ESLint clean on changed files (`npm run lint` still reports 5 errors + 1 warning in untouched template files: `Particles.jsx`, `NavBar.jsx`, `TechIcon.jsx`, all for P0-06) · `npm run build` passes · screenshots at high and low quality (shadows present at both), hover label, open panel; `meta robots` in head; no console errors.
+**Decisions:** owner approved the plan and `/?city` in production (unlinked + noindex). Quality never steps back up, and levels never toggle shadows (both measured to cost more than they save).
+**Problems / notes:**
+- Tried and dropped: drei `<Preload all>` (compiles offscreen shader variants, not the on-screen ones), and a full-scene warm-up render (no effect once the `args` bug was fixed).
+- Desktop starts at "medium" on this machine (4 cores reported). The ~55 ms worst frame left on the very first flight is Chrome's one-off first paint of the label in a fresh browser profile; returning visitors don't get it.
+- GitHub returned 403 for every repo during this session (rate limit). The server kept the last good stats. `npm run perf` no longer calls GitHub; adding a `GITHUB_TOKEN` to `.env` would raise the limit from 60 to 5,000 requests per hour.
+- Initial JS budget: needs P0-06 (template removal), and the city becoming the homepage needs P5-02.
+**Next:**
+- P0-06 (restructure + remove the template) to meet the initial JS budget, or Phase 2 (P2-01 `/api/buea`).
+
+---
+
 ## 2026-10-15 — Loading screen
 **Tasks:** P1-07 (done)
 **Done:**

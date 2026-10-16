@@ -51,6 +51,7 @@ npm run preview   # preview the built frontend (Vite only, no API)
 npm run dev:server  # Express API on :3001 (development mode, restarts on change, loads .env)
 npm run dev:all     # Vite + Express together; Vite proxies /api → :3001
 npm start           # production: Express serves dist/ + /api (Hostinger start command)
+npm run perf        # after a build: fps, draw calls and chunk sizes vs the budget (desktop + emulated phone)
 ```
 
 ## Code conventions (match the existing code)

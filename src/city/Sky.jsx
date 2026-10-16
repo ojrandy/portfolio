@@ -30,7 +30,12 @@ const geometry = new THREE.SphereGeometry(SKY_RADIUS, 32, 16);
 const Sky = ({ zenith, horizon }) => {
     const ref = useRef(null);
     const material = useRef(null);
-    const uniforms = useMemo(() => ({ zenith: { value: new THREE.Color() }, horizon: { value: new THREE.Color() } }), []);
+    // Memoised args: a new args object makes R3F rebuild the material, which frees and recompiles its shader.
+    const args = useMemo(() => [{
+        uniforms: { zenith: { value: new THREE.Color() }, horizon: { value: new THREE.Color() } },
+        vertexShader,
+        fragmentShader,
+    }], []);
 
     useLayoutEffect(() => {
         material.current.uniforms.zenith.value.set(zenith);
@@ -41,7 +46,7 @@ const Sky = ({ zenith, horizon }) => {
 
     return (
         <mesh ref={ref} geometry={geometry} renderOrder={-1} frustumCulled={false}>
-            <shaderMaterial ref={material} args={[{ uniforms, vertexShader, fragmentShader }]}
+            <shaderMaterial ref={material} args={args}
                 side={THREE.BackSide} depthWrite={false} fog={false} toneMapped={false} />
         </mesh>
     );

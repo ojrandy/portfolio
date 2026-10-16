@@ -168,20 +168,21 @@ _Effort (1–10) sets height when the repo is private or has no GitHub stats._
 - **Your role:** founder & lead developer
 - **Team size:** 1
 - **Dates:** 2025-09 → present
-- **Stack:** Next.js, Node.js, MongoDB, Claude API, MTN MoMo / Orange Money payments
-- **Category:** web
+- **Stack:** Flutter, Dart, Riverpod, Supabase, Firebase Cloud Messaging, Google Sign-In
+- **Category:** mobile
+_Stack, category, X-Ray and iframe corrected 2026-10-16 from the repo (pubspec.yaml, README): a Flutter app for Android and iOS. The rest of this block is still demo text._
 - **Problem:** Students and young workers in Buea spend too much on food and eat badly because planning meals around a small budget is tedious.
 - **Hardest part:** Producing meal plans from local ingredients and real market prices, not generic Western recipes.
 - **Decision:** A curated local ingredient and price list that the AI must plan from, so suggestions are realistic and cheap.
 - **Result:** Beta with 50 testers; average weekly food spend down 20% in the first month. Source: tester survey
 - **X-Ray layers:**
-  - UI: Next.js, Tailwind CSS
-  - API: Next.js API routes, AI meal-plan generator
-  - Data: MongoDB (users, plans, local price list)
-  - Infra / hosting: Hostinger Node.js
+  - UI: Flutter (Android, iOS), Riverpod, go_router
+  - API: TODO(content)
+  - Data: Supabase (auth, database, storage, realtime)
+  - Infra / hosting: Supabase; Firebase Cloud Messaging for push notifications
 - **Effort (1–10):** 8
 - **Media:** TODO(content)
-- **Can the live site be shown in an iframe?** yes
+- **Can the live site be shown in an iframe?** no (mobile app)
 
 ### [DEMO] OJ City (this portfolio)
 - **Slug:** oj-city

@@ -113,14 +113,15 @@
                 "end": "present"
             },
             "stack": [
-                "Next.js",
-                "Node.js",
-                "MongoDB",
-                "Claude API",
-                "MTN MoMo / Orange Money payments"
+                "Flutter",
+                "Dart",
+                "Riverpod",
+                "Supabase",
+                "Firebase Cloud Messaging",
+                "Google Sign-In"
             ],
             "category": [
-                "web"
+                "mobile"
             ],
             "caseStudy": {
                 "problem": "Students and young workers in Buea spend too much on food and eat badly because planning meals around a small budget is tedious.",
@@ -130,16 +131,16 @@
                 "resultSource": "tester survey"
             },
             "xray": {
-                "ui": "Next.js, Tailwind CSS",
-                "api": "Next.js API routes, AI meal-plan generator",
-                "data": "MongoDB (users, plans, local price list)",
-                "infra": "Hostinger Node.js"
+                "ui": "Flutter (Android, iOS), Riverpod, go_router",
+                "api": "TODO(content)",
+                "data": "Supabase (auth, database, storage, realtime)",
+                "infra": "Supabase; Firebase Cloud Messaging for push notifications"
             },
             "stats": {
                 "effort": 8
             },
             "media": "TODO(content)",
-            "iframe": true,
+            "iframe": false,
             "demo": true,
             "demoFields": []
         },

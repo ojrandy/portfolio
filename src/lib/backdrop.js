@@ -32,7 +32,7 @@ export const FAKO_COLORS = {
     rock: mixHex(COLORS.basalt, COLORS.ash, 0.5),
 };
 
-// Night defaults; P2-02 will drive these from Buea's time of day.
+// The night sky; src/lib/dayNight.js blends it with the other times of day.
 export const SKY_NIGHT = {
     zenith: mixHex(COLORS.basalt, COLORS.indigo, 0.3),
     horizon: mixHex(mixHex(COLORS.basalt, COLORS.indigo, 0.6), COLORS.mist, 0.18),

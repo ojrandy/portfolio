@@ -1,5 +1,5 @@
-// Sky dome: a vertical gradient that follows the camera (1 draw call). P2-02 drives the colours.
-import { useLayoutEffect, useMemo, useRef } from 'react';
+// Sky dome: a vertical gradient that follows the camera (1 draw call). Colours come from DayNight (P2-02).
+import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { SKY_RADIUS } from '../lib/backdrop.js';
@@ -26,27 +26,21 @@ const fragmentShader = /* glsl */ `
 
 const geometry = new THREE.SphereGeometry(SKY_RADIUS, 32, 16);
 
-/** @param {{ zenith: string, horizon: string }} props */
-const Sky = ({ zenith, horizon }) => {
+/** @param {{ lighting: { zenith: THREE.Color, horizon: THREE.Color } }} props  live colours, used as the uniforms */
+const Sky = ({ lighting }) => {
     const ref = useRef(null);
-    const material = useRef(null);
     // Memoised args: a new args object makes R3F rebuild the material, which frees and recompiles its shader.
     const args = useMemo(() => [{
-        uniforms: { zenith: { value: new THREE.Color() }, horizon: { value: new THREE.Color() } },
+        uniforms: { zenith: { value: lighting.zenith }, horizon: { value: lighting.horizon } },
         vertexShader,
         fragmentShader,
-    }], []);
-
-    useLayoutEffect(() => {
-        material.current.uniforms.zenith.value.set(zenith);
-        material.current.uniforms.horizon.value.set(horizon);
-    }, [zenith, horizon]);
+    }], [lighting]);
 
     useFrame(({ camera }) => ref.current?.position.copy(camera.position));
 
     return (
         <mesh ref={ref} geometry={geometry} renderOrder={-1} frustumCulled={false}>
-            <shaderMaterial ref={material} args={args}
+            <shaderMaterial args={args}
                 side={THREE.BackSide} depthWrite={false} fog={false} toneMapped={false} />
         </mesh>
     );

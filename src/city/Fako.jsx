@@ -51,7 +51,8 @@ const fragmentShader = /* glsl */ `
 `;
 
 /**
- * @param {{ placement: { x: number, z: number, rotationY: number }, mistColor: string, mist?: number }} props
+ * @param {{ placement: { x: number, z: number, rotationY: number }, mistColor: THREE.Color, mist?: number }} props
+ *   mistColor: the live colour from DayNight (used as the uniform, so it updates without a re-render).
  *   mist: density multiplier (1 = Buea's everyday mist; P2-04 raises it for fog).
  */
 const Fako = ({ placement, mistColor, mist = 1 }) => {
@@ -59,16 +60,15 @@ const Fako = ({ placement, mistColor, mist = 1 }) => {
     const material = useRef(null);
     // Memoised args: a new args object makes R3F rebuild the material, which frees and recompiles its shader.
     const args = useMemo(() => [{
-        uniforms: { color: { value: new THREE.Color() }, opacity: { value: 0 }, time: { value: 0 } },
+        uniforms: { color: { value: mistColor }, opacity: { value: 0 }, time: { value: 0 } },
         vertexShader,
         fragmentShader,
-    }], []);
+    }], [mistColor]);
 
     useLayoutEffect(() => {
         const { uniforms: u } = material.current;
-        u.color.value.set(mistColor);
         u.opacity.value = Math.min(1, MIST.opacity * mist);
-    }, [mistColor, mist]);
+    }, [mist]);
 
     useFrame((_, delta) => {
         if (!reducedMotion) material.current.uniforms.time.value += delta;

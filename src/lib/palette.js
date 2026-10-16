@@ -5,6 +5,7 @@ export const COLORS = {
     mist: '#C9D3DA',
     fakoGreen: '#2F6B4F',
     indigo: '#2B3A8C',
+    sky: '#4C9BE8',
     window: '#FFC56B',
     ember: '#E2552B',
     paper: '#F4F1EA',

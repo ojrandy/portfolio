@@ -8,6 +8,7 @@ import path from 'node:path';
 import { chromium, devices } from 'playwright';
 import { createApp } from '../server/app.js';
 import { createCityRouter } from '../server/routes/city.js';
+import { createBueaRouter } from '../server/routes/buea.js';
 
 const PORT = Number(process.env.PERF_PORT ?? 4173);
 const BASE = `http://127.0.0.1:${PORT}`;
@@ -41,7 +42,8 @@ const sizes = () => {
 };
 
 // The production app in this process, with GitHub stubbed out: perf runs use the cached stats as they are and
-// never spend the GitHub rate limit (a failed refresh keeps the last good data and writes nothing).
+// never spend the GitHub rate limit (a failed refresh keeps the last good data and writes nothing). Open-Meteo is off
+// too: /api/buea answers with the computed sun and fallback weather.
 const off = () => Promise.reject(new Error('GitHub disabled for perf runs'));
 const offline = { discover: off, allStats: off };
 const quiet = { ...console, error: () => {}, warn: () => {} };
@@ -49,7 +51,7 @@ const quiet = { ...console, error: () => {}, warn: () => {} };
 const startServer = async () => {
     const realConsole = globalThis.console;
     globalThis.console = quiet; // the cache logs the refusal on every refresh attempt
-    const app = createApp({ env: { ...process.env, NODE_ENV: 'production' }, routes: [createCityRouter({ github: offline })] });
+    const app = createApp({ env: { ...process.env, NODE_ENV: 'production' }, routes: [createCityRouter({ github: offline }), createBueaRouter({ weather: { current: off } })] });
     globalThis.console = realConsole;
     return new Promise((resolve, reject) => {
         const server = app.listen(PORT, '127.0.0.1', () => resolve(server));

@@ -12,7 +12,7 @@
     "content:build": "node scripts/build-content.js",
     "content:check": "node scripts/validate-content.js",
     "content:check:strict": "node scripts/validate-content.js --strict",
-    "test": "node --test \"scripts/**/*.test.js\" \"server/**/*.test.js\" \"src/**/*.test.js\"",
+    "test": "node --test \"shared/**/*.test.js\" \"scripts/**/*.test.js\" \"server/**/*.test.js\" \"src/**/*.test.js\"",
     "dev:server": "node --watch --env-file-if-exists=.env server/dev.js",
     "dev:all": "concurrently -k -n web,api -c cyan,magenta \"npm:dev\" \"npm:dev:server\"",
     "start": "node server/index.js",

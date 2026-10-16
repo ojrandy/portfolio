@@ -1,6 +1,9 @@
 // Buea time, sun and weather for /api/buea (P2-01, ADR-005). Open-Meteo needs no key; the request URL is fixed
 // to api.open-meteo.com and built from validated numbers. Everything except the client is pure and tested.
 import { z } from 'zod';
+import { solarTimes } from '../../shared/solar.js';
+
+export { solarTimes }; // used for sun times when Open-Meteo is unavailable
 
 const API = 'https://api.open-meteo.com/v1/forecast';
 const DAY = 24 * 60 * 60 * 1000;
@@ -88,40 +91,6 @@ export const localParts = (ms, tz) => {
     const m = parts.timeZoneName.match(/GMT([+-])(\d{2}):?(\d{2})?/);
     const offsetMinutes = m ? (m[1] === '-' ? -1 : 1) * (Number(m[2]) * 60 + Number(m[3] ?? 0)) : 0;
     return { date: `${parts.year}-${parts.month}-${parts.day}`, time: `${parts.hour}:${parts.minute}`, offsetMinutes };
-};
-
-const rad = (d) => (d * Math.PI) / 180;
-const deg = (r) => (r * 180) / Math.PI;
-
-/**
- * Sunrise and sunset (epoch ms) on a calendar date at lat/lon, NOAA solar calculator equations
- * (sun's upper limb with standard refraction, sea-level horizon). Used only when Open-Meteo is unavailable.
- * @param {string} date 'YYYY-MM-DD' (the local date; the result is in absolute time)
- */
-export const solarTimes = (date, lat, lon) => {
-    const midnight = Date.parse(`${date}T00:00:00Z`);
-    const jd = midnight / DAY + 2440587.5 + 0.5 - lon / 360; // around local solar noon
-    const t = (jd - 2451545) / 36525;
-
-    const l0 = (280.46646 + t * (36000.76983 + t * 0.0003032)) % 360;
-    const m = 357.52911 + t * (35999.05029 - 0.0001537 * t);
-    const e = 0.016708634 - t * (0.000042037 + 0.0000001267 * t);
-    const c = Math.sin(rad(m)) * (1.914602 - t * (0.004817 + 0.000014 * t))
-        + Math.sin(rad(2 * m)) * (0.019993 - 0.000101 * t) + Math.sin(rad(3 * m)) * 0.000289;
-    const appLong = l0 + c - 0.00569 - 0.00478 * Math.sin(rad(125.04 - 1934.136 * t));
-    const obliq = 23 + (26 + (21.448 - t * (46.815 + t * (0.00059 - t * 0.001813))) / 60) / 60
-        + 0.00256 * Math.cos(rad(125.04 - 1934.136 * t));
-    const decl = deg(Math.asin(Math.sin(rad(obliq)) * Math.sin(rad(appLong))));
-    const y = Math.tan(rad(obliq / 2)) ** 2;
-    const eqTime = 4 * deg(y * Math.sin(2 * rad(l0)) - 2 * e * Math.sin(rad(m))
-        + 4 * e * y * Math.sin(rad(m)) * Math.cos(2 * rad(l0))
-        - 0.5 * y * y * Math.sin(4 * rad(l0)) - 1.25 * e * e * Math.sin(2 * rad(m)));
-
-    const cosHa = Math.cos(rad(90.833)) / (Math.cos(rad(lat)) * Math.cos(rad(decl))) - Math.tan(rad(lat)) * Math.tan(rad(decl));
-    if (cosHa < -1 || cosHa > 1) return null; // polar day or night (never in Buea)
-    const ha = deg(Math.acos(cosHa));
-    const noon = 720 - 4 * lon - eqTime; // minutes after UTC midnight
-    return { sunrise: midnight + (noon - 4 * ha) * 60000, sunset: midnight + (noon + 4 * ha) * 60000 };
 };
 
 /** Open-Meteo response → { offsetSeconds, weather, days: [{ date, sunrise, sunset }] } (times in epoch ms). Throws on a bad shape. */

@@ -11,6 +11,9 @@ import CameraRig from './CameraRig.jsx';
 import FirstFrame from './FirstFrame.jsx';
 import PerfProbe from './PerfProbe.jsx';
 import Sun from './Sun.jsx';
+import DayNight from './DayNight.jsx';
+import { createLighting } from './liveLighting.js';
+import useBuea from '../hooks/useBuea.js';
 import useDeviceTier from '../hooks/useDeviceTier.js';
 import { LEVELS, QUALITY, stepQuality } from '../lib/quality.js';
 import ProjectPanel from '../components/ProjectPanel.jsx';
@@ -19,7 +22,6 @@ import CityProjectList from '../components/CityProjectList.jsx';
 import useCityData from '../hooks/useCityData.js';
 import { toBuildings } from '../lib/buildings.js';
 import { layoutCity } from '../lib/layout.js';
-import { COLORS } from '../lib/palette.js';
 import { CAMERA } from '../lib/camera.js';
 import useCityStore from '../store/useCityStore.js';
 
@@ -39,7 +41,8 @@ const hasWebGL = () => {
 };
 
 /**
- * @param {{ debug?: (state: { status, error, data, layout, focusName }) => { scene?: React.ReactNode, overlay?: React.ReactNode } }} props
+ * @param {{ debug?: (state: { status, error, data, layout, focusName }) => { scene?: React.ReactNode, overlay?: React.ReactNode, at?: number | null } }} props
+ *   debug.at: a fixed time (epoch ms) for the dev time-of-day preview.
  */
 const CityExperience = ({ debug }) => {
     const { status, data, fetchedAt, error, retry } = useCityData();
@@ -48,6 +51,8 @@ const CityExperience = ({ debug }) => {
     const tier = useDeviceTier();
     const [quality, setQuality] = useState(PINNED ?? tier);
     const viewport = useRef(null);
+    const [lighting] = useState(createLighting);
+    const { offsetMs } = useBuea();
     const focus = useCityStore((s) => s.focus);
     const hovered = useCityStore((s) => s.hovered);
     const openSlug = useCityStore((s) => s.openSlug);
@@ -92,9 +97,9 @@ const CityExperience = ({ debug }) => {
                             onDecline={() => setQuality((q) => stepQuality(q, -1))}
                         />
                     )}
-                    <ambientLight intensity={0.6} color={COLORS.mist} />
-                    <Sun shadowMap={QUALITY[quality].shadowMap} version={layout} />
-                    <Backdrop bounds={bounds} />
+                    <DayNight lighting={lighting} offsetMs={offsetMs} at={extra.at} />
+                    <Sun shadowMap={QUALITY[quality].shadowMap} lighting={lighting} version={layout} />
+                    <Backdrop bounds={bounds} lighting={lighting} />
                     {layout && (
                         <>
                             <CityLayout layout={layout} />

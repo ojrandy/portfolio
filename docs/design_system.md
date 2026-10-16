@@ -59,8 +59,8 @@ Placement is **deterministic** (seeded by slug), so the city looks the same for 
 - Placement: 25 west of Career Road, and its foot is 45 behind the city's north edge at every downtown size (tested).
 - Slope colours by height: ground colour at the foot → forest (fako-green + 35 % basalt) → grassland (ash + 30 % fako-green) from 30–50 % → rock (basalt + 50 % ash) from 55–80 %.
 - Mist band: a soft open band hugging the slope from 28 % to 50 % of the height, opacity 0.4 × `mist` (1 = everyday Buea mist; P2-04 raises it for fog codes). It drifts slowly and is static with `prefers-reduced-motion`.
-- Sky: a gradient dome (radius 900) that follows the camera. Night defaults: zenith basalt + 30 % indigo; horizon (basalt + 60 % indigo) + 18 % mist; mist mist + 25 % indigo. P2-02 drives `{ zenith, horizon, mist }`.
-- Fog: linear, 60 → 600, in the horizon colour. Distant ground meets the sky without an edge, and Fako gets natural haze.
+- Sky: a gradient dome (radius 900) that follows the camera. Night defaults: zenith basalt + 30 % indigo; horizon (basalt + 60 % indigo) + 18 % mist; mist mist + 25 % indigo. From P2-02 these are the Night keyframe; the time of day blends them with the others.
+- Fog and background: linear fog 60 → 600, both in the (changing) horizon colour. Distant ground meets the sky without an edge, and Fako gets natural haze.
 - Ground: a 2000 × 2000 plane in the ground colour at y = −0.05, just under the roads.
 
 **Camera rig (P1-05, `src/lib/camera.js`, `src/city/CameraRig.jsx`):**
@@ -92,7 +92,7 @@ Placement is **deterministic** (seeded by slug), so the city looks the same for 
 - Quality levels change only DPR and shadow-map size, never which shaders exist (turning shadows off recompiles every material, a long freeze on a phone): low = DPR 1 + 512 map, medium = 1.25 + 1024, high = 1.5 + 2048. DPR never exceeds 1.5.
 - Starting level from the device: ≤ 2 cores or ≤ 2 GB → low; ≤ 4 cores or ≤ 4 GB → medium (low on touch); otherwise high (medium on touch). Unknown values (no `deviceMemory` in Safari/Firefox) don't count against the device.
 - After the first frame, drei `PerformanceMonitor` steps down one level after ~5 s mostly under 40 fps. It never steps back up: each change resizes the canvas and redraws shadows, so flip-flopping costs more than it saves.
-- Shadows are static: the light and buildings don't move, so the shadow map is drawn only when the layout or quality changes. P2-02's moving sun will redraw it every few seconds, not every frame.
+- Shadows are static: the light and buildings don't move, so the shadow map is drawn only when the layout or quality changes. The moving sun (P2-02) redraws it for one frame once it has moved more than 0.3°, about once a minute.
 - No `backdrop-filter` blur or blurred `box-shadow` on UI over the canvas. A blur is recomputed every frame the canvas changes, and the label's first shadow cost a ~150 ms frame. Use opaque-ish backgrounds and 1 px borders/rings.
 
 **Final constants (P1-02, `src/lib/buildings.js`):**
@@ -111,6 +111,7 @@ Placement is **deterministic** (seeded by slug), so the city looks the same for 
 | `--mist` | `#C9D3DA` | fog, light text on dark |
 | `--fako-green` | `#2F6B4F` | vegetation, success |
 | `--indigo` | `#2B3A8C` | primary accent (indigo-dye inspired) |
+| `--sky` | `#4C9BE8` | clear day sky (P2-02; owner asked for a bright day) |
 | `--window` | `#FFC56B` | lit windows, warm highlights |
 | `--ember` | `#E2552B` | CTAs, beacon |
 | `--paper` | `#F4F1EA` | recruiter mode background (light) |
@@ -118,13 +119,21 @@ Placement is **deterministic** (seeded by slug), so the city looks the same for 
 Language accents: JavaScript `#F7DF1E` · TypeScript `#3178C6` · Python `#3776AB` · Dart `#0175C2` · PHP `#777BB4` · other `--indigo`.
 
 ## Time of day (Africa/Douala, UTC+1)
-Uses real sunrise/sunset from `/api/buea`. Keyframes:
+The sun's real position in Buea (NOAA equations in `shared/solar.js`; it sits on the horizon at the same sunrise/sunset as `/api/buea`, within ~1 min) on Buea's clock: the device clock corrected by `/api/buea`'s `now`, or the device clock alone if the API fails. Keyframes:
 | Phase | Sky | Sun/ambient | City |
 |---|---|---|---|
 | Night | basalt → deep indigo | moonlight, low | all lamps + most windows on |
 | Dawn | indigo → pink → mist | warm, rising | lamps fading |
-| Day | soft blue, hazy | bright neutral | windows off, beacons visible |
+| Day | bright clear blue (`--sky`), pale horizon | bright neutral | windows off, beacons visible |
 | Dusk | orange → indigo | warm low sun | lamps switching on one by one |
+
+**Implementation (P2-02, `src/lib/dayNight.js`):**
+- Phases by sun elevation: night < −10°, day ≥ 8°, dawn/dusk in between (dawn while the sun is rising). In Buea (mid-October) dawn runs ~05:30–06:45 and dusk ~17:35–18:45.
+- Keyframes by elevation, blended linearly. Morning: −12° Night → −6° pre-dawn (indigo, ember glow at the horizon) → 0° Dawn (pink horizon) → 8° morning (mist, sky + 40 % mist) → 20° Day (zenith `--sky`, horizon sky + 60 % paper). Evening: 20° Day → 8° golden (sky + 25 % indigo over a window-warm horizon) → 0° Dusk (orange: ember + 35 % window) → −6° blue hour (indigo + ember) → −12° Night. Every colour is a mix of the palette tokens; values in the code.
+- Light (one directional, always): the sun follows its real azimuth (east → south → west); its height is limited to 6–60° for shadows, as Buea's noon sun is ~75–90° up and flattens the city. Intensity 0 at −6°, 0.9–1 at 0°, 1.6 at 8°, 2.8 by day. Below −6° it becomes a fixed moonlight (south-east, 45° up, cool mist-indigo, 0.8), not the real moon. Both are dark at the swap, so it doesn't show.
+- Ambient (one ambient light, always): 0.6 at night, 0.8 at dawn/dusk, 0.9 in the morning and golden hour, 1.15 by day; colour mist, tinted ember/window around sunrise and sunset, indigo at night.
+- Updates every minute; the scene eases to the new values (time constant 0.6 s), instantly with reduced motion. The first frame is a cut (never a fade from night). Lights are never added or removed (that would recompile every material).
+- Not yet: windows and lamps by phase (P2-03), weather (P2-04).
 
 ## Weather (Open-Meteo WMO codes)
 | Codes | Meaning | Effect |

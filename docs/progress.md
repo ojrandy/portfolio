@@ -17,6 +17,26 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-16 — Day/night
+**Tasks:** P2-02 (done); P2-01 committed first (`c351f34`)
+**Done:**
+- `shared/solar.js` (new folder for pure code used by both server and browser): `solarTimes` moved from `server/lib/weather.js` (re-exported there, unchanged) + new `solarPosition(ms, lat, lon)`.
+- `src/lib/dayNight.js`: phases by sun elevation, morning/evening keyframes from the design_system table (all colours mixed from palette tokens), `lightingAt()` → sky, fog, mist, sun/moon light and ambient. Night keeps the P1-04 sky exactly.
+- `src/hooks/useBuea.js` (offset from the server clock, refreshed every 15 min), `src/city/DayNight.jsx` + `liveLighting.js` (update every minute, ease each frame, no React re-renders), `Sun.jsx` follows the light and redraws shadows after > 0.3° of movement. Sky and Fako use the live colours directly as uniforms; Backdrop no longer sets the background.
+- Dev HUD: Buea time · phase · sun elevation + a time-of-day slider (`debug().at`).
+- `npm run perf` now mounts `/api/buea` with Open-Meteo stubbed out (it was a console 404 → FAIL).
+- Docs: final rules in design_system.md (Time of day → Implementation), API in architecture.md.
+**Checks:** `npm test` 107/107 (9 new: sun on the horizon at Open-Meteo's sunrise/sunset, Buea sun path and 77° noon, phases by time, night = P1-04 sky, dawn ≠ dusk, light limits + moon swap in the dark, no minute-to-minute jumps all day, keyframe continuity, Buea date) · ESLint clean on changed files · `npm run build` passes; city chunk 55 KB gzip (was 53) · `npm run perf`: desktop and phone PASS, 60 fps idle, ~59 fps flight, **13 draw calls** (unchanged) · screenshots at 02:00, 05:50, 06:10, 06:40, 09:00, 12:10, 17:20, 17:55, 18:12, 18:35, 21:00 (Playwright fake clock) · device clock 02:00 + `/api/buea` 12:10 → noon scene, refetched after 15 min · dev HUD slider → 18:10 dusk; no console errors.
+**Decisions (owner):** plan approved with the recommendations: real sun height but the shadow light capped at 60°; plain fixed moonlight (no real moon phase).
+**Problems / notes:**
+- The plan said "the sun is on the horizon at /api/buea's sunrise/sunset". It is computed in the browser instead (agrees within ~1 min, tested against the captured Open-Meteo response), so the city never waits for the API and doesn't change if it fails. The API corrects the clock only.
+- First tuning had the city almost black around sunrise/sunset (a sun at the horizon lights only west faces). Fixed with more ambient light in every phase and a 6° minimum height for the shadow light.
+- Windows still glow at noon: switching them by phase is P2-03.
+- Owner follow-up: the day should be a bright day. New token `--sky` `#4C9BE8` (palette.js, index.css, design_system.md): day zenith = sky, horizon sky + 60 % paper; morning and golden hour lean on it; day light 2.4 → 2.8, ambient 1.0 → 1.15. Test: noon zenith is blue over a pale horizon. Screenshots 09:00, 12:10, 17:20 checked.
+**Next:** P2-03 city lights (windows off by day, lamps on one by one at dusk, using `sunState().phase`).
+
+---
+
 ## 2026-10-16 — /api/buea
 **Tasks:** P2-01 (done); content fix for Smart Meal (own commit)
 **Done:**

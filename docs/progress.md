@@ -17,6 +17,21 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-16 — /api/buea
+**Tasks:** P2-01 (done); content fix for Smart Meal (own commit)
+**Done:**
+- `server/lib/weather.js`: Open-Meteo client (fixed URL, 4 s timeout, zod-checked response, unknown WMO codes rejected), WMO code → `{ kind, label }` table (28 codes), NOAA sunrise/sunset (`solarTimes`), time-zone helpers, `weatherConfig(env)` (`BUEA_LAT` / `BUEA_LON` / `BUEA_TZ`, validated), and pure `bueaState({ now, place, upstream })`.
+- `server/routes/buea.js` → `GET /api/buea`, wired into `server/index.js` and warmed at start. Weather cached 15 min on disk; time computed per request; `Cache-Control: max-age=60`.
+- Fallbacks: weather older than 2 h or missing → marked `source: "fallback"` (code 0, `label: null`, numbers null), so nothing claims it is clear when we don't know. Sun times not covered by Open-Meteo → computed (`sun.source: "computed"`).
+- Docs: `/api/buea` shape and rules in architecture.md.
+- Smart Meal block corrected from its repo (`pubspec.yaml`, README): Flutter mobile app with Riverpod, go_router, Supabase, FCM, Google Sign-In; category mobile; X-Ray UI/data/infra; no iframe. API layer left `TODO(content)`; the rest stays demo.
+**Checks:** `npm test` 98/98 (10 new: WMO table, time helpers, real-response parsing, computed sun within 2 min of Open-Meteo, config validation, fresh/stale/no-data states, night/next sunrise, client errors, route end to end incl. fallback) · ESLint clean on `server/` · live `npm start`: `/api/buea` → 12:45, overcast, 25.1 °C, sunrise 06:07, sunset 18:09 (Open-Meteo).
+**Decisions (owner):** plan approved as proposed (2 h cut-off for cached weather, marked fallback). Smart Meal fix committed separately.
+**Notes:** Open-Meteo snaps Buea to a grid point (lat 4.112, lon 9.250, 868 m), which is fine for city weather. Snow codes are mapped for completeness only.
+**Next:** P2-02 day/night (browser `useBuea` hook + sky/sun/ambient from this endpoint).
+
+---
+
 ## 2026-10-16 — GitHub auto-discovery
 **Tasks:** P1-09 (new, owner-requested; done)
 **Done:**

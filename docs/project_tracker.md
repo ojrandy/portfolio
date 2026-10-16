@@ -9,7 +9,7 @@ Each task ID matches a prompt in `/prompt.md`. Commit messages start with the ta
 |---|---|---|---|
 | 0 | Foundations | 1 | [ ] |
 | 1 | The City | 1–2 | [~] |
-| 2 | Live Buea | 2 | [ ] |
+| 2 | Live Buea | 2 | [~] |
 | 3 | Content, Districts & X-Ray | 3 | [ ] |
 | 4 | Ask My Portfolio (AI) | 4 | [ ] |
 | 5 | Recruiter Mode & Polish | 5 | [ ] |
@@ -43,7 +43,7 @@ Each task ID matches a prompt in `/prompt.md`. Commit messages start with the ta
 *Status (2026-10-16):* all tasks done and fps/draw-call budgets met (`npm run perf`). The initial JS budget (< 200 KB gzip) is still missed because of the old template, so this waits on P0-06.
 
 ## Phase 2 — Live Buea
-- [ ] **P2-01** `/api/buea`: Buea local time + Open-Meteo weather, cached 15 min, safe fallback
+- [x] **P2-01** `/api/buea`: Buea local time + Open-Meteo weather, cached 15 min, safe fallback
 - [ ] **P2-02** Day/night cycle: sun position, sky colours, ambient keyed to Buea time
 - [ ] **P2-03** City lights: street lamps + window glow at dusk/night
 - [ ] **P2-04** Weather FX: mist/fog over Fako, rain, clouds, thunder flash (mapped from WMO codes)

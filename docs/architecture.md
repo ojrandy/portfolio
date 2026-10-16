@@ -65,7 +65,7 @@ All responses are JSON unless noted. All inputs are validated with zod. All endp
 |---|---|---|---|
 | GET | `/api/health` | uptime check | none |
 | GET | `/api/city` | content projects + public repos discovered on GitHub + GitHub stats → building data (ADR-012) | 6 h, stale-while-revalidate, file-persisted |
-| GET | `/api/buea` | `{ localTime, tz, sunrise, sunset, weather: { code, tempC, cloud, rain, wind } }` | 15 min |
+| GET | `/api/buea` | Buea local time, sunrise/sunset, current weather (shape below, P2-01) | weather 15 min (file-persisted); time per request |
 | POST | `/api/chat` | `{ messages: [{role, content}] }` → **SSE stream** of text + tool calls | none |
 | POST | `/api/contact` | `{ name, email, message, turnstileToken, website(honeypot) }` | none |
 
@@ -94,6 +94,25 @@ All responses are JSON unless noted. All inputs are validated with zod. All endp
 - `commits` = all commits on the default branch (any author).
 - `source: "github"` = discovered on one of the profile's GitHub accounts with no block in `projects.md` (rules in ADR-012): `featured` false, district downtown, `effort` null, `category` [], `stack` from GitHub languages, `status` derived, no case study. `source: "content"` = a `projects.md` block; its `description` is the GitHub description when the repo is public.
 - Implementation: `server/lib/github.js` (REST: `listRepos(account)` / `discover(accounts, previous)` via `GET /users/{account}/repos`, paged; `repoStats` = repo, languages, commit count via the `Link` header), `server/lib/cache.js`, `server/lib/city.js` (pure: `selectRepos`, `repoStatus`, `languageStack`, `prettyName`, `buildCity(projects, { stats, listing }, { hide, now })`), `server/routes/city.js`. Accounts and the hide list come from `content/profile.json` → `github: { accounts, hide }` (profile fields "GitHub accounts for the city" and "Hide these repos" in `projects.md`; without the first, only the GitHub username is scanned).
+
+### `/api/buea` response (shape)
+```json
+{
+  "now": "2026-10-16T11:45:27.382Z",
+  "tz": "Africa/Douala", "utcOffsetMinutes": 60,
+  "localDate": "2026-10-16", "localTime": "12:45",
+  "isDay": true,
+  "sun": { "sunrise": "2026-10-16T06:07:00+01:00", "sunset": "2026-10-16T18:09:00+01:00",
+           "nextSunrise": "2026-10-17T06:07:00+01:00", "source": "open-meteo | computed" },
+  "weather": { "code": 3, "kind": "cloudy", "label": "overcast", "tempC": 25.1, "cloud": 86, "rain": 0, "wind": 7.7,
+               "source": "open-meteo | fallback", "updatedAt": "ISO of the Open-Meteo fetch | null" }
+}
+```
+- `weather.kind`: clear · cloudy · fog · drizzle · rain · showers · thunderstorm · snow (WMO code table in `server/lib/weather.js`, matching the weather table in design_system.md). `label` is the plain-words description for the status line. `cloud` %, `rain` mm, `wind` km/h.
+- **Fallback:** weather older than 2 h, or no weather at all, is `{ code: 0, kind: "clear", label: null, all numbers null, source: "fallback" }`. That's for drawing the scene only; the status line (P2-05) must not state weather when `source` is `fallback`.
+- `sun.source: "computed"`: Open-Meteo's sunrise/sunset don't cover today (outage), so they are calculated with the NOAA equations (within ~1 min of Open-Meteo for Buea). `nextSunrise` is today's sunrise before dawn, tomorrow's after it.
+- Time is computed on every request from the server clock and `BUEA_TZ`; `Cache-Control: public, max-age=60`. Query parameters are ignored.
+- Implementation: `server/lib/weather.js` (Open-Meteo client with a 4 s timeout and zod check, WMO table, `solarTimes`, `localParts`, pure `bueaState`), `server/routes/buea.js` (cache key `buea-weather`, 15 min TTL, 2 min retry after a failure, a cold start waits ≤ 4.5 s). Tests: `server/buea.test.js` with a real captured response in `server/fixtures/open-meteo-buea.json`.
 
 ## AI chat design
 - **Knowledge:** the full content is small, so the whole `knowledge.md` goes in the system prompt with **prompt caching**. No vector DB/RAG.

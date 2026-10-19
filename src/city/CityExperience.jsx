@@ -6,6 +6,7 @@ import { PerformanceMonitor } from '@react-three/drei';
 import Buildings from './Buildings.jsx';
 import BuildingLabel from './BuildingLabel.jsx';
 import CityLayout from './CityLayout.jsx';
+import Lamps from './Lamps.jsx';
 import Backdrop from './Backdrop.jsx';
 import CameraRig from './CameraRig.jsx';
 import FirstFrame from './FirstFrame.jsx';
@@ -103,7 +104,14 @@ const CityExperience = ({ debug }) => {
                     {layout && (
                         <>
                             <CityLayout layout={layout} />
-                            <Buildings placed={layout.lots} highlighted={highlighted} onHover={setHovered} onSelect={openProject} />
+                            <Lamps layout={layout} lighting={lighting} />
+                            <Buildings
+                                placed={layout.lots}
+                                lighting={lighting}
+                                highlighted={highlighted}
+                                onHover={setHovered}
+                                onSelect={openProject}
+                            />
                             {lots.get(labelSlug) && projects.get(labelSlug) && (
                                 <BuildingLabel lot={lots.get(labelSlug)} project={projects.get(labelSlug)} />
                             )}

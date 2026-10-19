@@ -1,5 +1,6 @@
 // Renders every building with one InstancedMesh per part (6 draw calls for the whole skyline).
-import { useMemo, useRef } from 'react';
+// Windows switch on one by one at dusk and off at dawn (P2-03).
+import { useEffect, useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { mergeGeometries } from 'three/addons/utils/BufferGeometryUtils.js';
@@ -9,9 +10,12 @@ import { createRandom } from '../lib/random.js';
 import { canHover, isClick, slugAt } from '../lib/picking.js';
 import useReducedMotion from '../hooks/useReducedMotion.js';
 import Part from './InstancedPart.jsx';
+import { makeSwitchable, withSwitches } from './switchable.js';
 
 const UNLIT_WINDOW = '#1B1F2A';
 const DIM_WINDOW = mixHex(COLORS.window, UNLIT_WINDOW, 0.45);
+// By day every window is dark glass with a little of the sky in it; at night unlit windows are UNLIT_WINDOW.
+const SKY_IN_GLASS = 0.3;
 const ROOF_HEIGHT = 0.12;
 const NONE = [];
 
@@ -74,6 +78,7 @@ const toInstances = (placed) => {
                         rotationY: angle,
                         scale: [cell * 0.45, FLOOR_HEIGHT * 0.5, 1],
                         color: b.litWindows[index] ? lit : UNLIT_WINDOW,
+                        switchAt: b.windowSwitch[index],
                     });
                 }
             }
@@ -88,6 +93,34 @@ const toInstances = (placed) => {
         if (b.flag) parts.flags.push({ position: [x - w * 0.32, roof, z + d * 0.32] });
     }
     return parts;
+};
+
+// A window shows its own colour once `lighting.windows` passes its switch-on point, and uDark until then.
+const createWindowMaterial = (uniforms) => makeSwitchable(new THREE.MeshBasicMaterial({ toneMapped: false }), {
+    key: 'city-windows',
+    uniforms,
+    declarations: 'uniform vec3 uDark;',
+    fragment: 'diffuseColor.rgb = mix(uDark, diffuseColor.rgb, vOn);',
+});
+
+const unlitColor = new THREE.Color(UNLIT_WINDOW);
+
+const syncWindows = (uniforms, lighting) => {
+    uniforms.uLevel.value = lighting.windows;
+    uniforms.uDark.value.copy(unlitColor).lerp(lighting.horizon, SKY_IN_GLASS * (1 - lighting.windows));
+};
+
+const Windows = ({ items, lighting }) => {
+    const uniforms = useMemo(() => ({ uLevel: { value: 0 }, uDark: { value: unlitColor.clone() } }), []);
+    const material = useMemo(() => createWindowMaterial(uniforms), [uniforms]);
+    const geometry = useMemo(() => withSwitches(windowGeometry, items.map((w) => w.switchAt)), [items]);
+
+    useEffect(() => () => geometry.dispose(), [geometry]);
+    useEffect(() => () => material.dispose(), [material]);
+
+    useFrame(() => syncWindows(uniforms, lighting));
+
+    return <Part items={items} geometry={geometry} material={material} />;
 };
 
 const Beacons = ({ items }) => {
@@ -109,12 +142,13 @@ const Beacons = ({ items }) => {
 /**
  * @param {{
  *   placed: { slug: string, building: object, x: number, z: number }[],
+ *   lighting: object,  live lighting (liveLighting.js); windows follow lighting.windows
  *   highlighted?: string[],
  *   onHover?: (slug: string | null) => void,
  *   onSelect?: (slug: string) => void,
  * }} props
  */
-const Buildings = ({ placed, highlighted = NONE, onHover, onSelect }) => {
+const Buildings = ({ placed, lighting, highlighted = NONE, onHover, onSelect }) => {
     const parts = useMemo(() => toInstances(placed), [placed]);
     const bodies = useMemo(() => toBodies(placed, highlighted), [placed, highlighted]);
 
@@ -140,9 +174,7 @@ const Buildings = ({ placed, highlighted = NONE, onHover, onSelect }) => {
             <Part items={parts.roofs} geometry={boxGeometry}>
                 <meshStandardMaterial roughness={0.6} />
             </Part>
-            <Part items={parts.windows} geometry={windowGeometry}>
-                <meshBasicMaterial toneMapped={false} />
-            </Part>
+            <Windows items={parts.windows} lighting={lighting} />
             <Part items={parts.cranes} geometry={craneGeometry}>
                 <meshStandardMaterial vertexColors roughness={0.7} />
             </Part>

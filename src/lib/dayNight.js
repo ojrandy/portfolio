@@ -106,6 +106,21 @@ export const sunState = (ms, place = BUEA_PLACE) => {
     return { ...p, phase: phaseOf(p.elevation, p.rising) };
 };
 
+// City lights (P2-03), by sun elevation: 0 at or above `off`, 1 at or below `on`, linear between. The same ramps run
+// backwards at dawn. Windows lead the lamps, so lamps come on in the blue hour and go off just after sunrise.
+export const CITY_LIGHTS = {
+    windows: { off: 6, on: -4 },
+    lamps: { off: 2, on: -6 },
+};
+
+const ramp = (elevation, { off, on }) => Math.min(1, Math.max(0, (off - elevation) / (off - on)));
+
+/** How far the city lights are switched on (0..1) for a sun elevation: { windows, lamps }. */
+export const cityLightsAt = ({ elevation }) => ({
+    windows: ramp(elevation, CITY_LIGHTS.windows),
+    lamps: ramp(elevation, CITY_LIGHTS.lamps),
+});
+
 /** Unit vector towards a sky position in city space: east +x, up +y, north −z (Fako). */
 export const skyDirection = (azimuth, elevation) => {
     const az = (azimuth * Math.PI) / 180;
@@ -123,8 +138,8 @@ const blend = (a, b, t) => ({
 });
 
 /**
- * Scene lighting for a sun state: { zenith, horizon, mist, light: { color, intensity, direction, body }, ambient }.
- * `horizon` is also the fog and background colour. `body` is 'sun' or 'moon'.
+ * Scene lighting for a sun state: { zenith, horizon, mist, light: { color, intensity, direction, body }, ambient, city }.
+ * `horizon` is also the fog and background colour. `body` is 'sun' or 'moon'. `city` = cityLightsAt().
  */
 export const lightingAt = ({ elevation, azimuth, rising }) => {
     const frames = rising ? KEYFRAMES.morning : KEYFRAMES.evening;
@@ -141,7 +156,7 @@ export const lightingAt = ({ elevation, azimuth, rising }) => {
     const moon = elevation < MOON_BELOW;
     const clamped = Math.min(SHADOW_MAX_ELEVATION, Math.max(SHADOW_MIN_ELEVATION, elevation));
     const direction = moon ? skyDirection(MOON.azimuth, MOON.elevation) : skyDirection(azimuth, clamped);
-    return { ...key, light: { ...key.light, direction, body: moon ? 'moon' : 'sun' } };
+    return { ...key, light: { ...key.light, direction, body: moon ? 'moon' : 'sun' }, city: cityLightsAt({ elevation }) };
 };
 
 /** Epoch ms of HH:MM today in Buea (today = Buea's date at `nowMs`). For the dev time preview and P2-06. */

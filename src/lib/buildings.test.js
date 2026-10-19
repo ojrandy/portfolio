@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import {
     toBuilding, toBuildings, buildingHeight, buildingFootprint, litWindowRatio, hasCrane,
-    FLOOR_HEIGHT, MIN_HEIGHT, MAX_HEIGHT, FOOTPRINTS, FACES, LIT_MAX, LIT_MIN, LIT_BY_STATUS, LIT_UNKNOWN,
+    FLOOR_HEIGHT, MIN_HEIGHT, MAX_HEIGHT, FOOTPRINTS, FACES, LIT_MAX, LIT_MIN, LIT_BY_STATUS, LIT_UNKNOWN, SWITCH_LAST, SWITCH_NEVER,
 } from './buildings.js';
 import { COLORS, LANGUAGE_COLORS, languageColor, mixHex, desaturate } from './palette.js';
 import { createRandom, hashString, shuffledIndices } from './random.js';
@@ -173,4 +173,17 @@ test('every real project becomes a valid building', () => {
 test('parseCityResponse rejects a malformed response', () => {
     assert.throws(() => parseCityResponse({ projects: 'nope' }));
     assert.throws(() => parseCityResponse({ generatedAt: 'x', statsUpdatedAt: null, projects: [{ slug: '' }] }));
+});
+
+test('windows switch on at dusk at seeded points; unlit windows never switch on', () => {
+    const b = toBuilding(project({ slug: 'switch-test', stats: github({ lastPush: daysAgo(30) }) }), { now: NOW });
+    assert.equal(b.windowSwitch.length, b.litWindows.length);
+    b.windowSwitch.forEach((s, i) => {
+        if (b.litWindows[i]) assert.ok(s >= 0 && s <= SWITCH_LAST, `window ${i}`);
+        else assert.equal(s, SWITCH_NEVER);
+    });
+    // Spread out, not all at once, and the same for every visitor.
+    const lit = b.windowSwitch.filter((s) => s !== SWITCH_NEVER);
+    assert.ok(new Set(lit).size > lit.length * 0.9);
+    assert.deepEqual(toBuilding(project({ slug: 'switch-test', stats: github({ lastPush: daysAgo(30) }) }), { now: NOW }).windowSwitch, b.windowSwitch);
 });

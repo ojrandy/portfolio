@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import CityExperience from './CityExperience.jsx';
 import { DISTRICT_PLOTS } from '../lib/layout.js';
-import { BUEA_UTC_OFFSET_MINUTES, bueaTimeToday, sunState } from '../lib/dayNight.js';
+import { BUEA_UTC_OFFSET_MINUTES, bueaTimeToday, cityLightsAt, sunState } from '../lib/dayNight.js';
 
 const clock = (ms) => new Date(ms + BUEA_UTC_OFFSET_MINUTES * 60000).toISOString().slice(11, 16);
 
@@ -23,6 +23,7 @@ const CityPreview = () => {
     const [minutes, setMinutes] = useState(null); // null = live Buea time
     const at = minutes == null ? null : bueaTimeToday(minutes, stats.now);
     const sun = sunState(at ?? stats.now);
+    const lights = cityLightsAt(sun);
 
     const debug = ({ status, error, data, layout, focusName }) => ({
         scene: <Stats onChange={setStats} />,
@@ -42,7 +43,7 @@ const CityPreview = () => {
                         <p>stats: {data.statsUpdatedAt ?? 'no GitHub data yet'}</p>
                         <p>focus: {focusName ?? 'start view'} · camera {stats.camera}</p>
                         <p>
-                            Buea {clock(at ?? stats.now)} · {sun.phase} · sun {sun.elevation.toFixed(1)}° · {minutes == null ? 'live' : 'preview'}
+                            Buea {clock(at ?? stats.now)} · {sun.phase} · sun {sun.elevation.toFixed(1)}° · windows {Math.round(lights.windows * 100)} % · lamps {Math.round(lights.lamps * 100)} % · {minutes == null ? 'live' : 'preview'}
                         </p>
                         <p className="pointer-events-auto flex items-center gap-2">
                             <input type="range" min={0} max={1435} step={5} aria-label="Preview time of day"

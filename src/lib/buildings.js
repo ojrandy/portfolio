@@ -26,6 +26,10 @@ const LIT_HORIZON_DAYS = 365;
 // Without a push date, the owner's status stands in for activity.
 export const LIT_BY_STATUS = { 'in-progress': 0.6, live: 0.4, archived: 0.1 };
 export const LIT_UNKNOWN = 0.25;
+// Dusk (P2-03): each lit window switches on when the city's window level (0..1) passes its seeded point in
+// [0, SWITCH_LAST], so every lit window is on before the level reaches 1. Unlit windows never switch on.
+export const SWITCH_LAST = 0.9;
+export const SWITCH_NEVER = 2;
 
 const MIN_LANGUAGE_SHARE = 0.05;
 const DAY_MS = 86_400_000;
@@ -96,11 +100,13 @@ export const toBuilding = (project, { now }) => {
 
     const ratio = litWindowRatio(project, now);
     const windowCount = floors * columns * FACES;
-    // Fixed per-slug order, so a higher ratio lights more of the same windows (useful for dusk in P2-03).
+    // Fixed per-slug order, so a higher ratio lights more of the same windows.
     const order = shuffledIndices(windowCount, createRandom(project.slug));
     const litCount = Math.round(ratio * windowCount);
     const lit = new Array(windowCount).fill(false);
     for (let i = 0; i < litCount; i++) lit[order[i]] = true;
+    const switchRandom = createRandom(`${project.slug}:dusk`);
+    const windowSwitch = lit.map((on) => (on ? switchRandom() * SWITCH_LAST : SWITCH_NEVER));
 
     return {
         slug: project.slug,
@@ -115,6 +121,8 @@ export const toBuilding = (project, { now }) => {
         litWindowRatio: ratio,
         // Index = face * floors * columns + floor * columns + column.
         litWindows: lit,
+        // Same index; the window level at which each window switches on (SWITCH_NEVER when unlit).
+        windowSwitch,
         crane: hasCrane(project, now),
         beacon: Boolean(project.live),
         flag: Boolean(project.featured),

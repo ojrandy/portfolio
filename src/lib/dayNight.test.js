@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
-    KEYFRAMES, MOON, SHADOW_MAX_ELEVATION, SHADOW_MIN_ELEVATION, bueaTimeToday, lightingAt, phaseOf, skyDirection, sunState,
+    CITY_LIGHTS, KEYFRAMES, MOON, SHADOW_MAX_ELEVATION, SHADOW_MIN_ELEVATION, bueaTimeToday, cityLightsAt, lightingAt, phaseOf,
+    skyDirection, sunState,
 } from './dayNight.js';
 import { SKY_NIGHT } from './backdrop.js';
 
@@ -93,4 +94,27 @@ test('bueaTimeToday uses Buea’s date, not UTC’s', () => {
     const now = Date.parse('2026-10-15T23:30:00Z');
     assert.equal(bueaTimeToday(21 * 60, now), at('21:00'));
     assert.equal(bueaTimeToday(0, Date.parse('2026-10-16T12:00:00Z')), at('00:00'));
+});
+
+test('city lights: off by day, on at night, windows before lamps at dusk and lamps off first at dawn', () => {
+    for (const t of ['09:00', '12:10', '17:20']) assert.deepEqual(lightingAt(sunState(at(t))).city, { windows: 0, lamps: 0 }, t);
+    for (const t of ['19:30', '23:00', '02:00', '05:00']) assert.deepEqual(lightingAt(sunState(at(t))).city, { windows: 1, lamps: 1 }, t);
+    // Just before sunset (18:09) windows are coming on while the lamps are still off.
+    const sunset = cityLightsAt(sunState(at('17:55')));
+    assert.ok(sunset.windows > 0 && sunset.windows < 1);
+    assert.equal(sunset.lamps, 0);
+    // Twenty minutes after sunrise (06:07) the lamps are off and some windows are still on.
+    const morning = cityLightsAt(sunState(at('06:30')));
+    assert.equal(morning.lamps, 0);
+    assert.ok(morning.windows > 0);
+    assert.ok(CITY_LIGHTS.windows.off > CITY_LIGHTS.lamps.off && CITY_LIGHTS.windows.on > CITY_LIGHTS.lamps.on);
+});
+
+test('city lights change smoothly, minute to minute, all day', () => {
+    let prev = cityLightsAt(sunState(at('00:00')));
+    for (let m = 1; m < 24 * 60; m++) {
+        const now = cityLightsAt(sunState(at('00:00') + m * 60000));
+        assert.ok(Math.abs(now.windows - prev.windows) < 0.05 && Math.abs(now.lamps - prev.lamps) < 0.05, `minute ${m}`);
+        prev = now;
+    }
 });

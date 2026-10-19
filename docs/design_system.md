@@ -88,7 +88,7 @@ Placement is **deterministic** (seeded by slug), so the city looks the same for 
 - Accessibility: `role="status"` + `aria-live="polite"` with "Step n of 3"; the city wrapper is `aria-busy` until drawn; the screen never takes focus.
 
 **Performance (P1-08, `src/lib/quality.js`):**
-- 13 draw calls for today's city (budget 100): instanced building parts, merged layout surfaces, 4 backdrop meshes.
+- 16 draw calls for today's city (budget 100): instanced building parts, merged layout surfaces, 4 backdrop meshes, 3 for the street lamps (P2-03).
 - Quality levels change only DPR and shadow-map size, never which shaders exist (turning shadows off recompiles every material, a long freeze on a phone): low = DPR 1 + 512 map, medium = 1.25 + 1024, high = 1.5 + 2048. DPR never exceeds 1.5.
 - Starting level from the device: ≤ 2 cores or ≤ 2 GB → low; ≤ 4 cores or ≤ 4 GB → medium (low on touch); otherwise high (medium on touch). Unknown values (no `deviceMemory` in Safari/Firefox) don't count against the device.
 - After the first frame, drei `PerformanceMonitor` steps down one level after ~5 s mostly under 40 fps. It never steps back up: each change resizes the canvas and redraws shadows, so flip-flopping costs more than it saves.
@@ -133,7 +133,15 @@ The sun's real position in Buea (NOAA equations in `shared/solar.js`; it sits on
 - Light (one directional, always): the sun follows its real azimuth (east → south → west); its height is limited to 6–60° for shadows, as Buea's noon sun is ~75–90° up and flattens the city. Intensity 0 at −6°, 0.9–1 at 0°, 1.6 at 8°, 2.8 by day. Below −6° it becomes a fixed moonlight (south-east, 45° up, cool mist-indigo, 0.8), not the real moon. Both are dark at the swap, so it doesn't show.
 - Ambient (one ambient light, always): 0.6 at night, 0.8 at dawn/dusk, 0.9 in the morning and golden hour, 1.15 by day; colour mist, tinted ember/window around sunrise and sunset, indigo at night.
 - Updates every minute; the scene eases to the new values (time constant 0.6 s), instantly with reduced motion. The first frame is a cut (never a fade from night). Lights are never added or removed (that would recompile every material).
-- Not yet: windows and lamps by phase (P2-03), weather (P2-04).
+- Not yet: weather (P2-04).
+
+**City lights (P2-03, `cityLightsAt` in `src/lib/dayNight.js`, `src/lib/lamps.js`, `src/city/Lamps.jsx`):**
+- Two levels (0..1) by sun elevation, linear: windows 0 at +6° → 1 at −4°; lamps 0 at +2° → 1 at −6°. The same ramps run backwards at dawn, so windows come on first at dusk (~17:45 in mid-October) and lamps follow (~18:00–18:35); at dawn lamps go off first (gone by ~06:20) and the last windows by ~06:35. Day = all off, night = all on. Eased with the rest of the lighting (instant with reduced motion).
+- One by one: every lit window and every lamp has a seeded switch-on point in [0, 0.9] (window: slug; lamp: its position) and fades in over 0.04 of the level as the level passes it. A per-instance attribute + `onBeforeCompile` patch (`src/city/switchable.js`), so no extra draw calls.
+- Night windows: which and how many are lit is unchanged (push recency, 0.1–0.9; a real number, not "most windows on"). By day all windows are dark glass, `#1B1F2A` + 30 % of the horizon colour; at night unlit windows are plain `#1B1F2A`.
+- Lamps: on every block's pavement, 0.2 inside the edge, at the 4 corners and 4 edge midpoints (every 4 units); both sides of Career Road every 5; the main road's south side every 6 (not at Career Road's mouth) and its north side beside the district plots. 99 lamps today. A 1.3-high ash post, a `--window` head (grey when off) and a 3.2-wide round pool of light on the ground (additive, 0.4 peak, unfogged). No real lights: ~100 point lights would be far too slow on phones.
+- No bloom: a full-screen pass breaks the phone budget. May come back later as a high-quality-only extra.
+- Weather doesn't move the switch-on times yet (P2-04 may switch on earlier under heavy cloud).
 
 ## Weather (Open-Meteo WMO codes)
 | Codes | Meaning | Effect |

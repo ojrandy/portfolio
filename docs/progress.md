@@ -17,6 +17,24 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-16 — City lights
+**Tasks:** P2-03 (done)
+**Done:**
+- `cityLightsAt()` in `src/lib/dayNight.js`: window and lamp levels (0..1) by sun elevation (windows +6° → −4°, lamps +2° → −6°), part of `lightingAt()` and eased with the rest of the live lighting (`liveLighting.js`: `windows`, `lamps`).
+- `src/city/switchable.js`: per-instance `aSwitch` attribute + `onBeforeCompile` patch, so each window/lamp switches on at its own level with no extra draw calls.
+- Windows: `toBuilding` now also returns `windowSwitch` (seeded switch-on point per lit window; unlit = never). By day all windows are dark glass with 30 % of the horizon colour; at night the lit set is unchanged (push recency).
+- Street lamps: `src/lib/lamps.js` (placement from the layout: block pavements, Career Road, main road; 99 lamps today) and `src/city/Lamps.jsx` (post, head, ground pool; 3 draw calls; no real lights).
+- Dev HUD shows the windows/lamps levels next to the sun.
+- Docs: design_system.md (City lights section, draw-call count).
+**Checks:** `npm test` 113/113 (6 new: lights off by day / on at night / windows lead lamps at dusk and lamps go first at dawn, smooth minute to minute all day, window switch points seeded + unlit never on, lamp placement on the real city and a tier-5 city never on a road/lot/plot, unique spots, seeded spread) · ESLint clean on `src/` · `npm run build` passes; city chunk 58 KB gzip (was 55) · `npm run perf`: desktop and phone PASS, 60 fps idle, 58.5–59 fps flight, **16 draw calls** (was 13), 21k triangles · screenshots (Playwright clock, `/api/buea` blocked) at 06:00, 06:30, 12:00, 17:55, 18:10, 18:20, 18:35, 21:00: noon glass + lamps off, 17:55 windows coming on with lamps off, 18:20 lamps part-way on, 21:00 all on; no console errors besides the blocked request.
+**Decisions (owner):** all recommendations: no bloom for now (phone budget), plain modern lamp post, weather doesn't move the switch-on yet (P2-04).
+**Problems / notes:**
+- The `react-hooks/immutability` lint rule rejects writing to memoised uniform objects inside `useFrame`; the writes live in small module functions (`syncWindows`, `syncLamps`), the same pattern as `easeLighting`.
+- Initial JS is still 421 KB gzip (template; P0-06).
+**Next:** P2-04 weather FX.
+
+---
+
 ## 2026-10-16 — Day/night
 **Tasks:** P2-02 (done); P2-01 committed first (`c351f34`)
 **Done:**

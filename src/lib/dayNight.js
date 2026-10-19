@@ -134,6 +134,22 @@ export const statusLine = ({ localTime, weather } = {}) => {
     return parts.join(' · ');
 };
 
+// Dev preview weather names → /api/buea kinds.
+const PREVIEW_WEATHER = new Map([
+    ['clear', 'clear'], ['cloudy', 'cloudy'], ['fog', 'fog'], ['rain', 'rain'], ['storm', 'thunderstorm'], ['thunderstorm', 'thunderstorm'],
+]);
+
+/**
+ * Dev preview overrides (P2-06): `?time=HH:MM&weather=clear|cloudy|fog|rain|storm` (URLSearchParams) → { minutes, weather }.
+ * `minutes` is minutes after Buea midnight, `weather` a kind; each is null when missing or invalid.
+ */
+export const parsePreviewOverride = (params) => {
+    const [, hh, mm] = params.get('time')?.match(/^(\d{1,2}):(\d{2})$/) ?? [];
+    const minutes = hh != null && Number(hh) < 24 && Number(mm) < 60 ? Number(hh) * 60 + Number(mm) : null;
+    const weather = PREVIEW_WEATHER.get(params.get('weather')?.trim().toLowerCase()) ?? null;
+    return { minutes, weather };
+};
+
 /** Unit vector towards a sky position in city space: east +x, up +y, north −z (Fako). */
 export const skyDirection = (azimuth, elevation) => {
     const az = (azimuth * Math.PI) / 180;

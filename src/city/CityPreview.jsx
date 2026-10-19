@@ -4,7 +4,7 @@ import { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import CityExperience from './CityExperience.jsx';
 import { DISTRICT_PLOTS } from '../lib/layout.js';
-import { bueaClock, bueaTimeToday, cityLightsAt, sunState } from '../lib/dayNight.js';
+import { bueaClock, bueaTimeToday, cityLightsAt, parsePreviewOverride, sunState } from '../lib/dayNight.js';
 
 const round = (v) => v.toArray().map((n) => n.toFixed(1)).join(', ');
 
@@ -17,8 +17,12 @@ const Stats = ({ onChange }) => {
 };
 
 const CityPreview = () => {
+    const override = parsePreviewOverride(new URLSearchParams(window.location.search));
     const [stats, setStats] = useState(() => ({ calls: 0, camera: '', now: Date.now() }));
-    const [minutes, setMinutes] = useState(null); // null = live Buea time
+    const [minutes, setMinutes] = useState(override.minutes ?? null); // null = live Buea time
+    const weatherOverride = override.weather
+        ? { kind: override.weather, label: override.weather === 'thunderstorm' ? 'storm' : override.weather }
+        : null;
     const at = minutes == null ? null : bueaTimeToday(minutes, stats.now);
     const sun = sunState(at ?? stats.now);
     const lights = cityLightsAt(sun);
@@ -26,6 +30,7 @@ const CityPreview = () => {
     const debug = ({ status, error, data, layout, focusName }) => ({
         scene: <Stats onChange={setStats} />,
         at,
+        weather: weatherOverride,
         overlay: (
             <div className="pointer-events-none absolute left-4 top-16 z-10 rounded bg-black/60 px-3 py-2 font-mono text-xs text-mist">
                 <p>City preview (dev only)</p>

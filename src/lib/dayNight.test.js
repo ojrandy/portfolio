@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
     CITY_LIGHTS, KEYFRAMES, MOON, SHADOW_MAX_ELEVATION, SHADOW_MIN_ELEVATION, bueaTimeToday, cityLightsAt, lightingAt, phaseOf,
-    bueaClock, msToNextMinute, skyDirection, statusLine, sunState,
+    bueaClock, msToNextMinute, parsePreviewOverride, skyDirection, statusLine, sunState,
 } from './dayNight.js';
 import { SKY_NIGHT } from './backdrop.js';
 
@@ -123,6 +123,25 @@ test('status line formats Buea time, weather and the owner joke', () => {
     assert.equal(statusLine({ localTime: '23:40', weather: { label: 'light rain' } }), "It's 23:40 in Buea · light rain · Ojong is probably shipping something");
     assert.equal(statusLine({ localTime: '06:10', weather: { label: null } }), "It's 06:10 in Buea · Ojong is probably shipping something");
     assert.equal(statusLine({ localTime: '12:00', weather: null }), "It's 12:00 in Buea · Ojong is probably shipping something");
+});
+
+test('dev preview supports time and weather overrides from query params', () => {
+    assert.deepEqual(parsePreviewOverride(new URLSearchParams('?time=21:00&weather=rain')), {
+        minutes: 21 * 60,
+        weather: 'rain',
+    });
+    assert.deepEqual(parsePreviewOverride(new URLSearchParams('?time=00:30&weather=storm')), {
+        minutes: 30,
+        weather: 'thunderstorm',
+    });
+    assert.deepEqual(parsePreviewOverride(new URLSearchParams('?weather=cloudy')), { minutes: null, weather: 'cloudy' });
+    assert.equal(parsePreviewOverride(new URLSearchParams('?time=99:99'))?.minutes, null);
+    assert.equal(parsePreviewOverride(new URLSearchParams('?weather=mist'))?.weather, null);
+    assert.deepEqual(parsePreviewOverride(new URLSearchParams('')), { minutes: null, weather: null });
+    assert.deepEqual(parsePreviewOverride(new URLSearchParams('?time=23:59&weather=%20Storm%20')), { minutes: 23 * 60 + 59, weather: 'thunderstorm' });
+    for (const time of ['24:00', '12:60', '7', '07:5', 'noon', '-1:00']) assert.equal(parsePreviewOverride(new URLSearchParams({ time })).minutes, null, time);
+    for (const weather of ['constructor', '__proto__', 'toString', '']) assert.equal(parsePreviewOverride(new URLSearchParams({ weather })).weather, null, weather);
+    assert.equal(parsePreviewOverride(new URLSearchParams('?time=9:05')).minutes, 9 * 60 + 5);
 });
 
 test('Buea clock: HH:MM in Buea from any epoch, and the wait until the next minute', () => {

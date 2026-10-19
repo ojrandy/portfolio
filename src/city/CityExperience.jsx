@@ -75,7 +75,8 @@ const CityExperience = ({ debug }) => {
     const focusName = projects.get(focus)?.name;
     const openProjectData = projects.get(openSlug);
     const extra = debug?.({ status, error, data, layout, focusName }) ?? {};
-    const { kind, code, cloud, rain } = buea?.weather ?? {};
+    const bueaWeather = extra.weather ?? buea?.weather ?? null;
+    const { kind, code, cloud, rain } = bueaWeather ?? {};
     const weather = useMemo(() => weatherFx(kind ? { kind, code, cloud, rain } : null), [kind, code, cloud, rain]);
 
     return (
@@ -130,7 +131,7 @@ const CityExperience = ({ debug }) => {
                 </Canvas>}
             </div>
             <LoadingScreen code data={status} frame={drawn} webgl={webgl} lots={layout?.lots} onRetry={retry} />
-            <StatusLine offsetMs={offsetMs} at={extra.at} weather={buea?.weather ?? null} />
+            <StatusLine offsetMs={offsetMs} at={extra.at} weather={bueaWeather} />
             <p className="sr-only" aria-live="polite">
                 {focusName ? `${focusName}. Press Enter to open.` : 'Start view, looking up Career Road towards Fako'}
             </p>

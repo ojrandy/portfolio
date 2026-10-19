@@ -17,6 +17,22 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-19 — Debug override verified
+**Tasks:** P2-06 (done; the earlier 2026-10-16 "Debug override" work, audited and tidied)
+**Audit:** works as specified and stays dev-only. `parsePreviewOverride` was rewritten without nested IIFEs (same behaviour; a `Map`, so `?weather=constructor` can't hit an object key) and its test gained edge cases.
+**Done:**
+- `src/lib/dayNight.js`: `parsePreviewOverride(URLSearchParams)` → `{ minutes, weather }`.
+- `src/city/CityPreview.jsx`: the HUD slider starts at `?time=`, and `?weather=` drives the scene (through `weatherFx`, P2-04) and the status line.
+- `src/city/CityExperience.jsx`: the dev weather wins over /api/buea's.
+- architecture.md: Debug override note.
+**Checks:**
+- `npm test`: all pass (override edge cases: empty, 23:59, 9:05, out of range, bad formats, `constructor`/`__proto__`, padded `Storm`). ESLint clean on the changed files. `npm run build` passes.
+- Dev `/?city&time=21:00&weather=rain`: rainy night, HUD at 21:00 "preview", status line "21:00 · rain", no page errors.
+- Production `/?city&time=03:00&weather=storm`: ignored (real time shown, no storm).
+**Next:** audit P3-01 → P3-08 one task at a time.
+
+---
+
 ## 2026-10-19 — Status line fixed
 **Tasks:** P2-05 (done; fixes the earlier 2026-10-16 "Status line" work)
 **Audit of the earlier version:** the time was `/api/buea`'s `localTime`, fetched every 15 min, so it could be 14 minutes behind and showed `It's --:-- in Buea` whenever the API was down; the whole city re-rendered to change it; it sat under the dev HUD on `/?city` in dev.

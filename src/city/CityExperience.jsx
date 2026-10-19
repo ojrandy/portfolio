@@ -8,6 +8,7 @@ import BuildingLabel from './BuildingLabel.jsx';
 import CityLayout from './CityLayout.jsx';
 import Lamps from './Lamps.jsx';
 import Backdrop from './Backdrop.jsx';
+import Rain from './Rain.jsx';
 import CameraRig from './CameraRig.jsx';
 import FirstFrame from './FirstFrame.jsx';
 import PerfProbe from './PerfProbe.jsx';
@@ -24,6 +25,7 @@ import useCityData from '../hooks/useCityData.js';
 import { toBuildings } from '../lib/buildings.js';
 import { layoutCity } from '../lib/layout.js';
 import { CAMERA } from '../lib/camera.js';
+import { weatherFx } from '../lib/weatherFx.js';
 import useCityStore from '../store/useCityStore.js';
 
 const FALLBACK_BOUNDS = { minX: -40, maxX: 40, minZ: -40, maxZ: 40 };
@@ -53,7 +55,7 @@ const CityExperience = ({ debug }) => {
     const [quality, setQuality] = useState(PINNED ?? tier);
     const viewport = useRef(null);
     const [lighting] = useState(createLighting);
-    const { offsetMs } = useBuea();
+    const { data: buea, offsetMs } = useBuea();
     const focus = useCityStore((s) => s.focus);
     const hovered = useCityStore((s) => s.hovered);
     const openSlug = useCityStore((s) => s.openSlug);
@@ -72,6 +74,8 @@ const CityExperience = ({ debug }) => {
     const focusName = projects.get(focus)?.name;
     const openProjectData = projects.get(openSlug);
     const extra = debug?.({ status, error, data, layout, focusName }) ?? {};
+    const { kind, code, cloud, rain } = buea?.weather ?? {};
+    const weather = useMemo(() => weatherFx(kind ? { kind, code, cloud, rain } : null), [kind, code, cloud, rain]);
 
     return (
         <div className="fixed inset-0 bg-basalt">
@@ -98,12 +102,13 @@ const CityExperience = ({ debug }) => {
                             onDecline={() => setQuality((q) => stepQuality(q, -1))}
                         />
                     )}
-                    <DayNight lighting={lighting} offsetMs={offsetMs} at={extra.at} />
+                    <DayNight lighting={lighting} offsetMs={offsetMs} at={extra.at} weather={weather} />
                     <Sun shadowMap={QUALITY[quality].shadowMap} lighting={lighting} version={layout} />
                     <Backdrop bounds={bounds} lighting={lighting} />
+                    <Rain lighting={lighting} quality={quality} />
                     {layout && (
                         <>
-                            <CityLayout layout={layout} />
+                            <CityLayout layout={layout} lighting={lighting} />
                             <Lamps layout={layout} lighting={lighting} />
                             <Buildings
                                 placed={layout.lots}

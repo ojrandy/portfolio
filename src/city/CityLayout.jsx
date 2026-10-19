@@ -1,5 +1,6 @@
 // Roads, block pavements, parks and district plots from layoutCity() (3 draw calls).
-import { useMemo } from 'react';
+import { useMemo, useRef } from 'react';
+import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { LAYOUT_COLORS } from '../lib/layout.js';
 import Part from './InstancedPart.jsx';
@@ -29,14 +30,30 @@ const toInstances = (layout) => ({
     })),
 });
 
-/** @param {{ layout: ReturnType<import('../lib/layout.js').layoutCity> }} props */
-const CityLayout = ({ layout }) => {
+// Wet streets in rain (P2-04): darker and shinier as lighting.wet (0..1) rises. No reflections (too slow on phones).
+const DRY_ROUGHNESS = 0.95;
+const WET_ROUGHNESS = 0.4;
+const WET_DARKEN = 0.35;
+
+const syncWet = (material, lighting) => {
+    material.roughness = DRY_ROUGHNESS + (WET_ROUGHNESS - DRY_ROUGHNESS) * lighting.wet;
+    material.color.setScalar(1 - WET_DARKEN * lighting.wet);
+};
+
+/**
+ * @param {{ layout: ReturnType<import('../lib/layout.js').layoutCity>, lighting: object }} props
+ *   lighting: live lighting (liveLighting.js); streets follow lighting.wet
+ */
+const CityLayout = ({ layout, lighting }) => {
     const parts = useMemo(() => toInstances(layout), [layout]);
+    const surfaces = useRef(null);
+
+    useFrame(() => surfaces.current && syncWet(surfaces.current, lighting));
 
     return (
         <group>
             <Part items={parts.surfaces} geometry={tileGeometry} receiveShadow>
-                <meshStandardMaterial roughness={0.95} />
+                <meshStandardMaterial ref={surfaces} roughness={DRY_ROUGHNESS} />
             </Part>
             <Part items={parts.details} geometry={tileGeometry} receiveShadow>
                 <meshStandardMaterial roughness={1} />

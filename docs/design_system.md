@@ -88,7 +88,7 @@ Placement is **deterministic** (seeded by slug), so the city looks the same for 
 - Accessibility: `role="status"` + `aria-live="polite"` with "Step n of 3"; the city wrapper is `aria-busy` until drawn; the screen never takes focus.
 
 **Performance (P1-08, `src/lib/quality.js`):**
-- 16 draw calls for today's city (budget 100): instanced building parts, merged layout surfaces, 4 backdrop meshes, 3 for the street lamps (P2-03).
+- 16 draw calls for today's city (budget 100): instanced building parts, merged layout surfaces, 4 backdrop meshes, 3 for the street lamps (P2-03), +1 for rain while it rains (P2-04).
 - Quality levels change only DPR and shadow-map size, never which shaders exist (turning shadows off recompiles every material, a long freeze on a phone): low = DPR 1 + 512 map, medium = 1.25 + 1024, high = 1.5 + 2048. DPR never exceeds 1.5.
 - Starting level from the device: ≤ 2 cores or ≤ 2 GB → low; ≤ 4 cores or ≤ 4 GB → medium (low on touch); otherwise high (medium on touch). Unknown values (no `deviceMemory` in Safari/Firefox) don't count against the device.
 - After the first frame, drei `PerformanceMonitor` steps down one level after ~5 s mostly under 40 fps. It never steps back up: each change resizes the canvas and redraws shadows, so flip-flopping costs more than it saves.
@@ -133,7 +133,7 @@ The sun's real position in Buea (NOAA equations in `shared/solar.js`; it sits on
 - Light (one directional, always): the sun follows its real azimuth (east → south → west); its height is limited to 6–60° for shadows, as Buea's noon sun is ~75–90° up and flattens the city. Intensity 0 at −6°, 0.9–1 at 0°, 1.6 at 8°, 2.8 by day. Below −6° it becomes a fixed moonlight (south-east, 45° up, cool mist-indigo, 0.8), not the real moon. Both are dark at the swap, so it doesn't show.
 - Ambient (one ambient light, always): 0.6 at night, 0.8 at dawn/dusk, 0.9 in the morning and golden hour, 1.15 by day; colour mist, tinted ember/window around sunrise and sunset, indigo at night.
 - Updates every minute; the scene eases to the new values (time constant 0.6 s), instantly with reduced motion. The first frame is a cut (never a fade from night). Lights are never added or removed (that would recompile every material).
-- Not yet: weather (P2-04).
+- Weather (P2-04) adjusts these values before they are eased; see Weather → Implementation.
 
 **City lights (P2-03, `cityLightsAt` in `src/lib/dayNight.js`, `src/lib/lamps.js`, `src/city/Lamps.jsx`):**
 - Two levels (0..1) by sun elevation, linear: windows 0 at +6° → 1 at −4°; lamps 0 at +2° → 1 at −6°. The same ramps run backwards at dawn, so windows come on first at dusk (~17:45 in mid-October) and lamps follow (~18:00–18:35); at dawn lamps go off first (gone by ~06:20) and the last windows by ~06:35. Day = all off, night = all on. Eased with the rest of the lighting (instant with reduced motion).
@@ -141,7 +141,7 @@ The sun's real position in Buea (NOAA equations in `shared/solar.js`; it sits on
 - Night windows: which and how many are lit is unchanged (push recency, 0.1–0.9; a real number, not "most windows on"). By day all windows are dark glass, `#1B1F2A` + 30 % of the horizon colour; at night unlit windows are plain `#1B1F2A`.
 - Lamps: on every block's pavement, 0.2 inside the edge, at the 4 corners and 4 edge midpoints (every 4 units); both sides of Career Road every 5; the main road's south side every 6 (not at Career Road's mouth) and its north side beside the district plots. 99 lamps today. A 1.3-high ash post, a `--window` head (grey when off) and a 3.2-wide round pool of light on the ground (additive, 0.4 peak, unfogged). No real lights: ~100 point lights would be far too slow on phones.
 - No bloom: a full-screen pass breaks the phone budget. May come back later as a high-quality-only extra.
-- Weather doesn't move the switch-on times yet (P2-04 may switch on earlier under heavy cloud).
+- Under a dark sky they switch on earlier: as if the sun were up to 5° lower at full gloom (see Weather), so a stormy late afternoon lights up while a bright one doesn't.
 
 ## Weather (Open-Meteo WMO codes)
 | Codes | Meaning | Effect |
@@ -152,6 +152,16 @@ The sun's real position in Buea (NOAA equations in `shared/solar.js`; it sits on
 | 51–67, 80–82 | drizzle / rain / showers | rain particles, wet road reflections |
 | 95–99 | thunderstorm | rain + occasional lightning flash (disabled for reduced motion) |
 Buea is often misty: keep a light mist band on Fako even in clear weather.
+
+**Implementation (P2-04, `src/lib/weatherFx.js`, `src/city/Rain.jsx`):**
+- Levels: `weatherFx(/api/buea weather)` → cloud, rain, fog (0..1), storm, and gloom (0..1, how much darker the city gets: 0.55 cloud + 0.35 rain + 0.1 fog + 0.15 storm). Cloud is the measured cover when there is one, else by code (0 → 0, 1 → 0.15, 2 → 0.45, 3 → 0.85); rain by code (light drizzle 0.2 … heavy rain/showers 1), raised by the measured mm (6 mm/h = 1). Missing, unknown or fallback weather draws the plain clear city. Snow (never in Buea) is a grey, misty day.
+- Light (`applyWeather`, inside `lightingAt`, eased with day/night): the sky goes towards an overcast grey (the time of day's own sky, desaturated, darkened with gloom): zenith × 0.85 cloud, horizon and fog × 0.7 of cloud or fog. Direct sun −80 % and ambient −20 % at full gloom, both desaturated with cloud: overcast light is soft, with faint shadows. Clear weather changes nothing.
+- Clouds: drawn in the sky shader (no extra draw call), drifting noise on a flat ceiling, faded towards the horizon; coverage follows cloud.
+- Fog: scene fog closes in from 60–600 to 20–260 at full fog, and to 65 % of that in heavy rain. The Fako mist band's density = 1 + 1.6 fog + 0.6 cloud, so fog hides most of the mountain while the city stays readable.
+- Rain: one line mesh (1 draw call while raining, 0 otherwise), drops animated in the vertex shader in an 80 × 40 × 80 box in front of the camera that wraps as it moves. Drop count = rain × 600 / 1000 / 1500 (low / medium / high quality). Drops are pale against the day sky and faint grey at night. Frozen with reduced motion.
+- Wet streets: in rain, roads and pavements darken up to 35 % and lose roughness (0.95 → 0.4), so the sun leaves a soft sheen. No real reflections (too slow on phones).
+- Lightning (thunderstorm only): one strike per 14 s slot, 3–9 s into it, so strikes are 8–20 s apart; a strike is one or two 0.12 s flashes 0.2 s apart, so never more than 3 flashes a second (WCAG 2.3.1). It brightens the ambient light and the sky. Seeded by time, so the same for everyone. None with reduced motion.
+- Cost: storm = 1 extra draw call. `npm run perf -- --weather=storm` checks it (19 desktop / 17 phone draw calls, 60 fps).
 
 ## Typography
 - Display: a geometric sans with character (e.g. "Space Grotesk" or "Clash Display")

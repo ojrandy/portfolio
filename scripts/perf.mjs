@@ -20,6 +20,15 @@ const arg = (name) => process.argv.find((a) => a.startsWith(`--${name}=`))?.spli
 const QUALITY = arg('quality');
 const ONLY = arg('only');
 const REPEAT = Number(arg('repeat') ?? 1); // --repeat=N runs each profile N times in the same browser
+// --weather=cloudy|fog|rain|storm measures under that weather (P2-04): /api/buea answers with it.
+const WEATHERS = {
+    cloudy: { code: 3, kind: 'cloudy', label: 'overcast', cloud: 100, rain: 0 },
+    fog: { code: 45, kind: 'fog', label: 'fog', cloud: 100, rain: 0 },
+    rain: { code: 65, kind: 'rain', label: 'heavy rain', cloud: 100, rain: 8 },
+    storm: { code: 95, kind: 'thunderstorm', label: 'thunderstorm', cloud: 100, rain: 8 },
+};
+const WEATHER = arg('weather');
+if (WEATHER && !WEATHERS[WEATHER]) throw new Error(`--weather must be one of ${Object.keys(WEATHERS).join(', ')}`);
 
 const PROFILES = [
     { name: 'desktop', minFps: BUDGET.desktopFps, context: { viewport: { width: 1280, height: 800 }, deviceScaleFactor: 1.5 } },
@@ -93,6 +102,14 @@ const measure = async (browser, profile) => {
         await cdp.send('Emulation.setCPUThrottlingRate', { rate: profile.cpuThrottle });
     }
 
+    if (WEATHER) {
+        await page.route('**/api/buea', async (route) => {
+            const response = await route.fetch();
+            const json = await response.json();
+            await route.fulfill({ response, json: { ...json, weather: { ...json.weather, ...WEATHERS[WEATHER], source: 'perf' } } });
+        });
+    }
+
     const t0 = Date.now();
     await page.goto(`${BASE}/?city&perf${QUALITY ? `&quality=${QUALITY}` : ''}`);
     await page.waitForFunction(() => window.__cityPerf && !document.querySelector('[role=status]'), null, { timeout: 60000 });
@@ -138,6 +155,7 @@ const main = async () => {
         console.log(JSON.stringify({ size, results }, null, 2));
     } else {
         console.log(`Initial JS ${size.entryKb.toFixed(0)} KB gzip (budget ${BUDGET.entryKb}) · lazy chunks ${size.lazyKb.toFixed(0)} KB gzip`);
+        if (WEATHER) console.log(`Weather: ${WEATHER} (/api/buea stubbed)`);
         for (const c of size.chunks) console.log(`  ${c.initial ? 'initial' : 'lazy   '}  ${c.gzipKb.toString().padStart(6)} KB  ${c.file}`);
         for (const r of results) {
             console.log(`\n${r.profile}: ${r.pass ? 'PASS' : 'FAIL'}  (ready in ${r.readyMs} ms, dpr ${r.dpr}${r.quality ? `, quality ${r.quality}${QUALITY ? ' (pinned)' : ''}` : ''})`);

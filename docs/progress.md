@@ -17,6 +17,24 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-19 — Weather FX rebuilt
+**Tasks:** P2-04 (done; replaces the earlier 2026-10-16 "Weather FX" work, which failed the audit)
+**Audit of the earlier version:** rain was one mesh per drop (154 draw calls in rain, 181 in a storm, budget 100); the sky stayed bright blue in a thunderstorm; clouds were 6 translucent spheres; lightning was a hidden, constantly pulsing plane; `Math.random()` ran during render (drops jumped on re-render, 5 lint errors); no softer light, no city fog, no wet roads; docs not updated.
+**Done:**
+- `src/lib/weatherFx.js` (pure): `weatherFx()` maps /api/buea weather to cloud/rain/fog/storm/gloom (code, measured cloud % and rain mm); `applyWeather()` greys and darkens the sky, softens the sun, closes the fog in, thickens the Fako mist and wets the streets; `lightningAt()` is a seeded strike schedule (8–20 s apart, ≤ 3 flashes/s). `lightingAt(sun, fx)` applies it; city lights switch on up to 5° earlier under a dark sky.
+- `liveLighting.js` / `DayNight.jsx`: weather eases with day/night; DayNight sets the fog distances and the lightning flash (none with reduced motion).
+- `Sky.jsx`: clouds in the sky shader (0 draw calls) + flash. `Fako.jsx`: mist density from `lighting`. `Rain.jsx`: one GPU-animated line mesh around the camera (1 draw call), count by quality, frozen with reduced motion. `CityLayout.jsx`: wet streets. `Backdrop.jsx` back to its 4 meshes.
+- `npm run perf -- --weather=cloudy|fog|rain|storm`.
+- Docs: design_system.md (Weather → Implementation, lights earlier under cloud, draw calls), architecture.md.
+**Checks:**
+- `npm test`: all pass (7 new weather tests; Copilot's loose `weatherFxAt` test removed with the function). ESLint clean on `src/city`, `src/lib`, `scripts`. `npm run build` passes.
+- Draw calls (production, faked /api/buea, day and night): clear/partly/overcast/fog 18, rain/storm 19.
+- `npm run perf -- --weather=storm`: desktop PASS (60 / 59 fps, 19 calls), phone PASS (60 / 59.6 fps, 17 calls).
+- Screenshots at 15:00 and 21:00 in clear, partly cloudy, overcast, fog, rain and storm. Lightning stepped with a paused page clock over 22 s of a night storm: a double flash at 6.2/6.4 s, the next strike 15.7 s later, sky brightness 51 → 176. With reduced motion: no flash and steady rain.
+**Next:** P2-05 status line fixes (time from the browser clock, ticking each minute; dev HUD overlap).
+
+---
+
 ## 2026-10-16 — City lights
 **Tasks:** P2-03 (done)
 **Done:**

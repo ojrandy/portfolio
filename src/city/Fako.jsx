@@ -1,5 +1,5 @@
 // Fako (Mount Cameroon) with its mist band (2 draw calls). Shape and placement: src/lib/backdrop.js.
-import { useLayoutEffect, useMemo, useRef } from 'react';
+import { useMemo, useRef } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { MIST, fakoMesh, mistBand } from '../lib/backdrop.js';
@@ -51,27 +51,24 @@ const fragmentShader = /* glsl */ `
 `;
 
 /**
- * @param {{ placement: { x: number, z: number, rotationY: number }, mistColor: THREE.Color, mist?: number }} props
- *   mistColor: the live colour from DayNight (used as the uniform, so it updates without a re-render).
- *   mist: density multiplier (1 = Buea's everyday mist; P2-04 raises it for fog).
+ * @param {{ placement: { x: number, z: number, rotationY: number }, lighting: object }} props
+ *   lighting: live lighting (liveLighting.js). The mist colour is used as the uniform, so it updates without a
+ *   re-render; `mistDensity` (1 = Buea's everyday mist, more in fog and cloud, P2-04) sets its opacity.
  */
-const Fako = ({ placement, mistColor, mist = 1 }) => {
+const Fako = ({ placement, lighting }) => {
     const reducedMotion = useReducedMotion();
     const material = useRef(null);
     // Memoised args: a new args object makes R3F rebuild the material, which frees and recompiles its shader.
     const args = useMemo(() => [{
-        uniforms: { color: { value: mistColor }, opacity: { value: 0 }, time: { value: 0 } },
+        uniforms: { color: { value: lighting.mist }, opacity: { value: MIST.opacity }, time: { value: 0 } },
         vertexShader,
         fragmentShader,
-    }], [mistColor]);
-
-    useLayoutEffect(() => {
-        const { uniforms: u } = material.current;
-        u.opacity.value = Math.min(1, MIST.opacity * mist);
-    }, [mist]);
+    }], [lighting]);
 
     useFrame((_, delta) => {
-        if (!reducedMotion) material.current.uniforms.time.value += delta;
+        const { uniforms: u } = material.current;
+        u.opacity.value = Math.min(1, MIST.opacity * lighting.mistDensity);
+        if (!reducedMotion) u.time.value += delta;
     });
 
     return (

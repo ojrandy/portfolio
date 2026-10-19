@@ -4,6 +4,7 @@
 import { solarPosition } from '../../shared/solar.js';
 import { COLORS, mixHex } from './palette.js';
 import { SKY_NIGHT } from './backdrop.js';
+import { CLEAR, WEATHER_LIGHT, applyWeather } from './weatherFx.js';
 
 export const BUEA_PLACE = { lat: 4.1527, lon: 9.241 };
 export const BUEA_UTC_OFFSET_MINUTES = 60; // Africa/Douala, WAT, no daylight saving
@@ -115,11 +116,14 @@ export const CITY_LIGHTS = {
 
 const ramp = (elevation, { off, on }) => Math.min(1, Math.max(0, (off - elevation) / (off - on)));
 
-/** How far the city lights are switched on (0..1) for a sun elevation: { windows, lamps }. */
-export const cityLightsAt = ({ elevation }) => ({
-    windows: ramp(elevation, CITY_LIGHTS.windows),
-    lamps: ramp(elevation, CITY_LIGHTS.lamps),
-});
+/**
+ * How far the city lights are switched on (0..1) for a sun elevation: { windows, lamps }. Under a dark sky
+ * (`gloom`, weatherFx) they switch on earlier, as if the sun were up to WEATHER_LIGHT.lightsEarlier degrees lower.
+ */
+export const cityLightsAt = ({ elevation }, gloom = 0) => {
+    const e = elevation - WEATHER_LIGHT.lightsEarlier * gloom;
+    return { windows: ramp(e, CITY_LIGHTS.windows), lamps: ramp(e, CITY_LIGHTS.lamps) };
+};
 
 /** Unit vector towards a sky position in city space: east +x, up +y, north −z (Fako). */
 export const skyDirection = (azimuth, elevation) => {
@@ -138,10 +142,11 @@ const blend = (a, b, t) => ({
 });
 
 /**
- * Scene lighting for a sun state: { zenith, horizon, mist, light: { color, intensity, direction, body }, ambient, city }.
+ * Scene lighting for a sun state under weather `fx` (weatherFx(); clear by default):
+ * { zenith, horizon, mist, light: { color, intensity, direction, body }, ambient, city, fog: { near, far }, weather }.
  * `horizon` is also the fog and background colour. `body` is 'sun' or 'moon'. `city` = cityLightsAt().
  */
-export const lightingAt = ({ elevation, azimuth, rising }) => {
+export const lightingAt = ({ elevation, azimuth, rising }, fx = CLEAR) => {
     const frames = rising ? KEYFRAMES.morning : KEYFRAMES.evening;
     let key;
     if (elevation <= frames[0][0]) key = frames[0][1];
@@ -156,7 +161,8 @@ export const lightingAt = ({ elevation, azimuth, rising }) => {
     const moon = elevation < MOON_BELOW;
     const clamped = Math.min(SHADOW_MAX_ELEVATION, Math.max(SHADOW_MIN_ELEVATION, elevation));
     const direction = moon ? skyDirection(MOON.azimuth, MOON.elevation) : skyDirection(azimuth, clamped);
-    return { ...key, light: { ...key.light, direction, body: moon ? 'moon' : 'sun' }, city: cityLightsAt({ elevation }) };
+    const lit = applyWeather({ ...key, light: { ...key.light, direction, body: moon ? 'moon' : 'sun' } }, fx);
+    return { ...lit, city: cityLightsAt({ elevation }, fx.gloom) };
 };
 
 /** Epoch ms of HH:MM today in Buea (today = Buea's date at `nowMs`). For the dev time preview and P2-06. */

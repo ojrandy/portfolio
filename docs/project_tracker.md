@@ -46,7 +46,7 @@ Each task ID matches a prompt in `/prompt.md`. Commit messages start with the ta
 - [x] **P2-01** `/api/buea`: Buea local time + Open-Meteo weather, cached 15 min, safe fallback
 - [x] **P2-02** Day/night cycle: sun position, sky colours, ambient keyed to Buea time
 - [x] **P2-03** City lights: street lamps + window glow at dusk/night
-- [ ] **P2-04** Weather FX: mist/fog over Fako, rain, clouds, thunder flash (mapped from WMO codes)
+- [x] **P2-04** Weather FX: mist/fog over Fako, rain, clouds, thunder flash (mapped from WMO codes)
 - [ ] **P2-05** Status line: "It's 23:40 in Buea · light rain · Ojong is probably shipping something"
 - [ ] **P2-06** Debug override: `?time=21:00&weather=rain` (dev only)
 

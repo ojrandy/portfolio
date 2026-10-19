@@ -17,6 +17,22 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-19 — Status line fixed
+**Tasks:** P2-05 (done; fixes the earlier 2026-10-16 "Status line" work)
+**Audit of the earlier version:** the time was `/api/buea`'s `localTime`, fetched every 15 min, so it could be 14 minutes behind and showed `It's --:-- in Buea` whenever the API was down; the whole city re-rendered to change it; it sat under the dev HUD on `/?city` in dev.
+**Done:**
+- `src/lib/dayNight.js`: `bueaClock(ms)` ("HH:MM" in Buea) and `msToNextMinute(ms)`; the dev HUD reuses `bueaClock` instead of its own copy.
+- `src/components/StatusLine.jsx`: time from the device clock + the server offset (`useBuea`), re-rendering only itself on each minute; the dev preview's fixed time still pins it.
+- `src/city/CityPreview.jsx`: the dev HUD moved below the status line.
+- architecture.md: Status line note.
+**Checks:**
+- `npm test`: all pass (new: Buea clock across midnight, minute boundary, status line with the fallback weather). ESLint clean on the changed files. `npm run build` passes.
+- Production, page clock at 17:59:30: with /api/buea blocked → "It's 17:59 in Buea", 31 s later "It's 18:00"; with the device 10 min slow and /api/buea up (light rain) → "18:09 · light rain", then "18:10".
+- Dev `/?city&time=21:00&weather=rain`: status line 16–52 px, HUD from 64 px (no overlap), rain shows, no page errors.
+**Next:** commit P2-06 (debug override, verified working), then audit P3-01 → P3-08.
+
+---
+
 ## 2026-10-19 — Weather FX rebuilt
 **Tasks:** P2-04 (done; replaces the earlier 2026-10-16 "Weather FX" work, which failed the audit)
 **Audit of the earlier version:** rain was one mesh per drop (154 draw calls in rain, 181 in a storm, budget 100); the sky stayed bright blue in a thunderstorm; clouds were 6 translucent spheres; lightning was a hidden, constantly pulsing plane; `Math.random()` ran during render (drops jumped on re-render, 5 lint errors); no softer light, no city fog, no wet roads; docs not updated.

@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
     CITY_LIGHTS, KEYFRAMES, MOON, SHADOW_MAX_ELEVATION, SHADOW_MIN_ELEVATION, bueaTimeToday, cityLightsAt, lightingAt, phaseOf,
-    skyDirection, sunState,
+    bueaClock, msToNextMinute, skyDirection, statusLine, sunState,
 } from './dayNight.js';
 import { SKY_NIGHT } from './backdrop.js';
 
@@ -117,4 +117,22 @@ test('city lights change smoothly, minute to minute, all day', () => {
         assert.ok(Math.abs(now.windows - prev.windows) < 0.05 && Math.abs(now.lamps - prev.lamps) < 0.05, `minute ${m}`);
         prev = now;
     }
+});
+
+test('status line formats Buea time, weather and the owner joke', () => {
+    assert.equal(statusLine({ localTime: '23:40', weather: { label: 'light rain' } }), "It's 23:40 in Buea · light rain · Ojong is probably shipping something");
+    assert.equal(statusLine({ localTime: '06:10', weather: { label: null } }), "It's 06:10 in Buea · Ojong is probably shipping something");
+    assert.equal(statusLine({ localTime: '12:00', weather: null }), "It's 12:00 in Buea · Ojong is probably shipping something");
+});
+
+test('Buea clock: HH:MM in Buea from any epoch, and the wait until the next minute', () => {
+    assert.equal(bueaClock(at('23:40')), '23:40');
+    assert.equal(bueaClock(at('00:05')), '00:05');
+    assert.equal(bueaClock(Date.parse('2026-10-16T23:30:00Z')), '00:30'); // already tomorrow in Buea
+    assert.equal(bueaClock(at('09:59') + 59_999), '09:59');
+    assert.equal(msToNextMinute(at('12:00')), 60_000);
+    assert.equal(msToNextMinute(at('12:00') + 15_000), 45_000);
+    assert.equal(msToNextMinute(at('12:00') + 59_999), 1);
+    // The status line built from the clock: weather without a label (the /api/buea fallback) is left out.
+    assert.equal(statusLine({ localTime: bueaClock(at('18:07')), weather: { kind: 'clear', label: null } }), "It's 18:07 in Buea · Ojong is probably shipping something");
 });

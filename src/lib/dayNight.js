@@ -125,6 +125,15 @@ export const cityLightsAt = ({ elevation }, gloom = 0) => {
     return { windows: ramp(e, CITY_LIGHTS.windows), lamps: ramp(e, CITY_LIGHTS.lamps) };
 };
 
+/** Status line shown in the city: local time, weather label and the owner line. */
+export const statusLine = ({ localTime, weather } = {}) => {
+    const parts = [`It's ${localTime ?? '--:--'} in Buea`];
+    const label = weather?.label;
+    if (label) parts.push(label);
+    parts.push('Ojong is probably shipping something');
+    return parts.join(' · ');
+};
+
 /** Unit vector towards a sky position in city space: east +x, up +y, north −z (Fako). */
 export const skyDirection = (azimuth, elevation) => {
     const az = (azimuth * Math.PI) / 180;
@@ -171,3 +180,9 @@ export const bueaTimeToday = (minutes, nowMs) => {
     const date = new Date(nowMs + offset).toISOString().slice(0, 10);
     return Date.parse(`${date}T00:00:00Z`) - offset + minutes * 60000;
 };
+
+/** "HH:MM" in Buea at epoch ms (the status line and the dev HUD). */
+export const bueaClock = (ms) => new Date(ms + BUEA_UTC_OFFSET_MINUTES * 60000).toISOString().slice(11, 16);
+
+/** Milliseconds from `ms` to the start of the next minute (so a clock can tick on the minute). */
+export const msToNextMinute = (ms) => 60000 - (((ms % 60000) + 60000) % 60000);

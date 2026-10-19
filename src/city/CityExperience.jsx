@@ -20,6 +20,7 @@ import useDeviceTier from '../hooks/useDeviceTier.js';
 import { LEVELS, QUALITY, stepQuality } from '../lib/quality.js';
 import ProjectPanel from '../components/ProjectPanel.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
+import StatusLine from '../components/StatusLine.jsx';
 import CityProjectList from '../components/CityProjectList.jsx';
 import useCityData from '../hooks/useCityData.js';
 import { toBuildings } from '../lib/buildings.js';
@@ -129,6 +130,7 @@ const CityExperience = ({ debug }) => {
                 </Canvas>}
             </div>
             <LoadingScreen code data={status} frame={drawn} webgl={webgl} lots={layout?.lots} onRetry={retry} />
+            <StatusLine offsetMs={offsetMs} at={extra.at} weather={buea?.weather ?? null} />
             <p className="sr-only" aria-live="polite">
                 {focusName ? `${focusName}. Press Enter to open.` : 'Start view, looking up Career Road towards Fako'}
             </p>

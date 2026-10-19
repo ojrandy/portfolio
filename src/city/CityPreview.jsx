@@ -4,9 +4,7 @@ import { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import CityExperience from './CityExperience.jsx';
 import { DISTRICT_PLOTS } from '../lib/layout.js';
-import { BUEA_UTC_OFFSET_MINUTES, bueaTimeToday, cityLightsAt, sunState } from '../lib/dayNight.js';
-
-const clock = (ms) => new Date(ms + BUEA_UTC_OFFSET_MINUTES * 60000).toISOString().slice(11, 16);
+import { bueaClock, bueaTimeToday, cityLightsAt, sunState } from '../lib/dayNight.js';
 
 const round = (v) => v.toArray().map((n) => n.toFixed(1)).join(', ');
 
@@ -29,7 +27,7 @@ const CityPreview = () => {
         scene: <Stats onChange={setStats} />,
         at,
         overlay: (
-            <div className="pointer-events-none absolute left-4 top-4 z-10 rounded bg-black/60 px-3 py-2 font-mono text-xs text-mist">
+            <div className="pointer-events-none absolute left-4 top-16 z-10 rounded bg-black/60 px-3 py-2 font-mono text-xs text-mist">
                 <p>City preview (dev only)</p>
                 {status === 'error' && <p className="text-ember">/api/city failed: {error.message}. Is `npm run dev:server` running?</p>}
                 {status === 'ready' && (
@@ -43,7 +41,7 @@ const CityPreview = () => {
                         <p>stats: {data.statsUpdatedAt ?? 'no GitHub data yet'}</p>
                         <p>focus: {focusName ?? 'start view'} · camera {stats.camera}</p>
                         <p>
-                            Buea {clock(at ?? stats.now)} · {sun.phase} · sun {sun.elevation.toFixed(1)}° · windows {Math.round(lights.windows * 100)} % · lamps {Math.round(lights.lamps * 100)} % · {minutes == null ? 'live' : 'preview'}
+                            Buea {bueaClock(at ?? stats.now)} · {sun.phase} · sun {sun.elevation.toFixed(1)}° · windows {Math.round(lights.windows * 100)} % · lamps {Math.round(lights.lamps * 100)} % · {minutes == null ? 'live' : 'preview'}
                         </p>
                         <p className="pointer-events-auto flex items-center gap-2">
                             <input type="range" min={0} max={1435} step={5} aria-label="Preview time of day"

@@ -98,6 +98,15 @@ test('summary: case-study fields and media are omitted for demo projects', () =>
     assert.equal(discovered.caseStudy, null);
 });
 
+test('summary: preview and live site only for non-demo HTTPS projects that allow it', () => {
+    const s = projectSummary(project({ preview: '/previews/project.webp', live: 'https://example.com/project', iframe: true }));
+    assert.deepEqual([s.preview, s.live, s.iframe], ['/previews/project.webp', 'https://example.com/project', true]);
+    assert.equal(projectSummary(project({ live: 'https://example.com/project' })).iframe, false, 'not opted in');
+    assert.equal(projectSummary(project({ live: 'http://example.com/project', iframe: true })).iframe, false, 'HTTPS only');
+    const demo = projectSummary(project({ demo: true, preview: '/previews/demo.webp', live: 'https://demo.example/', iframe: true }));
+    assert.deepEqual([demo.preview, demo.iframe], [null, false]);
+});
+
 test('summary works for every real project', () => {
     const stats = JSON.parse(readFileSync(new URL('./fixtures/github-stats.json', import.meta.url), 'utf8'));
     for (const p of buildCity(loadProjects(), { stats })) {

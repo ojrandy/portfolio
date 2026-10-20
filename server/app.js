@@ -5,12 +5,14 @@ import compression from 'compression';
 import { existsSync } from 'node:fs';
 import path from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { securityHeaders } from './lib/security.js';
+import { previewFrameOrigins, securityHeaders } from './lib/security.js';
 import { limits } from './lib/rateLimit.js';
 import healthRouter from './routes/health.js';
+import { loadProjects } from './lib/city.js';
 
 const DEFAULT_DIST = fileURLToPath(new URL('../dist', import.meta.url));
 const ASSETS_DIR = `${path.sep}assets${path.sep}`;
+const PREVIEW_FRAMES = previewFrameOrigins(loadProjects());
 
 const BODY_ERRORS = {
     'entity.too.large': 'Request body too large',
@@ -39,7 +41,7 @@ export const createApp = ({ distDir = DEFAULT_DIST, env = process.env, routes = 
     app.disable('x-powered-by');
     // Hostinger runs the app behind one proxy; req.ip must be the visitor's IP for rate limits.
     app.set('trust proxy', 1);
-    app.use(securityHeaders({ production, hsts: env.ENABLE_HSTS === '1' }));
+    app.use(securityHeaders({ production, hsts: env.ENABLE_HSTS === '1', previewFrames: PREVIEW_FRAMES }));
     app.use(compression());
 
     const api = express.Router();

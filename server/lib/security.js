@@ -15,10 +15,18 @@ export const LEGACY_CSP = {
     ],
 };
 
-// Own project domains allowed in live-preview iframes (P3-02).
-const PREVIEW_FRAMES = [];
+/** Exact HTTPS origins of non-demo projects whose owner content explicitly permits iframe display (P3-02). */
+export const previewFrameOrigins = (projects = []) => [...new Set(projects.flatMap((project) => {
+    if (project.demo || project.iframe !== true || typeof project.live !== 'string') return [];
+    try {
+        const url = new URL(project.live);
+        return url.protocol === 'https:' ? [url.origin] : [];
+    } catch {
+        return [];
+    }
+}))];
 
-export const cspDirectives = ({ production }) => ({
+export const cspDirectives = ({ production, previewFrames = [] }) => ({
     defaultSrc: ["'self'"],
     scriptSrc: ["'self'", 'https://challenges.cloudflare.com', ...LEGACY_CSP.scriptSrc],
     styleSrc: ["'self'", "'unsafe-inline'", 'https://fonts.googleapis.com'],
@@ -28,7 +36,7 @@ export const cspDirectives = ({ production }) => ({
     // blob: three.js GLTFLoader fetches textures embedded in .glb files as blob: URLs.
     connectSrc: ["'self'", 'blob:', ...LEGACY_CSP.connectSrc],
     workerSrc: ["'self'", 'blob:'],
-    frameSrc: ['https://challenges.cloudflare.com', ...PREVIEW_FRAMES],
+    frameSrc: ['https://challenges.cloudflare.com', ...previewFrames],
     frameAncestors: ["'none'"],
     baseUri: ["'self'"],
     formAction: ["'self'"],
@@ -37,9 +45,9 @@ export const cspDirectives = ({ production }) => ({
     upgradeInsecureRequests: production ? [] : null,
 });
 
-export const securityHeaders = ({ production, hsts }) => [
+export const securityHeaders = ({ production, hsts, previewFrames = [] }) => [
     helmet({
-        contentSecurityPolicy: { useDefaults: false, directives: cspDirectives({ production }) },
+        contentSecurityPolicy: { useDefaults: false, directives: cspDirectives({ production, previewFrames }) },
         // Only after SSL is confirmed on Hostinger (P0-05): ENABLE_HSTS=1.
         strictTransportSecurity: hsts ? { maxAge: 31536000, includeSubDomains: true } : false,
         referrerPolicy: { policy: 'strict-origin-when-cross-origin' },

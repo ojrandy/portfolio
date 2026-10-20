@@ -85,15 +85,17 @@ All responses are JSON unless noted. All inputs are validated with zod. All endp
     "stats": { "source": "github | owner | none", "commits": 48, "stars": 1, "lastPush": "ISO", "languages": { "TypeScript": 0.98 } },
     "description": "the repo's GitHub description | null",
     "source": "content | github",
-    "preview": null,
+    "preview": "/previews/<slug>.webp | null",
     "caseStudy": { "problem": "… | null", "hardestPart": "… | null", "decision": "… | null", "result": "… | null", "resultSource": "… | null" },
     "media": "/previews/project.webp | https://… | null",
+    "iframe": false,
     "demo": false
   }]
 }
 ```
 - `stats.source` says where a building's numbers come from: `github` (public repo), `owner` (effort 1–10 from content; GitHub fields are null), `none` (no data: minimum building).
 - `TODO(content)` values become `null` (or `[]`); `repo` is never `"private"` and is dropped when GitHub says the repo is missing/private. Case-study fields come only from owner content: whole `[DEMO]` projects and field-marked demo/TODO text are omitted, and numeric results require a source. GitHub-discovered projects have no case study or media. Media renders only from HTTPS URLs or files under `public/images/` and `public/previews/`.
+- `preview` is the local `/previews/<slug>.webp` only when a non-demo content project has an HTTPS live URL and that generated file exists. `iframe` is true only for non-demo owner content explicitly marked `yes` with an HTTPS live URL; those origins alone are added to CSP `frame-src` (read from `content/projects.json` when the server starts, so restart after changing them).
 - `commits` = all commits on the default branch (any author).
 - `source: "github"` = discovered on one of the profile's GitHub accounts with no block in `projects.md` (rules in ADR-012): `featured` false, district downtown, `effort` null, `category` [], `stack` from GitHub languages, `status` derived, no case study. `source: "content"` = a `projects.md` block; its `description` is the GitHub description when the repo is public.
 - Implementation: `server/lib/github.js` (REST: `listRepos(account)` / `discover(accounts, previous)` via `GET /users/{account}/repos`, paged; `repoStats` = repo, languages, commit count via the `Link` header), `server/lib/cache.js`, `server/lib/city.js` (pure: `selectRepos`, `repoStatus`, `languageStack`, `prettyName`, `buildCity(projects, { stats, listing }, { hide, now })`), `server/routes/city.js`. Accounts and the hide list come from `content/profile.json` → `github: { accounts, hide }` (profile fields "GitHub accounts for the city" and "Hide these repos" in `projects.md`; without the first, only the GitHub username is scanned).
@@ -125,7 +127,7 @@ All responses are JSON unless noted. All inputs are validated with zod. All endp
 
 ## Data refresh
 - GitHub: fetched at server start and again after 6 h (stale-while-revalidate: old data is served while one background refresh runs). One refresh lists the accounts' repos, then fetches stats for content repos + selected discovered repos (~2–3 requests per repo; needs `GITHUB_TOKEN`). Content and the hide list are applied on every request, so a content deploy shows up immediately; a changed account list, or a repo added to content / un-hidden without stats, triggers an early refresh. A failing account keeps its previous repo list. The last good copy is kept on disk (`server/.cache/github-city.json`, git-ignored; the older `github-stats.json` is no longer read and can be deleted) so a GitHub outage or restart never breaks the city. A repo that fails keeps its previous stats; failed refreshes retry after 5 min. A cold start waits at most 4 s before answering with owner stats.
-- Previews: captured locally with `npm run previews` (Playwright) and committed as optimised `.webp`/`.webm`. No runtime screenshot API.
+- Previews: `npm run previews` captures non-demo HTTPS live projects from `content/projects.json` at 1280×800 to `public/previews/*.webp` with Playwright and Chromium's WebP encoder. Anti-bot challenge pages are never saved. The still is shown in the building hover label and in the project panel (`src/components/LivePreview.jsx`; touch screens have no hover). With `iframe: yes`, a "Load live site here" button swaps it for the real site, loaded only on request, in an iframe sandboxed to `allow-forms allow-same-origin allow-scripts` (same-origin = the site's own origin, so its cookies and Cloudflare's browser check work; it can't reach this page). No runtime screenshot API or video loops.
 
 ## Environment variables
 | Name | Where | Notes |

@@ -33,6 +33,8 @@ const projectSchema = z.looseObject({
         resultSource: z.string().nullable(),
     }).nullable().default(null),
     media: z.string().nullable().default(null),
+    preview: z.string().nullable().default(null),
+    iframe: z.boolean().default(false),
 });
 
 export const cityResponseSchema = z.looseObject({

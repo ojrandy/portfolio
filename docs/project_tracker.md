@@ -54,7 +54,7 @@ Each task ID matches a prompt in `/prompt.md`. Commit messages start with the ta
 
 ## Phase 3 — Content, Districts & X-Ray
 - [x] **P3-01** Case study panel: problem → hardest part → decision → result, links, stack, media
-- [ ] **P3-02** Preview capture script (Playwright) → `public/previews/*.webp` + short loops; hover preview on buildings
+- [x] **P3-02** Preview capture script (Playwright) → `public/previews/*.webp` + short loops; hover preview on buildings
 - [ ] **P3-03** Project X-Ray: building splits into floors UI → API → Data → Infra, each labelled from content
 - [ ] **P3-04** Replace counters with real numbers (GitHub + owner-supplied, each with a source)
 - [ ] **P3-05** Replace logo marquee with real tools/clients (or remove)

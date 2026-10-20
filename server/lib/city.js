@@ -1,12 +1,15 @@
 // /api/city data: content/projects.json + public repos discovered on GitHub + cached GitHub stats → the
 // public building list (ADR-012). Content is merged on every request, so a content deploy shows up without
 // waiting for the cache. A repo listed in content uses the owner's entry; GitHub only fills in the numbers.
-import { readFileSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { projectsFileSchema, profileFileSchema, TODO } from '../../content/schema.js';
 import { parseRepoUrl } from './github.js';
 
 const PROJECTS_FILE = new URL('../../content/projects.json', import.meta.url);
 const PROFILE_FILE = new URL('../../content/profile.json', import.meta.url);
+const DEFAULT_PREVIEWS_DIR = fileURLToPath(new URL('../../public/previews/', import.meta.url));
 
 export const loadProjects = (file = PROJECTS_FILE) => projectsFileSchema.parse(JSON.parse(readFileSync(file, 'utf8'))).projects;
 
@@ -17,6 +20,11 @@ export const loadGitHubConfig = (file = PROFILE_FILE) => profileFileSchema.parse
 export const repoRefs = (projects) => projects.map((p) => parseRepoUrl(p.repo)).filter(Boolean);
 
 const clean = (value) => (value === TODO ? null : value);
+
+// P3-02: the generated thumbnail (scripts/capture-previews.js), only for an HTTPS live site.
+const previewFor = (slug, live, previewDir) => (
+    httpsUrl(live) && existsSync(path.join(previewDir, `${slug}.webp`)) ? `/previews/${slug}.webp` : null
+);
 
 const caseStudyFor = (project) => {
     if (project.demo) return null;
@@ -113,7 +121,7 @@ const statsFor = (gh, effort) => {
  * @param {{ stats?: Record<string, object>, listing?: Record<string, object[]> }} github  cached GitHub data
  * @param {{ hide?: string[], now?: number }} options
  */
-export const buildCity = (projects, { stats = {}, listing = {} } = {}, { hide = [], now = Date.now() } = {}) => {
+export const buildCity = (projects, { stats = {}, listing = {} } = {}, { hide = [], now = Date.now(), previewDir = DEFAULT_PREVIEWS_DIR } = {}) => {
     const discovered = new Map(Object.values(listing).flat().map((r) => [r.key, r]));
 
     const fromContent = projects.map((p) => {
@@ -135,9 +143,10 @@ export const buildCity = (projects, { stats = {}, listing = {} } = {}, { hide = 
             stats: statsFor(gh, p.stats.effort),
             description: (ref && discovered.get(ref.key)?.description) ?? null,
             source: 'content',
-            preview: null, // P3-02
+            preview: p.demo ? null : previewFor(p.slug, clean(p.live), previewDir),
             caseStudy: caseStudyFor(p),
             media: mediaFor(p),
+            iframe: !p.demo && p.iframe === true && Boolean(httpsUrl(clean(p.live))),
             demo: p.demo,
         };
     });
@@ -169,6 +178,7 @@ export const buildCity = (projects, { stats = {}, listing = {} } = {}, { hide = 
                 preview: null,
                 caseStudy: null,
                 media: null,
+                iframe: false,
                 demo: false,
             };
         });

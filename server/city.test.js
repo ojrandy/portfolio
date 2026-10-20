@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, rm, readFile } from 'node:fs/promises';
+import { mkdtemp, rm, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import path from 'node:path';
 import { createApp } from './app.js';
@@ -147,12 +147,12 @@ test('buildCity on the real content publishes nothing marked demo or TODO', () =
     const projects = loadProjects();
     const city = buildCity(projects);
     assert.ok(city.length > 0);
-    const keys = ['slug', 'name', 'district', 'featured', 'status', 'category', 'stack', 'live', 'repo', 'primaryLanguage', 'effort', 'stats', 'description', 'source', 'preview', 'caseStudy', 'media', 'demo'];
+    const keys = ['slug', 'name', 'district', 'featured', 'status', 'category', 'stack', 'live', 'repo', 'primaryLanguage', 'effort', 'stats', 'description', 'source', 'preview', 'caseStudy', 'media', 'iframe', 'demo'];
     for (const p of city) assert.deepEqual(Object.keys(p), keys);
     assert.ok(!JSON.stringify(city.map(({ caseStudy, media }) => ({ caseStudy, media }))).includes('TODO(content)'));
     const content = new Map(projects.map((p) => [p.slug, p]));
     for (const p of city.filter((c) => c.demo)) {
-        assert.deepEqual([p.caseStudy, p.media], [null, null], `${p.slug} is a demo`);
+        assert.deepEqual([p.caseStudy, p.media, p.preview, p.iframe], [null, null, null, false], `${p.slug} is a demo`);
     }
     for (const p of city.filter((c) => !c.demo && content.has(c.slug))) {
         for (const field of content.get(p.slug).demoFields ?? []) {
@@ -179,6 +179,25 @@ test('buildCity publishes the owner case study, minus demo fields, TODOs and uns
     assert.equal(b.media, null, 'demo-marked media is omitted');
     assert.deepEqual([c.caseStudy, c.media], [null, null], 'a whole demo project publishes none of it');
     assert.deepEqual(d.caseStudy, { problem: null, hardestPart: null, decision: null, result: 'Done', resultSource: null }, 'text results need no source');
+});
+
+test('buildCity: a preview only for a non-demo HTTPS project with a generated WebP; iframes only when allowed', async () => {
+    const dir = await tempDir();
+    await writeFile(path.join(dir, 'p.webp'), 'image');
+    try {
+        const candidate = project({ live: 'https://example.com/project' });
+        assert.equal(buildCity([candidate], {}, { previewDir: path.join(dir, 'empty') })[0].preview, null);
+        assert.equal(buildCity([candidate], {}, { previewDir: dir })[0].preview, '/previews/p.webp');
+        assert.equal(buildCity([project({ live: 'http://example.com/project' })], {}, { previewDir: dir })[0].preview, null);
+        assert.equal(buildCity([project({ live: null })], {}, { previewDir: dir })[0].preview, null);
+        assert.equal(buildCity([{ ...candidate, demo: true }], {}, { previewDir: dir })[0].preview, null, 'no preview for a demo');
+    } finally {
+        await rm(dir, { recursive: true, force: true });
+    }
+    assert.equal(buildCity([project({ iframe: true, live: 'https://ok.example/' })])[0].iframe, true);
+    assert.equal(buildCity([project({ iframe: true, live: 'http://ok.example/' })])[0].iframe, false, 'iframes are HTTPS only');
+    assert.equal(buildCity([project({ live: 'https://ok.example/' })])[0].iframe, false, 'only when the owner allows it');
+    assert.equal(buildCity([project({ iframe: true, live: 'https://ok.example/', demo: true })])[0].iframe, false, 'never for a demo');
 });
 
 // --- discovery (ADR-012) ---

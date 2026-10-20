@@ -1,4 +1,4 @@
-// Project panel for a building (P1-06): status, stack, numbers, case study (P3-01), links.
+// Project panel for a building (P1-06): status, stack, numbers, case study (P3-01), links, preview (P3-02).
 // Non-modal dialog: right-hand sheet on desktop, bottom sheet on phones. Focus moves in on open and back on close.
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
@@ -6,6 +6,7 @@ import { useGSAP } from '@gsap/react';
 import { projectSummary } from '../lib/projectSummary.js';
 import useReducedMotion from '../hooks/useReducedMotion.js';
 import ProjectCaseStudy, { ProjectMedia } from './ProjectCaseStudy.jsx';
+import LivePreview from './LivePreview.jsx';
 
 const ProjectPanel = ({ project, onClose }) => {
     const panel = useRef(null);
@@ -115,6 +116,7 @@ const ProjectPanel = ({ project, onClose }) => {
                 </div>
             )}
 
+            <LivePreview name={s.name} preview={s.preview} live={s.iframe ? s.live : null} />
             <ProjectMedia media={s.media} projectName={s.name} />
         </aside>
     );

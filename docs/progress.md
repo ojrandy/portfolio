@@ -17,6 +17,17 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-20 — Previews audited and fixed
+**Tasks:** P3-02 (done; the 2026-10-16 work, audited)
+**Audit:** capture script and hover thumbnail are sound (non-demo HTTPS sites only, Cloudflare challenge pages never saved). Problems fixed:
+- The live-preview iframe was inside the links row (`flex`), squeezed beside the Live site / Code buttons.
+- Its sandbox lacked `allow-same-origin`, so the embedded site ran without its own cookies/storage: Sns Glam showed Cloudflare's "Checking your browser" forever and threw `cjs is not defined`. Added; safe because the site is a different origin.
+- It loaded a whole third-party site every time the panel opened. Now `LivePreview.jsx` shows the screenshot (also for touch screens, which have no hover card) and loads the live site only on "Load live site here".
+- Demo projects could still get `preview`/`iframe`/CSP origins; now excluded on the server, the client and in `previewFrameOrigins`.
+**Checks:** server tests for demo exclusion and HTTPS-only iframes; production build: panel shows the screenshot and no iframe until the button, then the real Sns Glam site renders below the links (310×174); no page errors from this page (the remaining 403s are Cloudflare refusing the automated browser inside the iframe).
+
+---
+
 ## 2026-10-20 — Case study panel audited
 **Tasks:** P3-01 (done; the 2026-10-16 work, audited)
 **Audit:** the rules are right and applied on both server and client: whole-demo projects, `[DEMO]` fields, `TODO(content)` and numeric results without a source are never published; GitHub-only projects get no case study; media is HTTPS or a file under `/images` or `/previews`. Fixes: the real-content test pinned the owner's exact Sns Glam wording (it would fail when the text is edited) and is now two tests: a rule check over all real content (nothing demo/TODO published, every published number has a source) and a fixture test of each rule; header comments; `role="group"` for the case-study block.
@@ -89,6 +100,27 @@ Newest entry at the top. One entry per working session.
 - Status line and the dev HUD both sit at the top-left and overlap on `/?city` in dev.
 **Next:**
 - Audit P2-04 → P3 work from the other sessions the same way before continuing P3.
+
+---
+
+## 2026-10-16 — Hover previews
+**Tasks:** P3-02 (done)
+**Done:**
+- `scripts/capture-previews.js` and `npm run previews`: capture non-demo, HTTPS live projects from generated content at 1280×800, converting browser PNGs to WebP with Chromium's native encoder. Cloudflare browser-check pages are allowed to resolve and are rejected if still present; individual failures are reported without discarding successful captures.
+- `server/lib/city.js`: `/api/city` advertises a preview only when the HTTPS-backed content project has its generated WebP. GitHub-discovered projects have no preview. `iframe` is exposed only when the content field is `yes`.
+- `src/city/BuildingLabel.jsx`: renders the static thumbnail on hover/focus. `src/components/ProjectPanel.jsx`: live preview iframe is rendered only for opted-in projects.
+- `server/lib/security.js` and `server/app.js`: CSP `frame-src` derives exact HTTPS origins from validated opted-in content; no wildcard origins.
+- Captured `public/previews/sns-glam.webp`. The OJ City entry is skipped because its whole content block is marked `[DEMO]`. Optional video loops were not added.
+- `docs/architecture.md` documents the preview API fields and workflow.
+**Checks:**
+- `npm run previews`: 1/1 eligible project captured; WebP is 1280×800 and 55 KB.
+- `npm test`: 122/122 pass.
+- Targeted ESLint and editor diagnostics: clean; `npm run build` succeeds.
+- Express serves the preview with HTTP 200 and `image/webp`; `/api/city` returns `/previews/sns-glam.webp`; CSP includes only the Sns Glam iframe origin plus Cloudflare Turnstile.
+**Problems / notes:**
+- The integrated browser tab remained paused on the 3D loading screen while hidden, so the hover card and iframe were not visually verified there. The captured asset, API path, static serving, CSP, and UI build are verified.
+**Next:**
+- P3-03 Project X-Ray (plan first).
 
 ---
 

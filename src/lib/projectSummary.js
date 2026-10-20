@@ -91,8 +91,9 @@ export const projectStats = (project) => {
 
 /** Everything the project panel shows. */
 export const projectSummary = (project) => {
+    const live = safeUrl(project.live);
     const links = [
-        { label: 'Live site', href: safeUrl(project.live) },
+        { label: 'Live site', href: live },
         { label: 'Code', href: safeUrl(project.repo) },
     ].filter((l) => l.href);
     return {
@@ -107,6 +108,9 @@ export const projectSummary = (project) => {
         description: typeof project.description === 'string' && project.description.trim() ? project.description.trim() : null,
         caseStudy: caseStudySummary(project),
         media: project.demo ? null : safeMedia(project.media),
+        preview: project.demo ? null : safeMedia(project.preview),
+        live,
+        iframe: !project.demo && project.iframe === true && Boolean(live),
         fromGitHub: project.source === 'github',
         demo: project.demo === true,
     };

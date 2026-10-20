@@ -8,6 +8,7 @@ import { z } from 'zod';
 import { createApp } from './app.js';
 import { validate } from './lib/validate.js';
 import { rateLimit } from './lib/rateLimit.js';
+import { previewFrameOrigins } from './lib/security.js';
 
 const listen = (app) => new Promise((resolve) => {
     const server = app.listen(0, () => resolve({ server, url: `http://127.0.0.1:${server.address().port}` }));
@@ -65,6 +66,8 @@ test('security headers are set, X-Powered-By is not', async () => {
     assert.match(csp, /default-src 'self'/);
     assert.match(csp, /frame-ancestors 'none'/);
     assert.match(csp, /object-src 'none'/);
+    assert.match(csp, /frame-src[^;]*https:\/\/snsglamshairmakeupstudio\.com/);
+    assert.doesNotMatch(csp, /frame-src[^;]*ojongrandy\.com/);
     assert.match(csp, /upgrade-insecure-requests/);
     assert.doesNotMatch(csp, /'unsafe-eval'/);
     assert.equal(res.headers.get('x-content-type-options'), 'nosniff');
@@ -72,6 +75,17 @@ test('security headers are set, X-Powered-By is not', async () => {
     assert.match(res.headers.get('permissions-policy'), /camera=\(\)/);
     assert.equal(res.headers.get('x-powered-by'), null);
     assert.equal(res.headers.get('strict-transport-security'), null, 'HSTS stays off until ENABLE_HSTS=1');
+});
+
+test('preview frame origins include only unique HTTPS URLs explicitly opted into iframe display', () => {
+    assert.deepEqual(previewFrameOrigins([
+        { iframe: true, live: 'https://example.com/project' },
+        { iframe: true, live: 'https://example.com/another' },
+        { iframe: false, live: 'https://blocked.example/' },
+        { iframe: true, live: 'http://insecure.example/' },
+        { iframe: true, live: 'javascript:alert(1)' },
+        { iframe: true, live: 'https://demo.example/', demo: true },
+    ]), ['https://example.com']);
 });
 
 test('HSTS only with ENABLE_HSTS=1; no upgrade-insecure-requests in development', async () => {

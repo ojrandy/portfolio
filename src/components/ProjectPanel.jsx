@@ -1,10 +1,11 @@
-// Project panel for a building (P1-06, placeholder layout; the case study arrives in P3-01).
+// Project panel for a building (P1-06): status, stack, numbers, case study (P3-01), links.
 // Non-modal dialog: right-hand sheet on desktop, bottom sheet on phones. Focus moves in on open and back on close.
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
 import { useGSAP } from '@gsap/react';
 import { projectSummary } from '../lib/projectSummary.js';
 import useReducedMotion from '../hooks/useReducedMotion.js';
+import ProjectCaseStudy, { ProjectMedia } from './ProjectCaseStudy.jsx';
 
 const ProjectPanel = ({ project, onClose }) => {
     const panel = useRef(null);
@@ -96,14 +97,7 @@ const ProjectPanel = ({ project, onClose }) => {
                 </div>
             )}
 
-            <div className="mt-4 rounded-lg border border-dashed border-mist/20 p-3 text-sm text-mist/60">
-                <h3 className="text-xs uppercase tracking-wider">Case study</h3>
-                <p className="mt-1">
-                    {s.fromGitHub
-                        ? 'Added automatically from GitHub. A case study appears once this project gets its own entry.'
-                        : 'Problem, hardest part, decision and result will appear here.'}
-                </p>
-            </div>
+            <ProjectCaseStudy caseStudy={s.caseStudy} titleId={`${titleId}-case-study`} />
 
             {s.links.length > 0 && (
                 <div className="mt-4 flex gap-2">
@@ -120,6 +114,8 @@ const ProjectPanel = ({ project, onClose }) => {
                     ))}
                 </div>
             )}
+
+            <ProjectMedia media={s.media} projectName={s.name} />
         </aside>
     );
 };

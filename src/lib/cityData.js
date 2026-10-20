@@ -25,6 +25,14 @@ const projectSchema = z.looseObject({
     // ADR-012: 'github' = discovered on GitHub, no owner-written entry; description is the repo's own.
     description: z.string().nullable().default(null),
     source: z.enum(['content', 'github']).default('content'),
+    caseStudy: z.object({
+        problem: z.string().nullable(),
+        hardestPart: z.string().nullable(),
+        decision: z.string().nullable(),
+        result: z.string().nullable(),
+        resultSource: z.string().nullable(),
+    }).nullable().default(null),
+    media: z.string().nullable().default(null),
 });
 
 export const cityResponseSchema = z.looseObject({

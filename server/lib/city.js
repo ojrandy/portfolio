@@ -18,6 +18,26 @@ export const repoRefs = (projects) => projects.map((p) => parseRepoUrl(p.repo)).
 
 const clean = (value) => (value === TODO ? null : value);
 
+const caseStudyFor = (project) => {
+    if (project.demo) return null;
+    const demoFields = new Set(project.demoFields ?? []);
+    const field = (name) => (demoFields.has(`caseStudy.${name}`) ? null : clean(project.caseStudy?.[name]));
+    const problem = field('problem');
+    const hardestPart = field('hardestPart');
+    const decision = field('decision');
+    let result = field('result');
+    const resultSource = field('resultSource');
+    if (result && /\d/.test(result) && !resultSource) result = null;
+
+    if (!problem && !hardestPart && !decision && !result) return null;
+    return { problem, hardestPart, decision, result, resultSource: result ? resultSource : null };
+};
+
+const mediaFor = (project) => {
+    if (project.demo || (project.demoFields ?? []).includes('media')) return null;
+    return clean(project.media) ?? null;
+};
+
 const EMPTY_STATS = { commits: null, stars: null, lastPush: null, languages: null };
 const ACTIVE_DAYS = 90;
 const DAY = 24 * 60 * 60 * 1000;
@@ -116,6 +136,8 @@ export const buildCity = (projects, { stats = {}, listing = {} } = {}, { hide = 
             description: (ref && discovered.get(ref.key)?.description) ?? null,
             source: 'content',
             preview: null, // P3-02
+            caseStudy: caseStudyFor(p),
+            media: mediaFor(p),
             demo: p.demo,
         };
     });
@@ -145,6 +167,8 @@ export const buildCity = (projects, { stats = {}, listing = {} } = {}, { hide = 
                 description: r.description,
                 source: 'github',
                 preview: null,
+                caseStudy: null,
+                media: null,
                 demo: false,
             };
         });

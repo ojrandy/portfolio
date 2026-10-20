@@ -143,12 +143,42 @@ test('buildCity merges GitHub stats and falls back to owner effort', () => {
     assert.ok(!JSON.stringify(city).includes('TODO(content)'));
 });
 
-test('buildCity output for the real content has no case-study text or TODO markers', () => {
-    const city = buildCity(loadProjects());
+test('buildCity on the real content publishes nothing marked demo or TODO', () => {
+    const projects = loadProjects();
+    const city = buildCity(projects);
     assert.ok(city.length > 0);
-    const keys = ['slug', 'name', 'district', 'featured', 'status', 'category', 'stack', 'live', 'repo', 'primaryLanguage', 'effort', 'stats', 'description', 'source', 'preview', 'demo'];
+    const keys = ['slug', 'name', 'district', 'featured', 'status', 'category', 'stack', 'live', 'repo', 'primaryLanguage', 'effort', 'stats', 'description', 'source', 'preview', 'caseStudy', 'media', 'demo'];
     for (const p of city) assert.deepEqual(Object.keys(p), keys);
-    assert.ok(!JSON.stringify(city).includes('TODO(content)'));
+    assert.ok(!JSON.stringify(city.map(({ caseStudy, media }) => ({ caseStudy, media }))).includes('TODO(content)'));
+    const content = new Map(projects.map((p) => [p.slug, p]));
+    for (const p of city.filter((c) => c.demo)) {
+        assert.deepEqual([p.caseStudy, p.media], [null, null], `${p.slug} is a demo`);
+    }
+    for (const p of city.filter((c) => !c.demo && content.has(c.slug))) {
+        for (const field of content.get(p.slug).demoFields ?? []) {
+            const [group, key] = field.split('.');
+            if (group === 'caseStudy') assert.equal(p.caseStudy?.[key] ?? null, null, `${p.slug} ${field}`);
+            if (field === 'media') assert.equal(p.media, null, `${p.slug} media`);
+        }
+        if (p.caseStudy?.result && /\d/.test(p.caseStudy.result)) assert.ok(p.caseStudy.resultSource, `${p.slug}: a number needs a source`);
+    }
+});
+
+test('buildCity publishes the owner case study, minus demo fields, TODOs and unsourced numbers', () => {
+    const caseStudy = { problem: 'Bookings by WhatsApp only', hardestPart: 'TODO(content)', decision: 'Online booking form', result: '120 bookings in a month', resultSource: null };
+    const city = buildCity([
+        project({ slug: 'a', caseStudy, demoFields: ['caseStudy.problem'], media: 'public/images/a.webp' }),
+        project({ slug: 'b', caseStudy: { ...caseStudy, resultSource: 'booking system export' }, media: 'public/images/b.webp', demoFields: ['media'] }),
+        project({ slug: 'c', caseStudy, media: 'public/images/c.webp', demo: true }),
+        project({ slug: 'd', caseStudy: { problem: 'TODO(content)', hardestPart: null, decision: null, result: 'Done', resultSource: null } }),
+    ]);
+    const [a, b, c, d] = city;
+    assert.deepEqual(a.caseStudy, { problem: null, hardestPart: null, decision: 'Online booking form', result: null, resultSource: null });
+    assert.equal(a.media, 'public/images/a.webp');
+    assert.deepEqual(b.caseStudy, { problem: 'Bookings by WhatsApp only', hardestPart: null, decision: 'Online booking form', result: '120 bookings in a month', resultSource: 'booking system export' });
+    assert.equal(b.media, null, 'demo-marked media is omitted');
+    assert.deepEqual([c.caseStudy, c.media], [null, null], 'a whole demo project publishes none of it');
+    assert.deepEqual(d.caseStudy, { problem: null, hardestPart: null, decision: null, result: 'Done', resultSource: null }, 'text results need no source');
 });
 
 // --- discovery (ADR-012) ---

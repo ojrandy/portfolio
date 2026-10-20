@@ -4,6 +4,7 @@
 export const STATUS_LABELS = { live: 'Live', 'in-progress': 'In progress', archived: 'Archived' };
 
 const SOURCES = { github: 'GitHub', owner: 'Owner estimate' };
+const TODO = 'TODO(content)';
 
 const capitalise = (s) => s.charAt(0).toUpperCase() + s.slice(1);
 
@@ -16,6 +17,44 @@ export const safeUrl = (url) => {
     } catch {
         return null;
     }
+};
+
+/** Public project media: HTTPS URLs or image/video files under public/images or public/previews. */
+export const safeMedia = (media) => {
+    if (typeof media !== 'string') return null;
+    const value = media.trim();
+    const external = safeUrl(value);
+    if (external) return external;
+
+    const path = value.startsWith('public/') ? `/${value.slice('public/'.length)}` : value;
+    let decoded;
+    try {
+        decoded = decodeURIComponent(path);
+    } catch {
+        return null;
+    }
+    const parts = decoded.split('/');
+    if (!decoded.startsWith('/images/') && !decoded.startsWith('/previews/')) return null;
+    if (decoded.includes('\\')) return null;
+    if (parts.slice(1).some((part) => part === '.' || part === '..' || !part)) return null;
+    if (!/\.(?:avif|gif|jpe?g|mp4|png|webm|webp)$/i.test(decoded)) return null;
+    return path;
+};
+
+const cleanText = (value) => (
+    typeof value === 'string' && value.trim() && !value.includes(TODO) ? value.trim() : null
+);
+
+const caseStudySummary = (project) => {
+    if (project.demo || project.source === 'github' || !project.caseStudy) return null;
+    const problem = cleanText(project.caseStudy.problem);
+    const hardestPart = cleanText(project.caseStudy.hardestPart);
+    const decision = cleanText(project.caseStudy.decision);
+    let result = cleanText(project.caseStudy.result);
+    const resultSource = cleanText(project.caseStudy.resultSource);
+    if (result && /\d/.test(result) && !resultSource) result = null;
+    if (!problem && !hardestPart && !decision && !result) return null;
+    return { problem, hardestPart, decision, result, resultSource: result ? resultSource : null };
 };
 
 /** First `max` stack items plus how many were left out. */
@@ -66,6 +105,8 @@ export const projectSummary = (project) => {
         links,
         stats: projectStats(project),
         description: typeof project.description === 'string' && project.description.trim() ? project.description.trim() : null,
+        caseStudy: caseStudySummary(project),
+        media: project.demo ? null : safeMedia(project.media),
         fromGitHub: project.source === 'github',
         demo: project.demo === true,
     };

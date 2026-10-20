@@ -86,12 +86,14 @@ All responses are JSON unless noted. All inputs are validated with zod. All endp
     "description": "the repo's GitHub description | null",
     "source": "content | github",
     "preview": null,
+    "caseStudy": { "problem": "… | null", "hardestPart": "… | null", "decision": "… | null", "result": "… | null", "resultSource": "… | null" },
+    "media": "/previews/project.webp | https://… | null",
     "demo": false
   }]
 }
 ```
 - `stats.source` says where a building's numbers come from: `github` (public repo), `owner` (effort 1–10 from content; GitHub fields are null), `none` (no data: minimum building).
-- `TODO(content)` values become `null` (or `[]`); `repo` is never `"private"` and is dropped when GitHub says the repo is missing/private. Case-study text is not included (P3-01).
+- `TODO(content)` values become `null` (or `[]`); `repo` is never `"private"` and is dropped when GitHub says the repo is missing/private. Case-study fields come only from owner content: whole `[DEMO]` projects and field-marked demo/TODO text are omitted, and numeric results require a source. GitHub-discovered projects have no case study or media. Media renders only from HTTPS URLs or files under `public/images/` and `public/previews/`.
 - `commits` = all commits on the default branch (any author).
 - `source: "github"` = discovered on one of the profile's GitHub accounts with no block in `projects.md` (rules in ADR-012): `featured` false, district downtown, `effort` null, `category` [], `stack` from GitHub languages, `status` derived, no case study. `source: "content"` = a `projects.md` block; its `description` is the GitHub description when the repo is public.
 - Implementation: `server/lib/github.js` (REST: `listRepos(account)` / `discover(accounts, previous)` via `GET /users/{account}/repos`, paged; `repoStats` = repo, languages, commit count via the `Link` header), `server/lib/cache.js`, `server/lib/city.js` (pure: `selectRepos`, `repoStatus`, `languageStack`, `prettyName`, `buildCity(projects, { stats, listing }, { hide, now })`), `server/routes/city.js`. Accounts and the hide list come from `content/profile.json` → `github: { accounts, hide }` (profile fields "GitHub accounts for the city" and "Hide these repos" in `projects.md`; without the first, only the GitHub username is scanned).

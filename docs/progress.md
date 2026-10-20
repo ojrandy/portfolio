@@ -17,6 +17,14 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-20 — Case study panel audited
+**Tasks:** P3-01 (done; the 2026-10-16 work, audited)
+**Audit:** the rules are right and applied on both server and client: whole-demo projects, `[DEMO]` fields, `TODO(content)` and numeric results without a source are never published; GitHub-only projects get no case study; media is HTTPS or a file under `/images` or `/previews`. Fixes: the real-content test pinned the owner's exact Sns Glam wording (it would fail when the text is edited) and is now two tests: a rule check over all real content (nothing demo/TODO published, every published number has a source) and a fixture test of each rule; header comments; `role="group"` for the case-study block.
+**Content notes for the owner (not changed):** Sns Glam's published "Hardest part" and "Decision" read "the toughest bug or decision was getting the best design and blend the colors" and "I use an Online Pallete the get the best color combination"; worth rewriting in `docs/projects.md`. Its result ("users: 100+, speed 100%") stays hidden until it has a source.
+**Checks:** `npm test` all pass; production build: Sns Glam panel shows Hardest part + Decision only, no TODO/demo text.
+
+---
+
 ## 2026-10-19 — Debug override verified
 **Tasks:** P2-06 (done; the earlier 2026-10-16 "Debug override" work, audited and tidied)
 **Audit:** works as specified and stays dev-only. `parsePreviewOverride` was rewritten without nested IIFEs (same behaviour; a `Map`, so `?weather=constructor` can't hit an object key) and its test gained edge cases.
@@ -81,6 +89,26 @@ Newest entry at the top. One entry per working session.
 - Status line and the dev HUD both sit at the top-left and overlap on `/?city` in dev.
 **Next:**
 - Audit P2-04 → P3 work from the other sessions the same way before continuing P3.
+
+---
+
+## 2026-10-16 — Case study panel
+**Tasks:** P3-01 (done)
+**Done:**
+- `server/lib/city.js`: `/api/city` now includes owner-authored case-study fields and media, omitting whole-project demos, field-marked demos, TODOs, and numeric results without a source. GitHub-discovered projects receive no invented case study.
+- `src/lib/projectSummary.js` and `src/lib/cityData.js`: validate and shape case-study data; media is limited to HTTPS or image/video files under `public/images/` and `public/previews/`.
+- `src/components/ProjectCaseStudy.jsx` and `src/components/ProjectPanel.jsx`: replaced the placeholder with the problem → hardest part → decision → result narrative, source attribution, stack, links, and optional media. The narrative is reusable for the future Recruiter Mode view.
+- `docs/architecture.md`: documented the expanded `/api/city` contract and content filtering.
+**Checks:**
+- `npm test`: 118/118 pass.
+- Targeted ESLint and editor diagnostics: clean.
+- `npm run build`: succeeds; existing chunk-size and dependency annotation warnings remain.
+- Browser smoke test opened Sns Glam from the accessible project list: available narrative fields appeared, demo/problem and unsourced result copy were absent, and no page errors occurred.
+**Problems / notes:**
+- Current content has no approved, non-demo media asset, so the media renderer is wired but no media is shown yet.
+- Recruiter Mode does not exist yet; the shared case-study component is ready for its P5-01 integration.
+**Next:**
+- P3-02 preview capture script.
 
 ---
 

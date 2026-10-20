@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { safeUrl, shortStack, labelText, projectStats, projectSummary } from './projectSummary.js';
+import { safeMedia, safeUrl, shortStack, labelText, projectStats, projectSummary } from './projectSummary.js';
 import { isClick, slugAt, canHover, CLICK_TOLERANCE } from './picking.js';
 import useCityStore from '../store/useCityStore.js';
 import { buildCity, loadProjects } from '../../server/lib/city.js';
@@ -16,6 +16,15 @@ test('safeUrl keeps https only', () => {
     assert.equal(safeUrl('https://ojongrandy.com/x'), 'https://ojongrandy.com/x');
     for (const bad of ['http://example.com', 'javascript:alert(1)', 'data:text/html,hi', 'not a url', '', null, undefined, 42]) {
         assert.equal(safeUrl(bad), null, String(bad));
+    }
+});
+
+test('safeMedia accepts https and public image/video assets only', () => {
+    assert.equal(safeMedia('https://cdn.example.com/project.webp'), 'https://cdn.example.com/project.webp');
+    assert.equal(safeMedia('public/previews/project.webp'), '/previews/project.webp');
+    assert.equal(safeMedia('/images/project.jpg'), '/images/project.jpg');
+    for (const bad of ['http://example.com/project.png', 'javascript:alert(1)', 'public/previews/../private.png', 'public/previews/%2e%2e/private.png', 'public/previews/project.webp (TODO)', 'TODO(content)', null]) {
+        assert.equal(safeMedia(bad), null, String(bad));
     }
 });
 
@@ -66,6 +75,27 @@ test('summary: GitHub-discovered projects carry their repo description and say s
     const c = projectSummary(project({ description: '   ' }));
     assert.equal(c.fromGitHub, false);
     assert.equal(c.description, null);
+});
+
+test('summary: case-study fields and media are omitted for demo projects', () => {
+    const s = projectSummary(project({
+        caseStudy: {
+            problem: 'A real problem', hardestPart: 'A real constraint', decision: 'A real choice',
+            result: 'A measured outcome', resultSource: 'Owner records',
+        },
+        media: 'public/previews/project.webp',
+    }));
+    assert.deepEqual(s.caseStudy, {
+        problem: 'A real problem', hardestPart: 'A real constraint', decision: 'A real choice',
+        result: 'A measured outcome', resultSource: 'Owner records',
+    });
+    assert.equal(s.media, '/previews/project.webp');
+
+    const demo = projectSummary(project({ demo: true, caseStudy: { problem: 'Demo text' }, media: 'public/previews/demo.webp' }));
+    assert.equal(demo.caseStudy, null);
+    assert.equal(demo.media, null);
+    const discovered = projectSummary(project({ source: 'github', caseStudy: { problem: 'Not owner-authored' } }));
+    assert.equal(discovered.caseStudy, null);
 });
 
 test('summary works for every real project', () => {

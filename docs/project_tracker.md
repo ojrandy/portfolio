@@ -10,7 +10,7 @@ Each task ID matches a prompt in `/prompt.md`. Commit messages start with the ta
 | 0 | Foundations | 1 | [ ] |
 | 1 | The City | 1–2 | [~] |
 | 2 | Live Buea | 2 | [x] |
-| 3 | Content, Districts & X-Ray | 3 | [ ] |
+| 3 | Content, Districts & X-Ray | 3 | [~] |
 | 4 | Ask My Portfolio (AI) | 4 | [ ] |
 | 5 | Recruiter Mode & Polish | 5 | [ ] |
 | 6 | Hardening & Launch | 6 | [ ] |
@@ -53,7 +53,7 @@ Each task ID matches a prompt in `/prompt.md`. Commit messages start with the ta
 **Done when:** opening the site at different times or in different weather shows a visibly different, correct Buea.
 
 ## Phase 3 — Content, Districts & X-Ray
-- [ ] **P3-01** Case study panel: problem → hardest part → decision → result, links, stack, media
+- [x] **P3-01** Case study panel: problem → hardest part → decision → result, links, stack, media
 - [ ] **P3-02** Preview capture script (Playwright) → `public/previews/*.webp` + short loops; hover preview on buildings
 - [ ] **P3-03** Project X-Ray: building splits into floors UI → API → Data → Infra, each labelled from content
 - [ ] **P3-04** Replace counters with real numbers (GitHub + owner-supplied, each with a source)

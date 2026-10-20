@@ -17,6 +17,22 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-20 — Arcade: Code runner mini-game
+**Tasks:** P3-09b (done)
+**Decisions (owner):** best score in this browser only (no shared leaderboard); scoring 10 unlocks a 6th egg, "Bug squasher"; coffee cups worth +3.
+**Done:**
+- `src/lib/codeRunner.js` (+ 7 tests): seeded rules, jump physics, spawning with speed-scaled safe gaps, forgiving hitboxes, cups, dt clamp, best-score parsing. A test bot survives 60 s to top speed on five seeds (every level is beatable).
+- `src/components/CodeRunner.jsx`: canvas drawing in OJ City colours, keyboard/tap input on a focusable stage, pause (P, and automatically when the tab is hidden), HTML overlays for start/pause/game over, live-region messages.
+- Hub: "Play" (lazy-loads the game, its own 2.4 KB chunk), "Back to the eggs", best score shown; "Start over" also clears the best. 6th egg added to `arcadeEggs.js`; toast raised above dialogs.
+**Checks:** `npm test` 154/154; lint clean; Playwright on the production build (GPU): chunk loads only on Play, focus moves to the game, pause works, standing still loses at 0, a pixel-watching bot scored 12 and earned the egg (toast "2/6: Bug squasher"), best saved mid-run and shown in the hub, Escape closes; Pixel 7: fits the width, tap jumps, no horizontal scroll; no console errors. `npm run perf`: desktop PASS (60 / 58.5 fps, 19 draw calls), phone PASS (17).
+**Problems / notes:**
+- Two jump presses in one frame both counted (the runner hadn't left the ground yet); "on the ground" now also needs no upward speed.
+- The best score was first saved only at game over, so leaving mid-run lost it; now saved as it rises.
+- A fast reflex game can't be fully accessible; it is optional, and nothing in the hub depends on it.
+**Next:** P3-10 School district.
+
+---
+
 ## 2026-10-20 — Arcade: easter eggs hub
 **Tasks:** P3-09 (done); P3-09b added (mini-game "Code runner", owner's choice, deferred)
 **Decisions (owner):** hub + eggs now, mini-game later as its own task; eggs: Konami code, Fako, find the hub, Night owl, plus one more of my choosing (Explorer: open three projects).

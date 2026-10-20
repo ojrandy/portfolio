@@ -62,7 +62,7 @@ Each task ID matches a prompt in `/prompt.md`. Commit messages start with the ta
 - [x] **P3-07** Replace testimonials with real, attributed quotes (or one strong quote; section removed until permission is confirmed)
 - [x] **P3-08** Cinema district: rooftop screen with video-editing reel (links to the YouTube channel; plays a local reel once one is added to `docs/projects.md` section 5)
 - [x] **P3-09** Arcade district: easter eggs hub (cabinet, hub, 5 eggs: Arcade, cheat code, Fako, Night owl, Explorer; mini-game split out to P3-09b)
-- [ ] **P3-09b** Arcade mini-game: "Code runner" (endless runner through Buea streets dodging bugs; keyboard + touch, lazy-loaded, reduced-motion aware)
+- [x] **P3-09b** Arcade mini-game: "Code runner" (endless runner through Buea streets dodging bugs; keyboard + touch, lazy-loaded, reduced-motion aware)
 - [ ] **P3-10** School district: teaching, tutorials, mentoring
 - [ ] **P3-11** Pitch district: kickable football; goal opens contact
 - [ ] **P3-12** Experience/career shown as the road into the city (timeline)

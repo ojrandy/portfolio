@@ -2,28 +2,32 @@
 // effects the scene reads each frame through getState() (no re-renders).
 import { create } from 'zustand';
 import { STORAGE_KEY, parseProgress, serializeProgress } from '../lib/arcadeEggs.js';
+import { BEST_KEY, parseBest } from '../lib/codeRunner.js';
 
 const EFFECT_MS = 6000;
 
 // Storage can be missing or throw (private windows, blocked site data); the eggs still work for this visit.
-const load = () => {
+const read = (key) => {
     try {
-        return parseProgress(window.localStorage.getItem(STORAGE_KEY));
+        return window.localStorage.getItem(key);
     } catch {
-        return [];
+        return null;
     }
 };
 
-const save = (found) => {
+const write = (key, value) => {
     try {
-        window.localStorage.setItem(STORAGE_KEY, serializeProgress(found));
+        window.localStorage.setItem(key, value);
     } catch {
         // nothing to do
     }
 };
 
+const save = (found) => write(STORAGE_KEY, serializeProgress(found));
+
 const useArcadeStore = create((set, get) => ({
-    found: load(),
+    found: parseProgress(read(STORAGE_KEY)),
+    best: parseBest(read(BEST_KEY)), // Code runner (P3-09b)
     latest: null, // egg id for the toast
     hubOpen: false,
     marqueeFlashUntil: 0, // performance.now() ms
@@ -45,9 +49,17 @@ const useArcadeStore = create((set, get) => ({
         get().find('hub');
     },
     closeHub: () => set({ hubOpen: false }),
+    /** Keeps the best Code runner score; returns true for a new best. */
+    recordScore: (score) => {
+        if (score <= get().best) return false;
+        write(BEST_KEY, String(score));
+        set({ best: score });
+        return true;
+    },
     reset: () => {
         save([]);
-        set({ found: [], latest: null });
+        write(BEST_KEY, '0');
+        set({ found: [], latest: null, best: 0 });
     },
 }));
 

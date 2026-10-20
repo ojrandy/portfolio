@@ -8,6 +8,7 @@ export const EGGS = [
     { id: 'fako', name: 'Knock on Fako', hint: 'The mountain hides in mist. Knock five times.', found: 'The mist cleared over Fako (Mount Cameroon) for a moment.' },
     { id: 'night', name: 'Night owl', hint: 'Come back when it is dark in Buea.', found: 'You visited after dark. The city follows Buea\'s real time.' },
     { id: 'explorer', name: 'Explorer', hint: 'Open three different projects.', found: 'You opened three projects.' },
+    { id: 'runner', name: 'Bug squasher', hint: 'Score 10 in Code runner, right here in the Arcade.', found: 'You scored 10 in Code runner.' },
 ];
 
 const IDS = new Set(EGGS.map((egg) => egg.id));

@@ -6,11 +6,14 @@ import {words} from "../constants/index.js";
 import Button from "../components/Button.jsx";
 import HeroExperience from "../components/HeroModels/HeroExperience.jsx";
 import AnimatedCounter from "../components/AnimatedCounter.jsx";
+import useCityData from "../hooks/useCityData.js";
 
 
 
 
 const Hero = () => {
+    const { status, data } = useCityData();
+
     useGSAP(() => {
         gsap.fromTo(".hero-text h1",
             {
@@ -81,7 +84,7 @@ const Hero = () => {
                         </div>
                     </figure>
             </div>
-            <AnimatedCounter />
+            <AnimatedCounter projects={data?.projects ?? []} status={status} />
         </section>
     )
 }

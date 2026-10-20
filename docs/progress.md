@@ -17,6 +17,14 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-20 — Sourced metrics fixed
+**Tasks:** P3-04 (done; the 2026-10-17 work, audited and fixed)
+**Audit:** the template's invented counters (5 years, 80 clients, 35 projects, 99 %) are gone, but "Projects in OJ City" counted the 13 whole `[DEMO]` placeholder projects as real ones, a fake stat. Fixed: demos never count, in both numbers. Also: the source was only a hover tooltip (invisible on touch screens), now visible text in plain words; and the counter was a `<section>`, which the template forces to `100dvw` inside the padded hero (now a `div` with `role="region"`).
+**Checks:** metrics test with demo projects; homepage shows the non-demo counts with their sources.
+**Note:** `react-countup` is no longer used; removing it is left to P6-02 (dependency clean-up).
+
+---
+
 ## 2026-10-20 — Project X-Ray audited
 **Tasks:** P3-03 (in progress: code done and verified; waits on real content with 2+ layers)
 **Audit:** the 2026-10-16 work is sound. `/api/city` publishes only owner-written, non-demo layers; the panel has a static ordered list (reduced motion, one layer, screen readers) and an Explode/Restore button; `BuildingXRay` swaps the building for one coloured, labelled floor per layer and lifts them apart with GSAP. Fixes: the building's hover label covered the top floor's label (now hidden while exploded); header comments and indentation. A test that pinned Sns Glam's current layers was removed (it would fail as soon as real layers are added); the general rule test covers it.
@@ -108,6 +116,22 @@ Newest entry at the top. One entry per working session.
 - Status line and the dev HUD both sit at the top-left and overlap on `/?city` in dev.
 **Next:**
 - Audit P2-04 → P3 work from the other sessions the same way before continuing P3.
+
+---
+
+## 2026-10-17 — Sourced portfolio metrics
+**Tasks:** P3-04 (done)
+**Done:**
+- `src/lib/portfolioStats.js`: derives two exact metrics from `/api/city`: projects in OJ City and projects with GitHub-backed stats. Each includes a source label for its tooltip.
+- `src/components/AnimatedCounter.jsx` and `src/sections/Hero.jsx`: replaced the template's animated/fabricated counters with the live values; loading shows no placeholder number and API failure is stated plainly.
+- `src/constants/index.js`: removed the unused template values (5 years, 80 clients, 35 projects, 99% retention).
+**Checks:**
+- `npm test`: 125/125 pass.
+- Targeted ESLint and editor diagnostics: clean.
+- `npm run build`: succeeds; existing Zod annotation and large-main-chunk warnings remain.
+- Browser displayed 39 projects and 29 projects with GitHub data, with their `/api/city` and GitHub API source tooltips; no page errors.
+**Next:**
+- P3-05 replace the logo marquee.
 
 ---
 

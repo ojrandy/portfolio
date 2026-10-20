@@ -28,13 +28,6 @@ const words = [
     { text: "Code", imgPath: "/images/code.svg" },
 ];
 
-const counterItems = [
-    { value: 5, suffix: "+", label: "Years of Experience" },
-    { value: 80, suffix: "+", label: "Satisfied Clients" },
-    { value: 35, suffix: "+", label: "Completed Projects" },
-    { value: 99, suffix: "%", label: "Client Retention Rate" },
-];
-
 const logoIconsList = [
     {
         imgPath: "/images/logos/company-logo-1.png",
@@ -301,7 +294,6 @@ const testimonials = [
     },
 ];
 
-
 const socialImgs = [
     {
         name: "insta",
@@ -325,7 +317,6 @@ export {
     words,
     abilities,
     logoIconsList,
-    counterItems,
     expCards,
     expLogos,
     testimonials,

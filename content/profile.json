@@ -35,7 +35,7 @@
         "Graphics design with Figma and Adobe XD",
         "Leverage the use of AI for the best study experience",
         "SEO and Google map integration",
-        "Experince Lecturer in Computer science and related IT cources"
+        "Experienced lecturer in computer science and related IT courses"
     ],
     "hobbies": [
         {
@@ -52,7 +52,7 @@
         },
         {
             "name": "Teaching",
-            "text": "currently teaching at Trustech University Institue of Buea (TUIB)"
+            "text": "currently teaching at Trustech University Institute of Buea (TUIB)"
         },
         {
             "name": "Football",
@@ -125,7 +125,7 @@
             "courses": null,
             "date": "TODO(content) → present",
             "link": null,
-            "demo": true,
+            "demo": false,
             "demoFields": []
         },
         {
@@ -135,7 +135,7 @@
             "courses": null,
             "date": "TODO(content) → present",
             "link": null,
-            "demo": true,
+            "demo": false,
             "demoFields": []
         },
         {
@@ -145,7 +145,7 @@
             "courses": null,
             "date": "TODO(content) → present",
             "link": null,
-            "demo": true,
+            "demo": false,
             "demoFields": []
         },
         {
@@ -155,7 +155,7 @@
             "courses": null,
             "date": "TODO(content)",
             "link": null,
-            "demo": true,
+            "demo": false,
             "demoFields": []
         }
     ],

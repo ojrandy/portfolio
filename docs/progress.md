@@ -17,6 +17,19 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-20 — School district
+**Tasks:** P3-10 (done)
+**Content (owner):** the four TUIB courses in section 4 confirmed real ([DEMO] removed; dates still `TODO(content)`, so hidden); "Institue" → "Institute" and "Experince Lecturer … cources" → "Experienced lecturer … courses" corrected; no tutorials or mentoring to list yet.
+**Done:**
+- `src/lib/schoolContent.js` (+ 3 tests): non-demo lessons only, no demo fields / TODO dates / non-HTTPS links; the owner's teaching line; short venue for the board.
+- `src/city/SchoolPlot.jsx`: two-storey school on the NE plot (3 draw calls, replaces the placeholder); drawn front with windows lit by `lighting.windows`, door and a "Teaching / TUIB" chalkboard; click or "Lessons" opens the panel.
+- `src/components/SchoolPanel.jsx`: quote + course list (venue, audience, dates and course link when present), via the shared `Dialog`.
+**Checks:** `npm test` 159/159; lint clean; Playwright on the production build (GPU): building renders, panel lists the owner's line and the four courses with no TODO/DEMO text, focus moves into it, Escape closes it; Pixel 7 no horizontal scroll; no console errors. `npm run perf`: desktop PASS (60 / 59.5 fps, 20 draw calls), phone PASS (15). Re-run after the client-sites session landed in the same tree: same results.
+**Content to fill (owner):** start dates for the four courses (section 4, `date:`); optional course links; tutorials, talks or mentoring as extra lines.
+**Next:** P3-11 Pitch district.
+
+---
+
 ## 2026-10-20 — Ten live client sites added
 **Tasks:** P0-02 (content, still in progress); P3-02 (preview script hardened)
 **Decisions (owner):** site → block mapping confirmed; "Navora" is the spelling; owner asked for all ten as Featured, but the schema allows 3, so Featured stays SNS Glam / Vital Pulse / Smart Meal (owner to choose).

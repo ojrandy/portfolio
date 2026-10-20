@@ -53,13 +53,13 @@ _Every public repo of these accounts becomes a building automatically, using rea
 - Graphics design with Figma and Adobe XD
 - Leverage the use of AI for the best study experience
 - SEO and Google map integration 
-- Experince Lecturer in Computer science and related IT cources  
+- Experienced lecturer in computer science and related IT courses  
 
 ### Hobbies
 - Coding: Using JS, Familiar with React, React Native, NextJs and love coding with Threejs and Flutter 
 - Video editing: use tools like premier pro, Capcut
 - Gaming: Love FIFA, GTA and Action games 
-- Teaching: currently teaching at Trustech University Institue of Buea (TUIB)
+- Teaching: currently teaching at Trustech University Institute of Buea (TUIB)
 - Football: Am a proud FCB fan, I play Gk and simetime RB. 
 
 ### Cultural motifs approved for public use (ADR-009)
@@ -920,10 +920,10 @@ _Added 2026-10-20: live site confirmed by the owner; fill in the details._
 
 ## 4. Teaching (School district)
 _One line per course or talk: `- **Title** · venue · audience: … · date: … · link: …`_
-- [DEMO] **Introduction to Programming (JavaScript)** · Trustech University Institute of Buea (TUIB) · audience: first-year students · date: TODO(content) → present
-- [DEMO] **Web Development (HTML, CSS, React)** · TUIB · audience: second-year students · date: TODO(content) → present
-- [DEMO] **Database Systems (SQL)** · TUIB · audience: second-year students · date: TODO(content) → present
-- [DEMO] **Networking & IT Support basics** · TUIB · audience: IT diploma students · date: TODO(content)
+- **Introduction to Programming (JavaScript)** · Trustech University Institute of Buea (TUIB) · audience: first-year students · date: TODO(content) → present
+- **Web Development (HTML, CSS, React)** · TUIB · audience: second-year students · date: TODO(content) → present
+- **Database Systems (SQL)** · TUIB · audience: second-year students · date: TODO(content) → present
+- **Networking & IT Support basics** · TUIB · audience: IT diploma students · date: TODO(content)
 
 ## 5. Video work (Cinema district)
 _One line per video: `- **Title**: link · what you did: … · tools: …`_

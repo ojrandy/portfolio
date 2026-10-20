@@ -16,6 +16,7 @@ import Sun from './Sun.jsx';
 import DayNight from './DayNight.jsx';
 import CinemaPlot, { CinemaModal } from './CinemaPlot.jsx';
 import ArcadePlot from './ArcadePlot.jsx';
+import SchoolPlot from './SchoolPlot.jsx';
 import { createLighting } from './liveLighting.js';
 import useBuea from '../hooks/useBuea.js';
 import useEasterEggs from '../hooks/useEasterEggs.js';
@@ -26,6 +27,7 @@ import LoadingScreen from '../components/LoadingScreen.jsx';
 import StatusLine from '../components/StatusLine.jsx';
 import CityProjectList from '../components/CityProjectList.jsx';
 import ArcadeHub from '../components/ArcadeHub.jsx';
+import SchoolPanel from '../components/SchoolPanel.jsx';
 import EggToast from '../components/EggToast.jsx';
 import useCityData from '../hooks/useCityData.js';
 import { toBuildings } from '../lib/buildings.js';
@@ -34,6 +36,7 @@ import { CAMERA } from '../lib/camera.js';
 import { weatherFx } from '../lib/weatherFx.js';
 import { xrayLayers as layersForXRay } from '../lib/projectSummary.js';
 import { cinemaReel } from '../lib/cinemaReel.js';
+import { schoolContent } from '../lib/schoolContent.js';
 import useCityStore from '../store/useCityStore.js';
 import useArcadeStore from '../store/useArcadeStore.js';
 import profile from '../../content/profile.json';
@@ -44,8 +47,10 @@ const PERF = params.has('perf');
 // Perf runs only: ?perf&quality=low|medium|high pins the level and turns the monitor off.
 const PINNED = PERF && LEVELS.includes(params.get('quality')) ? params.get('quality') : null;
 const CINEMA_REEL = cinemaReel(profile);
-// Districts whose own scene replaces the placeholder block: Cinema (with a reel or channel) and the Arcade (P3-09).
-const BUILT_DISTRICTS = CINEMA_REEL ? ['cinema', 'arcade'] : ['arcade'];
+const SCHOOL = schoolContent(profile);
+// Districts whose own scene replaces the placeholder block: Cinema (with a reel or channel), the Arcade (P3-09) and
+// the School (P3-10, with teaching content).
+const BUILT_DISTRICTS = [CINEMA_REEL && 'cinema', 'arcade', SCHOOL && 'school'].filter(Boolean);
 const GAMING = profile.hobbies?.find((hobby) => hobby.name === 'Gaming')?.text;
 
 const hasWebGL = () => {
@@ -68,6 +73,8 @@ const CityExperience = ({ debug }) => {
     const [cinemaOpen, setCinemaOpen] = useState(false);
     const [cinemaHovered, setCinemaHovered] = useState(false);
     const [arcadeHovered, setArcadeHovered] = useState(false);
+    const [schoolOpen, setSchoolOpen] = useState(false);
+    const [schoolHovered, setSchoolHovered] = useState(false);
     const hubOpen = useArcadeStore((s) => s.hubOpen);
     const tier = useDeviceTier();
     const [quality, setQuality] = useState(PINNED ?? tier);
@@ -92,6 +99,7 @@ const CityExperience = ({ debug }) => {
     const bounds = layout?.bounds ?? FALLBACK_BOUNDS;
     const cinemaPlot = layout?.districts.find((district) => district.id === 'cinema');
     const arcadePlot = layout?.districts.find((district) => district.id === 'arcade');
+    const schoolPlot = layout?.districts.find((district) => district.id === 'school');
     const labelSlug = hovered ?? focus;
     const focusName = projects.get(focus)?.name;
     const openProjectData = projects.get(openSlug);
@@ -112,7 +120,7 @@ const CityExperience = ({ debug }) => {
                 aria-roledescription="3D city"
                 aria-label="OJ City. Tab visits each building and Enter opens it. Arrow keys or WASD move, Q and E rotate, plus and minus zoom, Escape returns to the start."
                 className="absolute inset-0 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-window"
-                style={{ cursor: hovered || cinemaHovered || arcadeHovered ? 'pointer' : undefined }}
+                style={{ cursor: hovered || cinemaHovered || arcadeHovered || schoolHovered ? 'pointer' : undefined }}
                 aria-busy={!drawn}
             >
                 {webgl && <Canvas dpr={[1, QUALITY[quality].dpr]} shadows camera={{ position: [0, 24, 78], fov: CAMERA.fov, near: CAMERA.near, far: CAMERA.far }}>
@@ -144,6 +152,15 @@ const CityExperience = ({ debug }) => {
                                 />
                             )}
                             {arcadePlot && <ArcadePlot plot={arcadePlot} onHover={setArcadeHovered} />}
+                            {schoolPlot && SCHOOL && (
+                                <SchoolPlot
+                                    plot={schoolPlot}
+                                    school={SCHOOL}
+                                    lighting={lighting}
+                                    onOpen={() => setSchoolOpen(true)}
+                                    onHover={setSchoolHovered}
+                                />
+                            )}
                             <Lamps layout={layout} lighting={lighting} />
                             <Buildings
                                 placed={layout.lots}
@@ -182,6 +199,7 @@ const CityExperience = ({ debug }) => {
                 />
             )}
             {cinemaOpen && CINEMA_REEL?.kind === 'file' && <CinemaModal reel={CINEMA_REEL} onClose={() => setCinemaOpen(false)} />}
+            {schoolOpen && SCHOOL && <SchoolPanel school={SCHOOL} onClose={() => setSchoolOpen(false)} />}
             {hubOpen && <ArcadeHub gaming={GAMING} />}
             <EggToast />
             {extra.overlay}

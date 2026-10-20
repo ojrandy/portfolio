@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { safeMedia, safeUrl, shortStack, labelText, projectStats, projectSummary } from './projectSummary.js';
+import { safeMedia, safeUrl, shortStack, labelText, projectStats, projectSummary, xrayLayers } from './projectSummary.js';
 import { isClick, slugAt, canHover, CLICK_TOLERANCE } from './picking.js';
 import useCityStore from '../store/useCityStore.js';
 import { buildCity, loadProjects } from '../../server/lib/city.js';
@@ -107,6 +107,15 @@ test('summary: preview and live site only for non-demo HTTPS projects that allow
     assert.deepEqual([demo.preview, demo.iframe], [null, false]);
 });
 
+test('X-Ray layers are ordered, labelled, and omit demo or missing content', () => {
+    assert.deepEqual(xrayLayers(project({ xray: { ui: 'Screens', api: 'TODO(content)', data: null, infra: 'Hostinger' } })), [
+        { key: 'ui', label: 'UI', details: 'Screens' },
+        { key: 'infra', label: 'Infra', details: 'Hostinger' },
+    ]);
+    assert.deepEqual(xrayLayers(project({ demo: true, xray: { ui: 'Demo UI' } })), []);
+    assert.deepEqual(xrayLayers(project({ source: 'github', xray: { ui: 'Not owner-authored' } })), []);
+});
+
 test('summary works for every real project', () => {
     const stats = JSON.parse(readFileSync(new URL('./fixtures/github-stats.json', import.meta.url), 'utf8'));
     for (const p of buildCity(loadProjects(), { stats })) {
@@ -133,13 +142,18 @@ test('store: open flies and opens; unknown slugs are ignored; a new city drops s
     s().openProject('b');
     assert.equal(s().focus, 'b');
     assert.equal(s().openSlug, 'b');
+    s().toggleXRay('b');
+    assert.equal(s().xraySlug, 'b');
+    s().toggleXRay('unknown');
+    assert.equal(s().xraySlug, 'b');
     s().openProject('nope');
     assert.equal(s().openSlug, 'b');
     s().closeProject();
     assert.equal(s().openSlug, null);
+    assert.equal(s().xraySlug, null);
     assert.equal(s().focus, 'b', 'closing keeps the camera where it is');
     s().setHovered('c');
     s().openProject('c');
     s().setOrder(['a']);
-    assert.deepEqual([s().focus, s().hovered, s().openSlug], [null, null, null]);
+    assert.deepEqual([s().focus, s().hovered, s().openSlug, s().xraySlug], [null, null, null, null]);
 });

@@ -46,6 +46,17 @@ const mediaFor = (project) => {
     return clean(project.media) ?? null;
 };
 
+const XRAY_KEYS = ['ui', 'api', 'data', 'infra'];
+const xrayFor = (project) => {
+    if (project.demo) return null;
+    const demoFields = new Set(project.demoFields ?? []);
+    const layers = Object.fromEntries(XRAY_KEYS.map((key) => [
+        key,
+        demoFields.has(`xray.${key}`) ? null : clean(project.xray?.[key]),
+    ]));
+    return Object.values(layers).some(Boolean) ? layers : null;
+};
+
 const EMPTY_STATS = { commits: null, stars: null, lastPush: null, languages: null };
 const ACTIVE_DAYS = 90;
 const DAY = 24 * 60 * 60 * 1000;
@@ -147,6 +158,7 @@ export const buildCity = (projects, { stats = {}, listing = {} } = {}, { hide = 
             caseStudy: caseStudyFor(p),
             media: mediaFor(p),
             iframe: !p.demo && p.iframe === true && Boolean(httpsUrl(clean(p.live))),
+            xray: xrayFor(p),
             demo: p.demo,
         };
     });
@@ -179,6 +191,7 @@ export const buildCity = (projects, { stats = {}, listing = {} } = {}, { hide = 
                 caseStudy: null,
                 media: null,
                 iframe: false,
+                xray: null,
                 demo: false,
             };
         });

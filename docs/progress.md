@@ -17,6 +17,14 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-20 — Project X-Ray audited
+**Tasks:** P3-03 (in progress: code done and verified; waits on real content with 2+ layers)
+**Audit:** the 2026-10-16 work is sound. `/api/city` publishes only owner-written, non-demo layers; the panel has a static ordered list (reduced motion, one layer, screen readers) and an Explode/Restore button; `BuildingXRay` swaps the building for one coloured, labelled floor per layer and lifts them apart with GSAP. Fixes: the building's hover label covered the top floor's label (now hidden while exploded); header comments and indentation. A test that pinned Sns Glam's current layers was removed (it would fail as soon as real layers are added); the general rule test covers it.
+**Checks:** production build with four layers injected into the `/api/city` response in the browser (test data only, content untouched): Explode → four labelled floors lift apart, `aria-pressed` true, Restore puts the building back; reduced motion → no button, the four layers listed; no page errors.
+**Next (content):** add real `UI`, `API` and `Data` layers for a project in `docs/projects.md` (Sns Glam has only `Infra: Hostinger` published) to finish P3-03.
+
+---
+
 ## 2026-10-20 — Previews audited and fixed
 **Tasks:** P3-02 (done; the 2026-10-16 work, audited)
 **Audit:** capture script and hover thumbnail are sound (non-demo HTTPS sites only, Cloudflare challenge pages never saved). Problems fixed:
@@ -100,6 +108,28 @@ Newest entry at the top. One entry per working session.
 - Status line and the dev HUD both sit at the top-left and overlap on `/?city` in dev.
 **Next:**
 - Audit P2-04 → P3 work from the other sessions the same way before continuing P3.
+
+---
+
+## 2026-10-16 — Project X-Ray
+**Tasks:** P3-03 (done)
+**Done:**
+- `server/lib/city.js`: `/api/city` now returns only owner-authored X-Ray layers; whole-project demos, field-marked demo values, TODOs and GitHub-discovered projects have no layers.
+- `src/lib/projectSummary.js` and `src/lib/cityData.js`: added ordered UI → API → Data → Infra summary mapping and response validation.
+- `src/components/ProjectXRay.jsx`: added the accessible static diagram for reduced-motion users and one-layer projects, plus the explode/restore control when multiple layers are available.
+- `src/city/BuildingXRay.jsx`, `src/city/Buildings.jsx`, `src/store/useCityStore.js` and `src/city/CityExperience.jsx`: selecting X-Ray replaces only the active building's instanced parts with colored, labeled floors animated by GSAP; closing/switching projects resets the state.
+- `docs/architecture.md` and `docs/design_system.md`: documented the data contract, filtering, and interaction.
+**Checks:**
+- `npm test`: 124/124 pass.
+- Targeted ESLint and editor diagnostics: clean.
+- `npm run build`: succeeds; existing chunk-size and dependency annotation warnings remain.
+- Browser check: Sns Glam opens with the real Infra → Hostinger layer, shows no explode control for a single layer, includes its opted-in iframe, and has no page errors.
+**Problems / notes:**
+- Sns Glam is currently the only publishable project with X-Ray content, and it has one layer. The multi-floor GSAP presentation is implemented but cannot be exercised with current owner content; add real UI/API/Data layers in `docs/projects.md` to enable it.
+**Status correction:**
+- P3-03 remains in progress until a project has at least two verified X-Ray layers and the 3D floor separation can be demonstrated. The panel can be inspected by opening Sns Glam, where only `Infra: Hostinger` is currently publishable.
+**Next:**
+- P3-04 replace counters with sourced real numbers.
 
 ---
 

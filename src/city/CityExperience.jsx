@@ -27,6 +27,7 @@ import { toBuildings } from '../lib/buildings.js';
 import { layoutCity } from '../lib/layout.js';
 import { CAMERA } from '../lib/camera.js';
 import { weatherFx } from '../lib/weatherFx.js';
+import { xrayLayers as layersForXRay } from '../lib/projectSummary.js';
 import useCityStore from '../store/useCityStore.js';
 
 const FALLBACK_BOUNDS = { minX: -40, maxX: 40, minZ: -40, maxZ: 40 };
@@ -60,7 +61,8 @@ const CityExperience = ({ debug }) => {
     const focus = useCityStore((s) => s.focus);
     const hovered = useCityStore((s) => s.hovered);
     const openSlug = useCityStore((s) => s.openSlug);
-    const { setHovered, openProject, closeProject } = useCityStore.getState();
+    const xraySlug = useCityStore((s) => s.xraySlug);
+    const { setHovered, openProject, closeProject, toggleXRay } = useCityStore.getState();
 
     const layout = useMemo(
         () => (data ? layoutCity(toBuildings(data.projects, { now: fetchedAt })) : null),
@@ -74,6 +76,8 @@ const CityExperience = ({ debug }) => {
     const labelSlug = hovered ?? focus;
     const focusName = projects.get(focus)?.name;
     const openProjectData = projects.get(openSlug);
+    const openXRayLayers = layersForXRay(openProjectData);
+    const xrayActive = Boolean(openSlug && xraySlug === openSlug && openXRayLayers.length > 1);
     const extra = debug?.({ status, error, data, layout, focusName }) ?? {};
     const bueaWeather = extra.weather ?? buea?.weather ?? null;
     const { kind, code, cloud, rain } = bueaWeather ?? {};
@@ -118,8 +122,10 @@ const CityExperience = ({ debug }) => {
                                 highlighted={highlighted}
                                 onHover={setHovered}
                                 onSelect={openProject}
+                                xraySlug={xrayActive ? openSlug : null}
+                                xrayLayers={openXRayLayers}
                             />
-                            {lots.get(labelSlug) && projects.get(labelSlug) && (
+                            {lots.get(labelSlug) && projects.get(labelSlug) && !(xrayActive && labelSlug === openSlug) && (
                                 <BuildingLabel lot={lots.get(labelSlug)} project={projects.get(labelSlug)} />
                             )}
                             <CameraRig layout={layout} keyTarget={viewport} />
@@ -137,7 +143,15 @@ const CityExperience = ({ debug }) => {
             </p>
 
             {data && <CityProjectList projects={data.projects} />}
-            {openProjectData && <ProjectPanel key={openSlug} project={openProjectData} onClose={closeProject} />}
+            {openProjectData && (
+                <ProjectPanel
+                    key={openSlug}
+                    project={openProjectData}
+                    onClose={closeProject}
+                    xrayActive={xrayActive}
+                    onToggleXRay={() => toggleXRay(openSlug)}
+                />
+            )}
             {extra.overlay}
         </div>
     );

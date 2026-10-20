@@ -57,6 +57,16 @@ const caseStudySummary = (project) => {
     return { problem, hardestPart, decision, result, resultSource: result ? resultSource : null };
 };
 
+const XRAY_LABELS = { ui: 'UI', api: 'API', data: 'Data', infra: 'Infra' };
+
+export const xrayLayers = (project) => {
+    if (!project || project.demo || project.source === 'github') return [];
+    return Object.entries(XRAY_LABELS).flatMap(([key, label]) => {
+        const details = cleanText(project.xray?.[key]);
+        return details ? [{ key, label, details }] : [];
+    });
+};
+
 /** First `max` stack items plus how many were left out. */
 export const shortStack = (stack, max = 3) => ({ shown: stack.slice(0, max), more: Math.max(0, stack.length - max) });
 
@@ -107,6 +117,7 @@ export const projectSummary = (project) => {
         stats: projectStats(project),
         description: typeof project.description === 'string' && project.description.trim() ? project.description.trim() : null,
         caseStudy: caseStudySummary(project),
+        xrayLayers: xrayLayers(project),
         media: project.demo ? null : safeMedia(project.media),
         preview: project.demo ? null : safeMedia(project.preview),
         live,

@@ -147,17 +147,18 @@ test('buildCity on the real content publishes nothing marked demo or TODO', () =
     const projects = loadProjects();
     const city = buildCity(projects);
     assert.ok(city.length > 0);
-    const keys = ['slug', 'name', 'district', 'featured', 'status', 'category', 'stack', 'live', 'repo', 'primaryLanguage', 'effort', 'stats', 'description', 'source', 'preview', 'caseStudy', 'media', 'iframe', 'demo'];
+    const keys = ['slug', 'name', 'district', 'featured', 'status', 'category', 'stack', 'live', 'repo', 'primaryLanguage', 'effort', 'stats', 'description', 'source', 'preview', 'caseStudy', 'media', 'iframe', 'xray', 'demo'];
     for (const p of city) assert.deepEqual(Object.keys(p), keys);
-    assert.ok(!JSON.stringify(city.map(({ caseStudy, media }) => ({ caseStudy, media }))).includes('TODO(content)'));
+    assert.ok(!JSON.stringify(city.map(({ caseStudy, media, xray }) => ({ caseStudy, media, xray }))).includes('TODO(content)'));
     const content = new Map(projects.map((p) => [p.slug, p]));
     for (const p of city.filter((c) => c.demo)) {
-        assert.deepEqual([p.caseStudy, p.media, p.preview, p.iframe], [null, null, null, false], `${p.slug} is a demo`);
+        assert.deepEqual([p.caseStudy, p.media, p.xray, p.preview, p.iframe], [null, null, null, null, false], `${p.slug} is a demo`);
     }
     for (const p of city.filter((c) => !c.demo && content.has(c.slug))) {
         for (const field of content.get(p.slug).demoFields ?? []) {
             const [group, key] = field.split('.');
             if (group === 'caseStudy') assert.equal(p.caseStudy?.[key] ?? null, null, `${p.slug} ${field}`);
+            if (group === 'xray') assert.equal(p.xray?.[key] ?? null, null, `${p.slug} ${field}`);
             if (field === 'media') assert.equal(p.media, null, `${p.slug} media`);
         }
         if (p.caseStudy?.result && /\d/.test(p.caseStudy.result)) assert.ok(p.caseStudy.resultSource, `${p.slug}: a number needs a source`);
@@ -179,6 +180,14 @@ test('buildCity publishes the owner case study, minus demo fields, TODOs and uns
     assert.equal(b.media, null, 'demo-marked media is omitted');
     assert.deepEqual([c.caseStudy, c.media], [null, null], 'a whole demo project publishes none of it');
     assert.deepEqual(d.caseStudy, { problem: null, hardestPart: null, decision: null, result: 'Done', resultSource: null }, 'text results need no source');
+});
+
+test('buildCity strips field-level demo and TODO X-Ray layers', () => {
+    const city = buildCity([project({
+        xray: { ui: 'Real UI', api: 'Demo API', data: 'TODO(content)', infra: 'Real hosting' },
+        demoFields: ['xray.api'],
+    })]);
+    assert.deepEqual(city[0].xray, { ui: 'Real UI', api: null, data: null, infra: 'Real hosting' });
 });
 
 test('buildCity: a preview only for a non-demo HTTPS project with a generated WebP; iframes only when allowed', async () => {

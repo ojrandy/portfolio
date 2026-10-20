@@ -1,4 +1,4 @@
-// Project panel for a building (P1-06): status, stack, numbers, case study (P3-01), links, preview (P3-02).
+// Project panel for a building (P1-06): status, stack, numbers, X-Ray (P3-03), case study (P3-01), links, preview (P3-02).
 // Non-modal dialog: right-hand sheet on desktop, bottom sheet on phones. Focus moves in on open and back on close.
 import { useEffect, useRef } from 'react';
 import gsap from 'gsap';
@@ -6,9 +6,10 @@ import { useGSAP } from '@gsap/react';
 import { projectSummary } from '../lib/projectSummary.js';
 import useReducedMotion from '../hooks/useReducedMotion.js';
 import ProjectCaseStudy, { ProjectMedia } from './ProjectCaseStudy.jsx';
+import ProjectXRay from './ProjectXRay.jsx';
 import LivePreview from './LivePreview.jsx';
 
-const ProjectPanel = ({ project, onClose }) => {
+const ProjectPanel = ({ project, onClose, xrayActive = false, onToggleXRay }) => {
     const panel = useRef(null);
     const heading = useRef(null);
     const reducedMotion = useReducedMotion();
@@ -98,6 +99,7 @@ const ProjectPanel = ({ project, onClose }) => {
                 </div>
             )}
 
+            <ProjectXRay layers={s.xrayLayers} active={xrayActive} reducedMotion={reducedMotion} onToggle={onToggleXRay} />
             <ProjectCaseStudy caseStudy={s.caseStudy} titleId={`${titleId}-case-study`} />
 
             {s.links.length > 0 && (

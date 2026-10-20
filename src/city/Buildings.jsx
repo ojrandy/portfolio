@@ -10,6 +10,7 @@ import { createRandom } from '../lib/random.js';
 import { canHover, isClick, slugAt } from '../lib/picking.js';
 import useReducedMotion from '../hooks/useReducedMotion.js';
 import Part from './InstancedPart.jsx';
+import BuildingXRay from './BuildingXRay.jsx';
 import { makeSwitchable, withSwitches } from './switchable.js';
 
 const UNLIT_WINDOW = '#1B1F2A';
@@ -148,20 +149,26 @@ const Beacons = ({ items }) => {
  *   onSelect?: (slug: string) => void,
  * }} props
  */
-const Buildings = ({ placed, lighting, highlighted = NONE, onHover, onSelect }) => {
-    const parts = useMemo(() => toInstances(placed), [placed]);
-    const bodies = useMemo(() => toBodies(placed, highlighted), [placed, highlighted]);
+const Buildings = ({ placed, lighting, highlighted = NONE, onHover, onSelect, xraySlug = null, xrayLayers = NONE }) => {
+    const xrayLot = placed.find((lot) => lot.slug === xraySlug) ?? null;
+    const showXRay = Boolean(xrayLot && xrayLayers.length > 1);
+    const regularPlaced = useMemo(
+        () => (showXRay ? placed.filter((lot) => lot.slug !== xraySlug) : placed),
+        [placed, showXRay, xraySlug],
+    );
+    const parts = useMemo(() => toInstances(regularPlaced), [regularPlaced]);
+    const bodies = useMemo(() => toBodies(regularPlaced, highlighted), [regularPlaced, highlighted]);
 
     // Only the bodies are pickable; the nearest hit wins, so a tall building in front catches the pointer.
     const events = {
         onPointerMove: (e) => {
             e.stopPropagation();
-            if (onHover && canHover(e.nativeEvent.pointerType)) onHover(slugAt(placed, e.instanceId));
+            if (onHover && canHover(e.nativeEvent.pointerType)) onHover(slugAt(regularPlaced, e.instanceId));
         },
         onPointerOut: () => onHover?.(null),
         onClick: (e) => {
             e.stopPropagation();
-            const slug = slugAt(placed, e.instanceId);
+            const slug = slugAt(regularPlaced, e.instanceId);
             if (slug && onSelect && isClick(e.delta)) onSelect(slug);
         },
     };
@@ -182,6 +189,7 @@ const Buildings = ({ placed, lighting, highlighted = NONE, onHover, onSelect }) 
                 <meshStandardMaterial vertexColors roughness={0.8} side={THREE.DoubleSide} />
             </Part>
             <Beacons items={parts.beacons} />
+            {showXRay && <BuildingXRay lot={xrayLot} layers={xrayLayers} />}
         </group>
     );
 };

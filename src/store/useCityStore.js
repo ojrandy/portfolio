@@ -7,11 +7,12 @@ const useCityStore = create((set, get) => ({
     focus: null, // building slug the camera is on, or null for the start view
     hovered: null, // building slug under the mouse
     openSlug: null, // building whose project panel is open
+    xraySlug: null, // building currently separated into X-Ray layers
     order: [], // keyboard order (tabOrder), set by the camera rig
 
-    setOrder: (order) => set(({ focus, hovered, openSlug }) => {
+    setOrder: (order) => set(({ focus, hovered, openSlug, xraySlug }) => {
         const keep = (slug) => (order.includes(slug) ? slug : null);
-        return { order, focus: keep(focus), hovered: keep(hovered), openSlug: keep(openSlug) };
+        return { order, focus: keep(focus), hovered: keep(hovered), openSlug: keep(openSlug), xraySlug: keep(xraySlug) };
     }),
     flyTo: (slug) => set({ focus: get().order.includes(slug) ? slug : null }),
     goHome: () => set({ focus: null }),
@@ -25,9 +26,12 @@ const useCityStore = create((set, get) => ({
     setHovered: (slug) => set({ hovered: slug }),
     /** Fly to a building and open its panel. */
     openProject: (slug) => {
-        if (get().order.includes(slug)) set({ focus: slug, openSlug: slug });
+        if (get().order.includes(slug)) set({ focus: slug, openSlug: slug, xraySlug: null });
     },
-    closeProject: () => set({ openSlug: null }),
+    toggleXRay: (slug) => set((state) => (
+        state.openSlug === slug ? { xraySlug: state.xraySlug === slug ? null : slug } : {}
+    )),
+    closeProject: () => set({ openSlug: null, xraySlug: null }),
 }));
 
 export default useCityStore;

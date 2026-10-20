@@ -9,7 +9,7 @@ Each task ID matches a prompt in `/prompt.md`. Commit messages start with the ta
 |---|---|---|---|
 | 0 | Foundations | 1 | [ ] |
 | 1 | The City | 1–2 | [~] |
-| 2 | Live Buea | 2 | [~] |
+| 2 | Live Buea | 2 | [x] |
 | 3 | Content, Districts & X-Ray | 3 | [ ] |
 | 4 | Ask My Portfolio (AI) | 4 | [ ] |
 | 5 | Recruiter Mode & Polish | 5 | [ ] |

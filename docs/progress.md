@@ -67,6 +67,68 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-19 — City lights re-verified
+**Tasks:** P2-03 (done; re-checked because the work was never committed and later sessions edited the same files)
+**Done:**
+- Audited the P2-03 code against design_system.md → City lights: `cityLightsAt` ramps, `liveLighting.js` easing, `switchable.js`, window switch points in `buildings.js`, `Windows` in `Buildings.jsx`, `lamps.js` + `Lamps.jsx`, and their wiring in `CityExperience.jsx` / `DayNight.jsx`. Matches the spec; later edits (X-Ray, weather, Cinema) did not break it. No code changes needed.
+**Checks:**
+- `npm test`: 130/130 pass. ESLint: every P2-03 file clean.
+- `npm run build` passes. `npm run perf`: desktop PASS (60 / 59 fps, 18 draw calls), phone PASS (59.9 / 60 fps, 16 draw calls).
+- Production screenshots (Playwright clock, `/api/buea` blocked) at 06:00, 06:20, 12:00, 17:50, 18:05, 18:20, 18:35, 21:00: noon all off; 17:50 windows coming on, lamps off; 18:05–18:20 lamps one by one; 21:00 all on; 06:20 lamps already off, last windows on. No page errors.
+**Problems / notes (outside P2-03):**
+- ESLint errors in `src/city/Backdrop.jsx` (P2-04: `Math.random` during render, unused `index`, missing `fx.cloud` dependency) plus old template files (`Particles.jsx`, `NavBar.jsx`, `TechIcon.jsx`).
+- Status line (P2-05) shows `It's --:-- in Buea` whenever `/api/buea` is unavailable, although the time is known in the browser.
+- Status line and the dev HUD both sit at the top-left and overlap on `/?city` in dev.
+**Next:**
+- Audit P2-04 → P3 work from the other sessions the same way before continuing P3.
+
+---
+
+## 2026-10-16 — Debug override
+**Tasks:** P2-06 (done)
+**Done:**
+- `src/lib/dayNight.js`: added `parsePreviewOverride()` for dev-only `?time=HH:MM&weather=...` parsing and validation, including `storm` → `thunderstorm` mapping.
+- `src/city/CityPreview.jsx`: the dev HUD now reads the query override and wires it into the city preview, while preserving the live Buea values when the params are absent.
+- `src/city/CityExperience.jsx`: the city scene uses the preview override for the displayed time and weather effect during development only.
+- Follow-up: moved the debug callback below `layout` and `focusName` initialization to fix a temporal-dead-zone runtime error on `/?city`.
+**Checks:**
+- `node --test src/lib/dayNight.test.js` passes; the override regression is included in the day/night suite.
+- Browser smoke test at `/?city&time=21:00&weather=rain`: city mounted, override status displayed, and no page errors after reload.
+**Next:**
+- Continue with P3-01 case study panel work.
+
+---
+
+## 2026-10-16 — Status line
+**Tasks:** P2-05 (done)
+**Done:**
+- `src/lib/dayNight.js`: `statusLine()` formats the live Buea sentence with time, weather label and the owner line in the exact planned style.
+- `src/city/CityExperience.jsx`: the city now renders the live status line as an overlay, using the current `/api/buea` data when available and falling back cleanly when the weather is missing.
+- Tests cover the exact sentence format and the fallback path.
+**Checks:**
+- `npm test`: targeted status-line regression and the surrounding day/night/weather checks pass.
+**Next:**
+- P2-06 debug override.
+
+---
+
+## 2026-10-16 — Weather FX
+**Tasks:** P2-04 (done)
+**Done:**
+- `src/lib/dayNight.js`: `weatherFxAt()` translates the live WMO weather kind/code into mist, cloud, rain and lightning levels with a small, testable map.
+- `src/city/CityExperience.jsx` and `src/city/Backdrop.jsx`: the city now reads `/api/buea` weather and uses it to lift the Fako mist band, add cloud layers, animate rain particles, and trigger a brief thunder flash during storm conditions.
+- The scene keeps the existing day/night transitions and lamp/window logic intact while layering the weather effects on top.
+**Checks:**
+- `npm test`: 114/114 pass, including the new weather FX regression.
+- `npm run build`: production build succeeds.
+**Decisions:**
+- Weather FX follows the live WMO mapping already defined in the design doc instead of inventing a new local weather model.
+- Clouds and rain remain lightweight and subtle so they work without overwhelming the phone performance budget.
+**Problems / notes:**
+- The effect is deliberately gentle: a few cloud clusters and a modest rain pass keep the city readable while still showing Buea conditions.
+
+---
+
 ## 2026-10-16 — City lights
 **Tasks:** P2-03 (done)
 **Done:**

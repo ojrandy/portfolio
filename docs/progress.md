@@ -17,6 +17,12 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-20 — Featured case studies audited
+**Tasks:** P3-06 (done; the 2026-10-17 work, audited)
+**Audit:** correct: the template's ability cards (invented claims) are removed. No featured project has a complete, publishable case study yet, so nothing replaces them; the case studies live in the city's project panels (P3-01).
+
+---
+
 ## 2026-10-20 — Tools and clients audited
 **Tasks:** P3-05 (done; the 2026-10-17 work, audited)
 **Audit:** shows only owner content, but tools came only from two IDE names matched in the summary sentence, so tool groups would have stayed hidden even after the owner confirmed them. Now: tools from every non-[DEMO] group plus the IDEs named in the summary; client lines only with `logoPermission: yes`; placeholders never. Tests are rule tests (the old one pinned the exact client wording).
@@ -124,6 +130,23 @@ Newest entry at the top. One entry per working session.
 - Status line and the dev HUD both sit at the top-left and overlap on `/?city` in dev.
 **Next:**
 - Audit P2-04 → P3 work from the other sessions the same way before continuing P3.
+
+---
+
+## 2026-10-17 — Featured case studies
+**Tasks:** P3-06 (done)
+**Done:**
+- `src/App.jsx`: removed the template ability-card section from the homepage.
+- `src/constants/index.js`: deleted the unused fabricated ability claims and export; `src/sections/FeatureCards.jsx` was removed.
+**Checks:**
+- `npm test`: 126/126 pass.
+- Editor diagnostics: clean.
+- `npm run build`: succeeds; existing Zod annotation and large-main-chunk warnings remain.
+- Browser after full reload: ability-card headings are absent, Tools & clients remains, and no page errors occur.
+**Problems / notes:**
+- No featured project currently has a complete publishable case study. Sns Glam has demo-marked/missing fields; Vital Pulse and Smart Meal are whole-record demos. The section stays absent until verified featured case-study content is supplied.
+**Next:**
+- P3-07 remove unapproved testimonials.
 
 ---
 

@@ -162,7 +162,7 @@ The server runs in production mode unless `NODE_ENV=development` (secure by defa
 
 ## Local development
 - `npm run dev`: Vite on :5173, proxies `/api` to :3001
-- `npm run dev:server`: Express on :3001 with `--watch`
+- `npm run dev:server`: Express on :3001 with `--watch-path=server --watch-path=content` (restarts after `npm run content:build`)
 - `npm run dev:all`: both together
 - `npm run build && npm start`: production-like run
 - `/?city`: the 3D city (`src/city/CityExperience.jsx`, its own lazy chunk). In production it is unlinked and `noindex` (`X-Robots-Tag` header + `<meta name="robots">`) until P5-02 makes it the homepage. In dev (`dev:all`, :5173) `src/city/CityPreview.jsx` wraps it with a HUD: draw calls, focused building, camera position, Buea time/phase/sun elevation and a time-of-day slider ("live" returns to real time).

@@ -133,30 +133,31 @@ _Effort (1–10) sets height when the repo is private or has no GitHub stats._
 - **Media:** [DEMO] public/previews/sns-glam.webp (captured by P3-02)
 - **Can the live site be shown in an iframe?** yes
 
-### [DEMO] Vital Pulse
+### Vital Pulse
+_Live URL confirmed by the owner on 2026-10-20. The other fields are still the 2026-10-14 placeholders (including the 300+ patients number); replace each [DEMO] value._
 - **Slug:** vital-pulse
 - **Featured:** yes
 - **Status:** live
-- **Live URL:** TODO(content)
+- **Live URL:** https://vitalpulse237.com
 - **Repo URL:** https://github.com/ojrandy/vitalpulse-mobile
-- **Built for:** own product
-- **Your role:** founder & lead developer
-- **Team size:** 2
-- **Dates:** 2025-02 → present
-- **Stack:** React Native (Expo), Node.js, Express, PostgreSQL, Firebase Cloud Messaging
+- **Built for:** [DEMO] own product
+- **Your role:** [DEMO] founder & lead developer
+- **Team size:** [DEMO] 2
+- **Dates:** [DEMO] 2025-02 → present
+- **Stack:** [DEMO] React Native (Expo), Node.js, Express, PostgreSQL, Firebase Cloud Messaging
 - **Category:** mobile
-- **Problem:** Patients managing long-term conditions (hypertension, diabetes) in Cameroon log readings on paper, if at all, so doctors see a few numbers per visit instead of a trend.
-- **Hardest part:** Keeping readings safe and in sync when patients are offline for days on weak mobile networks.
-- **Decision:** Offline-first: readings are saved on the phone and synced with conflict-safe timestamps when a connection returns, instead of requiring a live connection.
-- **Result:** 300+ patients logging readings weekly; doctors get a 30-day trend chart before each visit. Source: app analytics
+- **Problem:** [DEMO] Patients managing long-term conditions (hypertension, diabetes) in Cameroon log readings on paper, if at all, so doctors see a few numbers per visit instead of a trend.
+- **Hardest part:** [DEMO] Keeping readings safe and in sync when patients are offline for days on weak mobile networks.
+- **Decision:** [DEMO] Offline-first: readings are saved on the phone and synced with conflict-safe timestamps when a connection returns, instead of requiring a live connection.
+- **Result:** [DEMO] 300+ patients logging readings weekly; doctors get a 30-day trend chart before each visit. Source: app analytics
 - **X-Ray layers:**
-  - UI: React Native screens, charts, reminders
-  - API: Node.js + Express REST API, JWT auth, rate-limited
-  - Data: PostgreSQL (readings, users), on-device SQLite cache
-  - Infra / hosting: VPS + Firebase Cloud Messaging for reminders
-- **Effort (1–10):** 9
-- **Media:** TODO(content)
-- **Can the live site be shown in an iframe?** no (mobile app)
+  - UI: [DEMO] React Native screens, charts, reminders
+  - API: [DEMO] Node.js + Express REST API, JWT auth, rate-limited
+  - Data: [DEMO] PostgreSQL (readings, users), on-device SQLite cache
+  - Infra / hosting: [DEMO] VPS + Firebase Cloud Messaging for reminders
+- **Effort (1–10):** [DEMO] 9
+- **Media:** public/previews/vital-pulse.webp (captured by P3-02)
+- **Can the live site be shown in an iframe?** TODO(content)
 
 ### [DEMO] Smart Meal
 - **Slug:** smart-meal
@@ -359,30 +360,31 @@ _Stack, category, X-Ray and iframe corrected 2026-10-16 from the repo (pubspec.y
 - **Media:** TODO(content), anonymised
 - **Can the live site be shown in an iframe?** no
 
-### [DEMO] Computer Solution Website
+### Computer Solutions Accessories
+_Live URL confirmed by the owner on 2026-10-20. The other fields are still the 2026-10-14 placeholders; replace each [DEMO] value._
 - **Slug:** computer-solution
 - **Featured:** no
 - **Status:** live
-- **Live URL:** TODO(content)
-- **Repo URL:** private
-- **Built for:** client (via Web Spectron Ltd)
-- **Your role:** developer
-- **Team size:** 2
-- **Dates:** 2026-07
-- **Stack:** React, Tailwind CSS, Google Maps embed
+- **Live URL:** https://computersolutionsaccessories.com/
+- **Repo URL:** [DEMO] private
+- **Built for:** [DEMO] client (via Web Spectron Ltd)
+- **Your role:** [DEMO] developer
+- **Team size:** [DEMO] 2
+- **Dates:** [DEMO] 2026-07
+- **Stack:** [DEMO] React, Tailwind CSS, Google Maps embed
 - **Category:** web
-- **Problem:** A computer sales and repair shop needed to be found on Google and show its services and location.
-- **Hardest part:** Ranking locally for "computer repair Buea".
-- **Decision:** Local SEO: Google Business Profile, LocalBusiness schema and a Maps embed.
-- **Result:** Live, listed on Google Maps. Source: client
+- **Problem:** [DEMO] A computer sales and repair shop needed to be found on Google and show its services and location.
+- **Hardest part:** [DEMO] Ranking locally for "computer repair Buea".
+- **Decision:** [DEMO] Local SEO: Google Business Profile, LocalBusiness schema and a Maps embed.
+- **Result:** [DEMO] Live, listed on Google Maps. Source: client
 - **X-Ray layers:**
-  - UI: React, Tailwind CSS
-  - API: contact form endpoint
-  - Data: —
+  - UI: [DEMO] React, Tailwind CSS
+  - API: [DEMO] contact form endpoint
+  - Data: [DEMO] —
   - Infra / hosting: Hostinger
-- **Effort (1–10):** 4
-- **Media:** TODO(content)
-- **Can the live site be shown in an iframe?** yes
+- **Effort (1–10):** [DEMO] 4
+- **Media:** public/previews/computer-solution.webp (captured by P3-02)
+- **Can the live site be shown in an iframe?** TODO(content)
 
 ### [DEMO] Banking Landing Page
 - **Slug:** banking-landing-page
@@ -409,29 +411,30 @@ _Stack, category, X-Ray and iframe corrected 2026-10-16 from the repo (pubspec.y
 - **Media:** TODO(content)
 - **Can the live site be shown in an iframe?** yes
 
-### [DEMO] Anointed PLC Website
+### Anointed Financial PLC
+_Live URL confirmed by the owner on 2026-10-20; merged with the afplc-connect repo block. The stack below is the old placeholder (WordPress) and the repo says React/TanStack; confirm which, then replace each [DEMO] value._
 - **Slug:** anointed-plc
 - **Featured:** no
 - **Status:** live
-- **Live URL:** TODO(content)
-- **Repo URL:** private
-- **Built for:** client (Yaoundé)
-- **Your role:** solo
-- **Team size:** 1
+- **Live URL:** https://anointedfinancialplc.com/
+- **Repo URL:** https://github.com/mazunita237-netizen/afplc-connect
+- **Built for:** [DEMO] client (Yaoundé)
+- **Your role:** [DEMO] solo
+- **Team size:** [DEMO] 1
 - **Dates:** TODO(content)
-- **Stack:** WordPress, Elementor
+- **Stack:** [DEMO] React, TypeScript, TanStack Start, Tailwind CSS, shadcn/ui (Radix), Lovable
 - **Category:** web
-- **Problem:** A Yaoundé company needed a professional bilingual (English/French) site it could update itself.
-- **Hardest part:** Bilingual content without doubling the editing work.
-- **Decision:** WordPress with a translation plugin and a short training session for the client.
-- **Result:** Client updates the site without a developer. Source: client
+- **Problem:** [DEMO] A Yaoundé company needed a professional bilingual (English/French) site it could update itself.
+- **Hardest part:** [DEMO] Bilingual content without doubling the editing work.
+- **Decision:** [DEMO] WordPress with a translation plugin and a short training session for the client.
+- **Result:** [DEMO] Client updates the site without a developer. Source: client
 - **X-Ray layers:**
-  - UI: WordPress theme + Elementor
-  - API: —
-  - Data: WordPress (MySQL)
-  - Infra / hosting: TODO(content)
-- **Effort (1–10):** 4
-- **Media:** TODO(content)
+  - UI: [DEMO] WordPress theme + Elementor
+  - API: [DEMO] —
+  - Data: [DEMO] WordPress (MySQL)
+  - Infra / hosting: Hostinger
+- **Effort (1–10):** [DEMO] 4
+- **Media:** public/previews/anointed-plc.webp (captured by P3-02)
 - **Can the live site be shown in an iframe?** TODO(content)
 
 ### [DEMO] WordPress Client Sites
@@ -459,12 +462,12 @@ _Stack, category, X-Ray and iframe corrected 2026-10-16 from the repo (pubspec.y
 - **Media:** TODO(content)
 - **Can the live site be shown in an iframe?** TODO(content)
 
-### navoraglobalfreight
-_Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHub: TypeScript, created 2026-10, last push 2026-10._
+### Navora Global Freight
+_Added 2026-10-15 from the GitHub repo list; fill in the details. GitHub: TypeScript, created 2026-10, last push 2026-10._ _Live URL confirmed by the owner on 2026-10-20._
 - **Slug:** navoraglobalfreight
 - **Featured:** no
-- **Status:** 
-- **Live URL:** 
+- **Status:** live
+- **Live URL:** https://navoraglobalfreight.com/
 - **Repo URL:** https://github.com/ojrandy/navoraglobalfreight
 - **Built for:** 
 - **Your role:** 
@@ -472,7 +475,7 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Dates:** 
 - **Stack:** [DEMO] React, TypeScript, Vite, Node.js, Express, Leaflet maps
 _Stack read from the repo's package.json on 2026-10-15; confirm or edit, then remove [DEMO]._
-- **Category:** 
+- **Category:** web
 - **Problem:** 
 - **Hardest part:** 
 - **Decision:** 
@@ -483,7 +486,7 @@ _Stack read from the repo's package.json on 2026-10-15; confirm or edit, then re
   - Data: 
   - Infra / hosting: 
 - **Effort (1–10):** 
-- **Media:** 
+- **Media:** public/previews/navoraglobalfreight.webp (captured by P3-02)
 - **Can the live site be shown in an iframe?** 
 
 ### advancedGlobal
@@ -513,12 +516,12 @@ _Stack read from the repo's package.json on 2026-10-15; confirm or edit, then re
 - **Media:** 
 - **Can the live site be shown in an iframe?** 
 
-### WVL
-_Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHub: TypeScript, created 2026-10, last push 2026-10._
+### World Vexa Logistics
+_Added 2026-10-15 from the GitHub repo list; fill in the details. GitHub: TypeScript, created 2026-10, last push 2026-10._ _Live URL confirmed by the owner on 2026-10-20._
 - **Slug:** wvl
 - **Featured:** no
-- **Status:** 
-- **Live URL:** 
+- **Status:** live
+- **Live URL:** https://worldvexalogistics.com/
 - **Repo URL:** https://github.com/ojrandy/WVL
 - **Built for:** 
 - **Your role:** 
@@ -526,7 +529,7 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Dates:** 
 - **Stack:** [DEMO] React, TypeScript, Vite, Node.js, Express, Leaflet maps
 _Stack read from the repo's package.json on 2026-10-15; confirm or edit, then remove [DEMO]._
-- **Category:** 
+- **Category:** web
 - **Problem:** 
 - **Hardest part:** 
 - **Decision:** 
@@ -537,7 +540,7 @@ _Stack read from the repo's package.json on 2026-10-15; confirm or edit, then re
   - Data: 
   - Infra / hosting: 
 - **Effort (1–10):** 
-- **Media:** 
+- **Media:** public/previews/wvl.webp (captured by P3-02)
 - **Can the live site be shown in an iframe?** 
 
 ### coretexcore
@@ -701,33 +704,6 @@ _Stack read from the repo's package.json + README on 2026-10-15; confirm or edit
 - **Media:** 
 - **Can the live site be shown in an iframe?** 
 
-### afplc-connect
-_Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHub: TypeScript, created 2026-08, last push 2026-08. Same project as "Anointed PLC Website"? If so, merge the blocks._
-- **Slug:** afplc-connect
-- **Featured:** no
-- **Status:** 
-- **Live URL:** 
-- **Repo URL:** https://github.com/mazunita237-netizen/afplc-connect
-- **Built for:** 
-- **Your role:** 
-- **Team size:** 
-- **Dates:** 
-- **Stack:** [DEMO] React, TypeScript, TanStack Start, Tailwind CSS, shadcn/ui (Radix), Lovable
-_Stack read from the repo's package.json + README on 2026-10-15; confirm or edit, then remove [DEMO]._
-- **Category:** 
-- **Problem:** 
-- **Hardest part:** 
-- **Decision:** 
-- **Result:** 
-- **X-Ray layers:**
-  - UI: 
-  - API: 
-  - Data: 
-  - Infra / hosting: 
-- **Effort (1–10):** 
-- **Media:** 
-- **Can the live site be shown in an iframe?** 
-
 ### iot-sentinelf
 _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHub: JavaScript, created 2026-05, last push 2026-06._
 - **Slug:** iot-sentinelf
@@ -755,12 +731,12 @@ _Stack read from the repo's firmware/, backend/ and frontend/ package.json on 20
 - **Media:** 
 - **Can the live site be shown in an iframe?** 
 
-### novaTransport
-_Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHub: TypeScript, created 2026-10, last push 2026-10._
+### Nuvexa Global Transport
+_Added 2026-10-15 from the GitHub repo list; fill in the details. GitHub: TypeScript, created 2026-10, last push 2026-10._ _Live URL confirmed by the owner on 2026-10-20._
 - **Slug:** novatransport
 - **Featured:** no
-- **Status:** 
-- **Live URL:** 
+- **Status:** live
+- **Live URL:** https://nuvexaglobaltransport.com/
 - **Repo URL:** https://github.com/webspectron/novaTransport
 - **Built for:** 
 - **Your role:** 
@@ -768,7 +744,7 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Dates:** 
 - **Stack:** [DEMO] React, TypeScript, Vite, Node.js, Express, Leaflet maps
 _Stack read from the repo's package.json on 2026-10-15; confirm or edit, then remove [DEMO]._
-- **Category:** 
+- **Category:** web
 - **Problem:** 
 - **Hardest part:** 
 - **Decision:** 
@@ -779,7 +755,7 @@ _Stack read from the repo's package.json on 2026-10-15; confirm or edit, then re
   - Data: 
   - Infra / hosting: 
 - **Effort (1–10):** 
-- **Media:** 
+- **Media:** public/previews/novatransport.webp (captured by P3-02)
 - **Can the live site be shown in an iframe?** 
 
 ### novaF
@@ -834,6 +810,110 @@ _Stack read from the repo's package.json on 2026-10-15; confirm or edit, then re
   - Infra / hosting: 
 - **Effort (1–10):** 
 - **Media:** 
+- **Can the live site be shown in an iframe?** 
+
+### Rebirth Labs
+_Added 2026-10-20: live site confirmed by the owner; fill in the details._
+- **Slug:** rebirth-labs
+- **Featured:** no
+- **Status:** live
+- **Live URL:** https://rebirthlabs.org/
+- **Repo URL:** 
+- **Built for:** 
+- **Your role:** 
+- **Team size:** 
+- **Dates:** 
+- **Stack:** 
+- **Category:** web
+- **Problem:** 
+- **Hardest part:** 
+- **Decision:** 
+- **Result:** 
+- **X-Ray layers:**
+  - UI: 
+  - API: 
+  - Data: 
+  - Infra / hosting: 
+- **Effort (1–10):** 
+- **Media:** public/previews/rebirth-labs.webp (captured by P3-02)
+- **Can the live site be shown in an iframe?** 
+
+### Global Sphere Autos
+_Added 2026-10-20: live site confirmed by the owner; fill in the details._
+- **Slug:** global-sphere-autos
+- **Featured:** no
+- **Status:** live
+- **Live URL:** https://globalsphereautos.com/
+- **Repo URL:** 
+- **Built for:** 
+- **Your role:** 
+- **Team size:** 
+- **Dates:** 
+- **Stack:** 
+- **Category:** web
+- **Problem:** 
+- **Hardest part:** 
+- **Decision:** 
+- **Result:** 
+- **X-Ray layers:**
+  - UI: 
+  - API: 
+  - Data: 
+  - Infra / hosting: 
+- **Effort (1–10):** 
+- **Media:** public/previews/global-sphere-autos.webp (captured by P3-02)
+- **Can the live site be shown in an iframe?** 
+
+### Queens Cargo
+_Added 2026-10-20: live site confirmed by the owner; fill in the details._
+- **Slug:** queens-cargo
+- **Featured:** no
+- **Status:** live
+- **Live URL:** https://queenscargo.com/
+- **Repo URL:** 
+- **Built for:** 
+- **Your role:** 
+- **Team size:** 
+- **Dates:** 
+- **Stack:** 
+- **Category:** web
+- **Problem:** 
+- **Hardest part:** 
+- **Decision:** 
+- **Result:** 
+- **X-Ray layers:**
+  - UI: 
+  - API: 
+  - Data: 
+  - Infra / hosting: 
+- **Effort (1–10):** 
+- **Media:** public/previews/queens-cargo.webp (captured by P3-02)
+- **Can the live site be shown in an iframe?** 
+
+### HandyMan Do IT
+_Added 2026-10-20: live site confirmed by the owner; fill in the details._
+- **Slug:** handyman-do-it
+- **Featured:** no
+- **Status:** live
+- **Live URL:** https://app.handymandoit.com/
+- **Repo URL:** 
+- **Built for:** 
+- **Your role:** 
+- **Team size:** 
+- **Dates:** 
+- **Stack:** 
+- **Category:** web
+- **Problem:** 
+- **Hardest part:** 
+- **Decision:** 
+- **Result:** 
+- **X-Ray layers:**
+  - UI: 
+  - API: 
+  - Data: 
+  - Infra / hosting: 
+- **Effort (1–10):** 
+- **Media:** public/previews/handyman-do-it.webp (captured by P3-02)
 - **Can the live site be shown in an iframe?** 
 
 ---

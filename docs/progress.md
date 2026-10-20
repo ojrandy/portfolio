@@ -17,6 +17,21 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-20 — Ten live client sites added
+**Tasks:** P0-02 (content, still in progress); P3-02 (preview script hardened)
+**Decisions (owner):** site → block mapping confirmed; "Navora" is the spelling; owner asked for all ten as Featured, but the schema allows 3, so Featured stays SNS Glam / Vital Pulse / Smart Meal (owner to choose).
+**Done:**
+- `docs/projects.md`: live URLs + `Status: live` on Vital Pulse, Computer Solutions Accessories, Anointed Financial PLC (merged with the afplc-connect repo block), Navora Global Freight, World Vexa Logistics (WVL), Nuvexa Global Transport (novaTransport); new blocks for Rebirth Labs, Global Sphere Autos, Queens Cargo, HandyMan Do IT. The three former `[DEMO]` blocks are now real projects with each placeholder field still marked `[DEMO]`. 31 projects.
+- `scripts/capture-previews.js`: waits for network idle, clicks age-gate/consent buttons, refuses a blank single-colour screenshot (+2 tests). Fixed HandyMan (was blank) and Rebirth Labs (was the 21+ gate).
+- Previews captured: `rebirth-labs.webp`, `handyman-do-it.webp`.
+**Checks:** `npm test` 156/156; `content:check` OK; lint clean on the script.
+**Problems / notes:**
+- Every Hostinger-hosted site (2a02:4780::/32, incl. SNS Glam) resets connections from this machine (HTTP and HTTPS, IPv4), so 8 previews are missing. Likely Hostinger's firewall blocking this IP after rapid requests; re-run `npm run previews` later or from another network.
+- Rebirth Labs sends `X-Frame-Options: SAMEORIGIN`, so its iframe answer will be "no".
+**Next:** re-run `npm run previews`; owner fills the new blocks' details and picks the 3 featured projects.
+
+---
+
 ## 2026-10-20 — Arcade: Code runner mini-game
 **Tasks:** P3-09b (done)
 **Decisions (owner):** best score in this browser only (no shared leaderboard); scoring 10 unlocks a 6th egg, "Bug squasher"; coffee cups worth +3.

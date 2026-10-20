@@ -14,7 +14,7 @@
     "content:check:strict": "node scripts/validate-content.js --strict",
     "previews": "node scripts/capture-previews.js",
     "test": "node --test \"shared/**/*.test.js\" \"scripts/**/*.test.js\" \"server/**/*.test.js\" \"src/**/*.test.js\"",
-    "dev:server": "node --watch --env-file-if-exists=.env server/dev.js",
+    "dev:server": "node --watch-path=server --watch-path=content --env-file-if-exists=.env server/dev.js",
     "dev:all": "concurrently -k -n web,api -c cyan,magenta \"npm:dev\" \"npm:dev:server\"",
     "start": "node server/index.js",
     "perf": "node scripts/perf.mjs"

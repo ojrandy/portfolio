@@ -57,7 +57,7 @@
             "district": "downtown",
             "featured": true,
             "status": "live",
-            "live": "TODO(content)",
+            "live": "https://vitalpulse237.com",
             "repo": "https://github.com/ojrandy/vitalpulse-mobile",
             "builtFor": "own product",
             "role": "founder & lead developer",
@@ -92,10 +92,25 @@
             "stats": {
                 "effort": 9
             },
-            "media": "TODO(content)",
-            "iframe": false,
-            "demo": true,
-            "demoFields": []
+            "media": "public/previews/vital-pulse.webp (captured by P3-02)",
+            "iframe": "TODO(content)",
+            "demo": false,
+            "demoFields": [
+                "builtFor",
+                "role",
+                "teamSize",
+                "dates",
+                "stack",
+                "caseStudy.problem",
+                "caseStudy.hardestPart",
+                "caseStudy.decision",
+                "caseStudy.result",
+                "xray.ui",
+                "xray.api",
+                "xray.data",
+                "xray.infra",
+                "stats.effort"
+            ]
         },
         {
             "slug": "smart-meal",
@@ -464,11 +479,11 @@
         },
         {
             "slug": "computer-solution",
-            "name": "Computer Solution Website",
+            "name": "Computer Solutions Accessories",
             "district": "downtown",
             "featured": false,
             "status": "live",
-            "live": "TODO(content)",
+            "live": "https://computersolutionsaccessories.com/",
             "repo": "private",
             "builtFor": "client (via Web Spectron Ltd)",
             "role": "developer",
@@ -501,10 +516,25 @@
             "stats": {
                 "effort": 4
             },
-            "media": "TODO(content)",
-            "iframe": true,
-            "demo": true,
-            "demoFields": []
+            "media": "public/previews/computer-solution.webp (captured by P3-02)",
+            "iframe": "TODO(content)",
+            "demo": false,
+            "demoFields": [
+                "repo",
+                "builtFor",
+                "role",
+                "teamSize",
+                "dates",
+                "stack",
+                "caseStudy.problem",
+                "caseStudy.hardestPart",
+                "caseStudy.decision",
+                "caseStudy.result",
+                "xray.ui",
+                "xray.api",
+                "xray.data",
+                "stats.effort"
+            ]
         },
         {
             "slug": "banking-landing-page",
@@ -552,12 +582,12 @@
         },
         {
             "slug": "anointed-plc",
-            "name": "Anointed PLC Website",
+            "name": "Anointed Financial PLC",
             "district": "downtown",
             "featured": false,
             "status": "live",
-            "live": "TODO(content)",
-            "repo": "private",
+            "live": "https://anointedfinancialplc.com/",
+            "repo": "https://github.com/mazunita237-netizen/afplc-connect",
             "builtFor": "client (Yaoundé)",
             "role": "solo",
             "teamSize": 1,
@@ -566,8 +596,12 @@
                 "end": "TODO(content)"
             },
             "stack": [
-                "WordPress",
-                "Elementor"
+                "React",
+                "TypeScript",
+                "TanStack Start",
+                "Tailwind CSS",
+                "shadcn/ui (Radix)",
+                "Lovable"
             ],
             "category": [
                 "web"
@@ -583,15 +617,28 @@
                 "ui": "WordPress theme + Elementor",
                 "api": null,
                 "data": "WordPress (MySQL)",
-                "infra": "TODO(content)"
+                "infra": "Hostinger"
             },
             "stats": {
                 "effort": 4
             },
-            "media": "TODO(content)",
+            "media": "public/previews/anointed-plc.webp (captured by P3-02)",
             "iframe": "TODO(content)",
-            "demo": true,
-            "demoFields": []
+            "demo": false,
+            "demoFields": [
+                "builtFor",
+                "role",
+                "teamSize",
+                "stack",
+                "caseStudy.problem",
+                "caseStudy.hardestPart",
+                "caseStudy.decision",
+                "caseStudy.result",
+                "xray.ui",
+                "xray.api",
+                "xray.data",
+                "stats.effort"
+            ]
         },
         {
             "slug": "wordpress-sites",
@@ -639,11 +686,11 @@
         },
         {
             "slug": "navoraglobalfreight",
-            "name": "navoraglobalfreight",
+            "name": "Navora Global Freight",
             "district": "downtown",
             "featured": false,
-            "status": "TODO(content)",
-            "live": "TODO(content)",
+            "status": "live",
+            "live": "https://navoraglobalfreight.com/",
             "repo": "https://github.com/ojrandy/navoraglobalfreight",
             "builtFor": "TODO(content)",
             "role": "TODO(content)",
@@ -660,7 +707,9 @@
                 "Express",
                 "Leaflet maps"
             ],
-            "category": "TODO(content)",
+            "category": [
+                "web"
+            ],
             "caseStudy": {
                 "problem": "TODO(content)",
                 "hardestPart": "TODO(content)",
@@ -677,7 +726,7 @@
             "stats": {
                 "effort": null
             },
-            "media": "TODO(content)",
+            "media": "public/previews/navoraglobalfreight.webp (captured by P3-02)",
             "iframe": "TODO(content)",
             "demo": false,
             "demoFields": [
@@ -733,11 +782,11 @@
         },
         {
             "slug": "wvl",
-            "name": "WVL",
+            "name": "World Vexa Logistics",
             "district": "downtown",
             "featured": false,
-            "status": "TODO(content)",
-            "live": "TODO(content)",
+            "status": "live",
+            "live": "https://worldvexalogistics.com/",
             "repo": "https://github.com/ojrandy/WVL",
             "builtFor": "TODO(content)",
             "role": "TODO(content)",
@@ -754,7 +803,9 @@
                 "Express",
                 "Leaflet maps"
             ],
-            "category": "TODO(content)",
+            "category": [
+                "web"
+            ],
             "caseStudy": {
                 "problem": "TODO(content)",
                 "hardestPart": "TODO(content)",
@@ -771,7 +822,7 @@
             "stats": {
                 "effort": null
             },
-            "media": "TODO(content)",
+            "media": "public/previews/wvl.webp (captured by P3-02)",
             "iframe": "TODO(content)",
             "demo": false,
             "demoFields": [
@@ -1044,53 +1095,6 @@
             ]
         },
         {
-            "slug": "afplc-connect",
-            "name": "afplc-connect",
-            "district": "downtown",
-            "featured": false,
-            "status": "TODO(content)",
-            "live": "TODO(content)",
-            "repo": "https://github.com/mazunita237-netizen/afplc-connect",
-            "builtFor": "TODO(content)",
-            "role": "TODO(content)",
-            "teamSize": "TODO(content)",
-            "dates": {
-                "start": "TODO(content)",
-                "end": "TODO(content)"
-            },
-            "stack": [
-                "React",
-                "TypeScript",
-                "TanStack Start",
-                "Tailwind CSS",
-                "shadcn/ui (Radix)",
-                "Lovable"
-            ],
-            "category": "TODO(content)",
-            "caseStudy": {
-                "problem": "TODO(content)",
-                "hardestPart": "TODO(content)",
-                "decision": "TODO(content)",
-                "result": "TODO(content)",
-                "resultSource": null
-            },
-            "xray": {
-                "ui": "TODO(content)",
-                "api": "TODO(content)",
-                "data": "TODO(content)",
-                "infra": "TODO(content)"
-            },
-            "stats": {
-                "effort": null
-            },
-            "media": "TODO(content)",
-            "iframe": "TODO(content)",
-            "demo": false,
-            "demoFields": [
-                "stack"
-            ]
-        },
-        {
             "slug": "iot-sentinelf",
             "name": "iot-sentinelf",
             "district": "downtown",
@@ -1140,11 +1144,11 @@
         },
         {
             "slug": "novatransport",
-            "name": "novaTransport",
+            "name": "Nuvexa Global Transport",
             "district": "downtown",
             "featured": false,
-            "status": "TODO(content)",
-            "live": "TODO(content)",
+            "status": "live",
+            "live": "https://nuvexaglobaltransport.com/",
             "repo": "https://github.com/webspectron/novaTransport",
             "builtFor": "TODO(content)",
             "role": "TODO(content)",
@@ -1161,7 +1165,9 @@
                 "Express",
                 "Leaflet maps"
             ],
-            "category": "TODO(content)",
+            "category": [
+                "web"
+            ],
             "caseStudy": {
                 "problem": "TODO(content)",
                 "hardestPart": "TODO(content)",
@@ -1178,7 +1184,7 @@
             "stats": {
                 "effort": null
             },
-            "media": "TODO(content)",
+            "media": "public/previews/novatransport.webp (captured by P3-02)",
             "iframe": "TODO(content)",
             "demo": false,
             "demoFields": [
@@ -1278,6 +1284,166 @@
             "demoFields": [
                 "stack"
             ]
+        },
+        {
+            "slug": "rebirth-labs",
+            "name": "Rebirth Labs",
+            "district": "downtown",
+            "featured": false,
+            "status": "live",
+            "live": "https://rebirthlabs.org/",
+            "repo": "TODO(content)",
+            "builtFor": "TODO(content)",
+            "role": "TODO(content)",
+            "teamSize": "TODO(content)",
+            "dates": {
+                "start": "TODO(content)",
+                "end": "TODO(content)"
+            },
+            "stack": "TODO(content)",
+            "category": [
+                "web"
+            ],
+            "caseStudy": {
+                "problem": "TODO(content)",
+                "hardestPart": "TODO(content)",
+                "decision": "TODO(content)",
+                "result": "TODO(content)",
+                "resultSource": null
+            },
+            "xray": {
+                "ui": "TODO(content)",
+                "api": "TODO(content)",
+                "data": "TODO(content)",
+                "infra": "TODO(content)"
+            },
+            "stats": {
+                "effort": null
+            },
+            "media": "public/previews/rebirth-labs.webp (captured by P3-02)",
+            "iframe": "TODO(content)",
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "slug": "global-sphere-autos",
+            "name": "Global Sphere Autos",
+            "district": "downtown",
+            "featured": false,
+            "status": "live",
+            "live": "https://globalsphereautos.com/",
+            "repo": "TODO(content)",
+            "builtFor": "TODO(content)",
+            "role": "TODO(content)",
+            "teamSize": "TODO(content)",
+            "dates": {
+                "start": "TODO(content)",
+                "end": "TODO(content)"
+            },
+            "stack": "TODO(content)",
+            "category": [
+                "web"
+            ],
+            "caseStudy": {
+                "problem": "TODO(content)",
+                "hardestPart": "TODO(content)",
+                "decision": "TODO(content)",
+                "result": "TODO(content)",
+                "resultSource": null
+            },
+            "xray": {
+                "ui": "TODO(content)",
+                "api": "TODO(content)",
+                "data": "TODO(content)",
+                "infra": "TODO(content)"
+            },
+            "stats": {
+                "effort": null
+            },
+            "media": "public/previews/global-sphere-autos.webp (captured by P3-02)",
+            "iframe": "TODO(content)",
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "slug": "queens-cargo",
+            "name": "Queens Cargo",
+            "district": "downtown",
+            "featured": false,
+            "status": "live",
+            "live": "https://queenscargo.com/",
+            "repo": "TODO(content)",
+            "builtFor": "TODO(content)",
+            "role": "TODO(content)",
+            "teamSize": "TODO(content)",
+            "dates": {
+                "start": "TODO(content)",
+                "end": "TODO(content)"
+            },
+            "stack": "TODO(content)",
+            "category": [
+                "web"
+            ],
+            "caseStudy": {
+                "problem": "TODO(content)",
+                "hardestPart": "TODO(content)",
+                "decision": "TODO(content)",
+                "result": "TODO(content)",
+                "resultSource": null
+            },
+            "xray": {
+                "ui": "TODO(content)",
+                "api": "TODO(content)",
+                "data": "TODO(content)",
+                "infra": "TODO(content)"
+            },
+            "stats": {
+                "effort": null
+            },
+            "media": "public/previews/queens-cargo.webp (captured by P3-02)",
+            "iframe": "TODO(content)",
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "slug": "handyman-do-it",
+            "name": "HandyMan Do IT",
+            "district": "downtown",
+            "featured": false,
+            "status": "live",
+            "live": "https://app.handymandoit.com/",
+            "repo": "TODO(content)",
+            "builtFor": "TODO(content)",
+            "role": "TODO(content)",
+            "teamSize": "TODO(content)",
+            "dates": {
+                "start": "TODO(content)",
+                "end": "TODO(content)"
+            },
+            "stack": "TODO(content)",
+            "category": [
+                "web"
+            ],
+            "caseStudy": {
+                "problem": "TODO(content)",
+                "hardestPart": "TODO(content)",
+                "decision": "TODO(content)",
+                "result": "TODO(content)",
+                "resultSource": null
+            },
+            "xray": {
+                "ui": "TODO(content)",
+                "api": "TODO(content)",
+                "data": "TODO(content)",
+                "infra": "TODO(content)"
+            },
+            "stats": {
+                "effort": null
+            },
+            "media": "public/previews/handyman-do-it.webp (captured by P3-02)",
+            "iframe": "TODO(content)",
+            "demo": false,
+            "demoFields": []
         }
     ]
 }

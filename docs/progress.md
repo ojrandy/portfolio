@@ -17,6 +17,14 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-20 — Tools and clients audited
+**Tasks:** P3-05 (done; the 2026-10-17 work, audited)
+**Audit:** shows only owner content, but tools came only from two IDE names matched in the summary sentence, so tool groups would have stayed hidden even after the owner confirmed them. Now: tools from every non-[DEMO] group plus the IDEs named in the summary; client lines only with `logoPermission: yes`; placeholders never. Tests are rule tests (the old one pinned the exact client wording).
+**Content notes for the owner (not changed):** all three tool groups are still `[DEMO]`, so only VS Code and WebStorm show. Client lines are shown as written: "have worked with WebSpectron LTD Buea." and "Work for a client in yaounde (Anionted PLC)" may need a capital letter / spelling check.
+**Checks:** tool and client tests pass; homepage shows VS Code, WebStorm and the four permitted client lines.
+
+---
+
 ## 2026-10-20 — Sourced metrics fixed
 **Tasks:** P3-04 (done; the 2026-10-17 work, audited and fixed)
 **Audit:** the template's invented counters (5 years, 80 clients, 35 projects, 99 %) are gone, but "Projects in OJ City" counted the 13 whole `[DEMO]` placeholder projects as real ones, a fake stat. Fixed: demos never count, in both numbers. Also: the source was only a hover tooltip (invisible on touch screens), now visible text in plain words; and the counter was a `<section>`, which the template forces to `100dvw` inside the padded hero (now a `div` with `role="region"`).
@@ -116,6 +124,22 @@ Newest entry at the top. One entry per working session.
 - Status line and the dev HUD both sit at the top-left and overlap on `/?city` in dev.
 **Next:**
 - Audit P2-04 → P3 work from the other sessions the same way before continuing P3.
+
+---
+
+## 2026-10-17 — Tools and clients
+**Tasks:** P3-05 (done)
+**Done:**
+- `src/lib/toolClientContent.js`: selects VS Code and WebStorm from the non-demo profile summary and client statements only where `logoPermission` is true; placeholder text is filtered out.
+- `src/sections/LogoSection.jsx`: replaced the animated generic logo marquee with a responsive text-only tools and clients section.
+- `src/constants/index.js`: removed the unused generic logo list and export. The generic image files remain unreferenced for P0-06 asset cleanup.
+**Checks:**
+- `npm test`: 126/126 pass.
+- Targeted ESLint and editor diagnostics: clean.
+- `npm run build`: succeeds; existing Zod annotation and large-main-chunk warnings remain.
+- Browser displayed only VS Code, WebStorm, and permission-approved client statements; no generic logo images or page errors.
+**Next:**
+- P3-06 replace ability cards with featured case studies.
 
 ---
 

@@ -15,14 +15,18 @@ import PerfProbe from './PerfProbe.jsx';
 import Sun from './Sun.jsx';
 import DayNight from './DayNight.jsx';
 import CinemaPlot, { CinemaModal } from './CinemaPlot.jsx';
+import ArcadePlot from './ArcadePlot.jsx';
 import { createLighting } from './liveLighting.js';
 import useBuea from '../hooks/useBuea.js';
+import useEasterEggs from '../hooks/useEasterEggs.js';
 import useDeviceTier from '../hooks/useDeviceTier.js';
 import { LEVELS, QUALITY, stepQuality } from '../lib/quality.js';
 import ProjectPanel from '../components/ProjectPanel.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
 import StatusLine from '../components/StatusLine.jsx';
 import CityProjectList from '../components/CityProjectList.jsx';
+import ArcadeHub from '../components/ArcadeHub.jsx';
+import EggToast from '../components/EggToast.jsx';
 import useCityData from '../hooks/useCityData.js';
 import { toBuildings } from '../lib/buildings.js';
 import { layoutCity } from '../lib/layout.js';
@@ -31,6 +35,7 @@ import { weatherFx } from '../lib/weatherFx.js';
 import { xrayLayers as layersForXRay } from '../lib/projectSummary.js';
 import { cinemaReel } from '../lib/cinemaReel.js';
 import useCityStore from '../store/useCityStore.js';
+import useArcadeStore from '../store/useArcadeStore.js';
 import profile from '../../content/profile.json';
 
 const FALLBACK_BOUNDS = { minX: -40, maxX: 40, minZ: -40, maxZ: 40 };
@@ -39,7 +44,9 @@ const PERF = params.has('perf');
 // Perf runs only: ?perf&quality=low|medium|high pins the level and turns the monitor off.
 const PINNED = PERF && LEVELS.includes(params.get('quality')) ? params.get('quality') : null;
 const CINEMA_REEL = cinemaReel(profile);
-const BUILT_DISTRICTS = CINEMA_REEL ? ['cinema'] : []; // the Cinema plot replaces its placeholder block
+// Districts whose own scene replaces the placeholder block: Cinema (with a reel or channel) and the Arcade (P3-09).
+const BUILT_DISTRICTS = CINEMA_REEL ? ['cinema', 'arcade'] : ['arcade'];
+const GAMING = profile.hobbies?.find((hobby) => hobby.name === 'Gaming')?.text;
 
 const hasWebGL = () => {
     try {
@@ -60,11 +67,14 @@ const CityExperience = ({ debug }) => {
     const [drawn, setDrawn] = useState(false);
     const [cinemaOpen, setCinemaOpen] = useState(false);
     const [cinemaHovered, setCinemaHovered] = useState(false);
+    const [arcadeHovered, setArcadeHovered] = useState(false);
+    const hubOpen = useArcadeStore((s) => s.hubOpen);
     const tier = useDeviceTier();
     const [quality, setQuality] = useState(PINNED ?? tier);
     const viewport = useRef(null);
     const [lighting] = useState(createLighting);
     const { data: buea, offsetMs } = useBuea();
+    useEasterEggs({ active: drawn, offsetMs });
     const focus = useCityStore((s) => s.focus);
     const hovered = useCityStore((s) => s.hovered);
     const openSlug = useCityStore((s) => s.openSlug);
@@ -81,6 +91,7 @@ const CityExperience = ({ debug }) => {
 
     const bounds = layout?.bounds ?? FALLBACK_BOUNDS;
     const cinemaPlot = layout?.districts.find((district) => district.id === 'cinema');
+    const arcadePlot = layout?.districts.find((district) => district.id === 'arcade');
     const labelSlug = hovered ?? focus;
     const focusName = projects.get(focus)?.name;
     const openProjectData = projects.get(openSlug);
@@ -101,7 +112,7 @@ const CityExperience = ({ debug }) => {
                 aria-roledescription="3D city"
                 aria-label="OJ City. Tab visits each building and Enter opens it. Arrow keys or WASD move, Q and E rotate, plus and minus zoom, Escape returns to the start."
                 className="absolute inset-0 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-window"
-                style={{ cursor: hovered || cinemaHovered ? 'pointer' : undefined }}
+                style={{ cursor: hovered || cinemaHovered || arcadeHovered ? 'pointer' : undefined }}
                 aria-busy={!drawn}
             >
                 {webgl && <Canvas dpr={[1, QUALITY[quality].dpr]} shadows camera={{ position: [0, 24, 78], fov: CAMERA.fov, near: CAMERA.near, far: CAMERA.far }}>
@@ -132,6 +143,7 @@ const CityExperience = ({ debug }) => {
                                     onHover={setCinemaHovered}
                                 />
                             )}
+                            {arcadePlot && <ArcadePlot plot={arcadePlot} onHover={setArcadeHovered} />}
                             <Lamps layout={layout} lighting={lighting} />
                             <Buildings
                                 placed={layout.lots}
@@ -170,6 +182,8 @@ const CityExperience = ({ debug }) => {
                 />
             )}
             {cinemaOpen && CINEMA_REEL?.kind === 'file' && <CinemaModal reel={CINEMA_REEL} onClose={() => setCinemaOpen(false)} />}
+            {hubOpen && <ArcadeHub gaming={GAMING} />}
+            <EggToast />
             {extra.overlay}
         </div>
     );

@@ -1,9 +1,12 @@
 // Fako (Mount Cameroon) with its mist band (2 draw calls). Shape and placement: src/lib/backdrop.js.
-import { useMemo, useRef } from 'react';
+// Easter egg (P3-09): five knocks (clicks) on the mountain clear the mist for a few seconds.
+import { useMemo, useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import { MIST, fakoMesh, mistBand } from '../lib/backdrop.js';
 import useReducedMotion from '../hooks/useReducedMotion.js';
+import { knockCounter } from '../lib/arcadeEggs.js';
+import useArcadeStore from '../store/useArcadeStore.js';
 
 const buildGeometry = () => {
     const { positions, colors, indices } = fakoMesh();
@@ -27,7 +30,18 @@ const geometry = buildGeometry();
 const band = mistBand();
 const mistGeometry = new THREE.CylinderGeometry(band.radiusTop, band.radiusBottom, band.bandHeight, 64, 1, true);
 
-const vertexShader = /* glsl */ `
+const CLEARED = 0.1; // share of the mist left while the egg clears it
+const CLEAR_RATE = 1.5; // per second
+
+const onKnock = (knock) => (event) => {
+    event.stopPropagation();
+    if (!knock(performance.now())) return;
+    const { find, clearMist } = useArcadeStore.getState();
+    clearMist();
+    find('fako');
+};
+
+const vertexShader =/* glsl */ `
     varying vec2 vUv;
     void main() {
         vUv = uv;
@@ -58,6 +72,8 @@ const fragmentShader = /* glsl */ `
 const Fako = ({ placement, lighting }) => {
     const reducedMotion = useReducedMotion();
     const material = useRef(null);
+    const clearing = useRef(1);
+    const [knock] = useState(() => onKnock(knockCounter()));
     // Memoised args: a new args object makes R3F rebuild the material, which frees and recompiles its shader.
     const args = useMemo(() => [{
         uniforms: { color: { value: lighting.mist }, opacity: { value: MIST.opacity }, time: { value: 0 } },
@@ -67,13 +83,15 @@ const Fako = ({ placement, lighting }) => {
 
     useFrame((_, delta) => {
         const { uniforms: u } = material.current;
-        u.opacity.value = Math.min(1, MIST.opacity * lighting.mistDensity);
+        const target = performance.now() < useArcadeStore.getState().mistClearUntil ? CLEARED : 1;
+        clearing.current = reducedMotion ? target : clearing.current + (target - clearing.current) * Math.min(1, delta * CLEAR_RATE);
+        u.opacity.value = Math.min(1, MIST.opacity * lighting.mistDensity) * clearing.current;
         if (!reducedMotion) u.time.value += delta;
     });
 
     return (
         <group position={[placement.x, 0, placement.z]} rotation-y={placement.rotationY}>
-            <mesh geometry={geometry}>
+            <mesh geometry={geometry} onClick={knock}>
                 <meshStandardMaterial vertexColors flatShading roughness={1} />
             </mesh>
             <mesh geometry={mistGeometry} position-y={band.y} scale={band.scale} renderOrder={1}>

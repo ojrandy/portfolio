@@ -4,11 +4,12 @@
 // - otherwise the screen shows a drawn "Video work" card and opens the owner's channel in a new tab (nothing is
 //   loaded from the channel, so the CSP is unchanged).
 // Without either, CityExperience doesn't mount this and the plot keeps its placeholder block.
-import { useEffect, useMemo, useRef } from 'react';
+import { useEffect, useMemo } from 'react';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { COLORS } from '../lib/palette.js';
 import useReducedMotion from '../hooks/useReducedMotion.js';
+import Dialog from '../components/Dialog.jsx';
 
 const PLATFORM_GEOMETRY = new THREE.BoxGeometry(5.6, 3.2, 5.6);
 const FRAME_GEOMETRY = new THREE.BoxGeometry(6.25, 3.65, 0.3);
@@ -133,64 +134,22 @@ const CinemaPlot = ({ plot, reel, paused, onOpen, onHover }) => {
     );
 };
 
-/** Player for the reel: modal dialog, Escape or Close shuts it, Tab stays inside, focus goes back where it was. */
+/** Player for the reel (Dialog: Escape or Close shuts it, Tab stays inside, focus goes back where it was). */
 export const CinemaModal = ({ reel, onClose }) => {
-    const dialog = useRef(null);
-    const closeButton = useRef(null);
     const reducedMotion = useReducedMotion();
 
-    useEffect(() => {
-        const previousFocus = document.activeElement;
-        closeButton.current?.focus();
-        const onKeyDown = (event) => {
-            if (event.key === 'Escape') onClose();
-            if (event.key !== 'Tab' || !dialog.current) return;
-            const focusable = [...dialog.current.querySelectorAll('button, video[controls]')];
-            const first = focusable[0];
-            const last = focusable.at(-1);
-            if (event.shiftKey && document.activeElement === first) { event.preventDefault(); last.focus(); }
-            else if (!event.shiftKey && document.activeElement === last) { event.preventDefault(); first.focus(); }
-        };
-        window.addEventListener('keydown', onKeyDown);
-        return () => {
-            window.removeEventListener('keydown', onKeyDown);
-            if (previousFocus instanceof HTMLElement && previousFocus.isConnected) previousFocus.focus();
-        };
-    }, [onClose]);
-
     return (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4" onClick={onClose}>
-            {/* A div, not <section>: the template forces every section to 100dvw (overflows on phones). */}
-            <div
-                ref={dialog}
-                role="dialog"
-                aria-modal="true"
-                aria-labelledby="cinema-title"
-                className="w-full max-w-5xl border border-mist/20 bg-basalt p-4 text-mist sm:p-6"
-                onClick={(event) => event.stopPropagation()}
-            >
-                <div className="mb-4 flex items-center justify-between gap-4">
-                    <h2 id="cinema-title" className="text-sm font-semibold">{reel.title}</h2>
-                    <button
-                        ref={closeButton}
-                        type="button"
-                        onClick={onClose}
-                        className="border border-mist/25 px-3 py-1.5 text-sm hover:bg-mist/10 focus-visible:outline-2 focus-visible:outline-window"
-                    >
-                        Close
-                    </button>
-                </div>
-                <video
-                    className="aspect-video w-full bg-black object-contain"
-                    src={reel.src}
-                    controls
-                    autoPlay={!reducedMotion}
-                    muted
-                    playsInline
-                    preload="metadata"
-                />
-            </div>
-        </div>
+        <Dialog id="cinema-title" title={reel.title} onClose={onClose}>
+            <video
+                className="aspect-video w-full bg-black object-contain"
+                src={reel.src}
+                controls
+                autoPlay={!reducedMotion}
+                muted
+                playsInline
+                preload="metadata"
+            />
+        </Dialog>
     );
 };
 

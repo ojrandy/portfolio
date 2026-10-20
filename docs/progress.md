@@ -17,6 +17,25 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-20 — Arcade: easter eggs hub
+**Tasks:** P3-09 (done); P3-09b added (mini-game "Code runner", owner's choice, deferred)
+**Decisions (owner):** hub + eggs now, mini-game later as its own task; eggs: Konami code, Fako, find the hub, Night owl, plus one more of my choosing (Explorer: open three projects).
+**Done:**
+- `src/lib/arcadeEggs.js` (+ tests): egg list, Konami matcher (any lead-in, any case), Fako knock counter (5 in a row, ≤ 2 s apart), night check from the real sun, defensive progress parsing.
+- `src/store/useArcadeStore.js`: found eggs saved in `localStorage` (try/catch), toast, marquee/mist effect timers. `src/hooks/useEasterEggs.js`: cheat code, Night owl, Explorer triggers.
+- `src/city/ArcadePlot.jsx`: cabinet on the SW plot (4 draw calls, replaces the placeholder), screen shows eggs found, marquee lit after the cheat code. `Fako.jsx`: knocks + mist fade.
+- `src/components/ArcadeHub.jsx` (hub dialog with hints), `EggToast.jsx` (aria-live toast), `Dialog.jsx`: the Cinema player's focus-trap modal extracted and shared (CinemaModal now uses it).
+**Checks:** `npm test` 147/147; lint clean on changed files; Playwright on the production build (GPU): hub, cheat code, Explorer, Fako all fire, toast + save + reload ("Found 4 of 5") + "Start over" work, focus moves into the dialog and Escape closes it, no console errors. Night owl unit-tested only (daytime in Buea). `npm run perf`: desktop PASS (60 / 57.7 fps, 19 draw calls), phone PASS (17).
+**Problems / notes:**
+- The toast's live region first had `role="status"`; `perf.mjs` waits for no `[role=status]` (the loading screen), so perf hung. Now a plain `aria-live` region (documented in architecture.md).
+- The first Fako rule (5 knocks within 4 s) missed slow clicks; replaced by "5 in a row, ≤ 2 s apart".
+- The Arcade sits beside Career Road, behind the start view's frame, so it is found by looking around (fits an easter-egg district). Its floating button, like the Cinema's, stays in the Tab order while off-screen; worth a look in P5 accessibility.
+- Initial JS 442 KB gzip vs the 200 KB budget is the homepage template bundle (unchanged here); the city chunk is 40 KB.
+**Content:** the hub quotes the gaming hobby line; "Acion" corrected to "Action" in `docs/projects.md` with the owner's OK (content rebuilt).
+**Next:** P3-10 School district (or P3-09b Code runner).
+
+---
+
 ## 2026-10-20 — Cinema: owner's YouTube channel
 **Tasks:** P3-08 (done; the 2026-10-17 work, audited and changed with the owner)
 **Audit:** the earlier session registered `public/images/screen.mp4` in `docs/projects.md` as the owner's "Cinema reel". That file is the template's 5-second "Hello world!" terminal loop, not video-editing work, so it was invented content. **Owner decision:** link the YouTube channel instead.

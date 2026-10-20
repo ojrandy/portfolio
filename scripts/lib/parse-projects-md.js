@@ -610,11 +610,12 @@ export const parseProjectsMd = (md, file = 'docs/projects.md') => {
         });
     });
 
-    inlineItems(sections.video, ['what you did', 'tools', 'link'], (title, f, demo, n) => {
+    inlineItems(sections.video, ['what you did', 'tools', 'link', 'file'], (title, f, demo, n) => {
         if (f.free.length) at(n).err(`don't know where "${f.free.join(' · ')}" goes; use "key: value"`);
         profile.video.push({
             title,
             link: f.link,
+            file: f.file ?? null,
             role: f['what you did'] ?? null,
             tools: f.tools ? splitList(f.tools) : [],
             demo,

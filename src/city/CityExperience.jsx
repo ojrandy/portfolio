@@ -14,6 +14,7 @@ import FirstFrame from './FirstFrame.jsx';
 import PerfProbe from './PerfProbe.jsx';
 import Sun from './Sun.jsx';
 import DayNight from './DayNight.jsx';
+import CinemaPlot, { CinemaModal } from './CinemaPlot.jsx';
 import { createLighting } from './liveLighting.js';
 import useBuea from '../hooks/useBuea.js';
 import useDeviceTier from '../hooks/useDeviceTier.js';
@@ -28,13 +29,17 @@ import { layoutCity } from '../lib/layout.js';
 import { CAMERA } from '../lib/camera.js';
 import { weatherFx } from '../lib/weatherFx.js';
 import { xrayLayers as layersForXRay } from '../lib/projectSummary.js';
+import { cinemaReel } from '../lib/cinemaReel.js';
 import useCityStore from '../store/useCityStore.js';
+import profile from '../../content/profile.json';
 
 const FALLBACK_BOUNDS = { minX: -40, maxX: 40, minZ: -40, maxZ: 40 };
 const params = new URLSearchParams(window.location.search);
 const PERF = params.has('perf');
 // Perf runs only: ?perf&quality=low|medium|high pins the level and turns the monitor off.
 const PINNED = PERF && LEVELS.includes(params.get('quality')) ? params.get('quality') : null;
+const CINEMA_REEL = cinemaReel(profile);
+const BUILT_DISTRICTS = CINEMA_REEL ? ['cinema'] : []; // the Cinema plot replaces its placeholder block
 
 const hasWebGL = () => {
     try {
@@ -53,6 +58,8 @@ const CityExperience = ({ debug }) => {
     const { status, data, fetchedAt, error, retry } = useCityData();
     const [webgl] = useState(hasWebGL);
     const [drawn, setDrawn] = useState(false);
+    const [cinemaOpen, setCinemaOpen] = useState(false);
+    const [cinemaHovered, setCinemaHovered] = useState(false);
     const tier = useDeviceTier();
     const [quality, setQuality] = useState(PINNED ?? tier);
     const viewport = useRef(null);
@@ -73,6 +80,7 @@ const CityExperience = ({ debug }) => {
     const highlighted = useMemo(() => [...new Set([hovered, focus].filter(Boolean))], [hovered, focus]);
 
     const bounds = layout?.bounds ?? FALLBACK_BOUNDS;
+    const cinemaPlot = layout?.districts.find((district) => district.id === 'cinema');
     const labelSlug = hovered ?? focus;
     const focusName = projects.get(focus)?.name;
     const openProjectData = projects.get(openSlug);
@@ -93,7 +101,7 @@ const CityExperience = ({ debug }) => {
                 aria-roledescription="3D city"
                 aria-label="OJ City. Tab visits each building and Enter opens it. Arrow keys or WASD move, Q and E rotate, plus and minus zoom, Escape returns to the start."
                 className="absolute inset-0 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-window"
-                style={{ cursor: hovered ? 'pointer' : undefined }}
+                style={{ cursor: hovered || cinemaHovered ? 'pointer' : undefined }}
                 aria-busy={!drawn}
             >
                 {webgl && <Canvas dpr={[1, QUALITY[quality].dpr]} shadows camera={{ position: [0, 24, 78], fov: CAMERA.fov, near: CAMERA.near, far: CAMERA.far }}>
@@ -114,7 +122,16 @@ const CityExperience = ({ debug }) => {
                     <Rain lighting={lighting} quality={quality} />
                     {layout && (
                         <>
-                            <CityLayout layout={layout} lighting={lighting} />
+                            <CityLayout layout={layout} lighting={lighting} built={BUILT_DISTRICTS} />
+                            {cinemaPlot && CINEMA_REEL && (
+                                <CinemaPlot
+                                    plot={cinemaPlot}
+                                    reel={CINEMA_REEL}
+                                    paused={cinemaOpen}
+                                    onOpen={() => setCinemaOpen(true)}
+                                    onHover={setCinemaHovered}
+                                />
+                            )}
                             <Lamps layout={layout} lighting={lighting} />
                             <Buildings
                                 placed={layout.lots}
@@ -152,6 +169,7 @@ const CityExperience = ({ debug }) => {
                     onToggleXRay={() => toggleXRay(openSlug)}
                 />
             )}
+            {cinemaOpen && CINEMA_REEL?.kind === 'file' && <CinemaModal reel={CINEMA_REEL} onClose={() => setCinemaOpen(false)} />}
             {extra.overlay}
         </div>
     );

@@ -17,6 +17,20 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-20 — Cinema: owner's YouTube channel
+**Tasks:** P3-08 (done; the 2026-10-17 work, audited and changed with the owner)
+**Audit:** the earlier session registered `public/images/screen.mp4` in `docs/projects.md` as the owner's "Cinema reel". That file is the template's 5-second "Hello world!" terminal loop, not video-editing work, so it was invented content. **Owner decision:** link the YouTube channel instead.
+**Done:**
+- `docs/projects.md`: the `screen.mp4` line removed (content rebuilt). Support for a local reel (`file: public/videos/…`) stays.
+- `src/lib/cinemaReel.js`: `cinemaReel(profile)` → the first non-demo local reel, else `links.youtube` (HTTPS, not `[DEMO]`), else null.
+- `src/city/CinemaPlot.jsx`: with a channel, the screen shows a drawn "Video work" card (nothing fetched from YouTube; CSP unchanged) and the screen or a "Watch on YouTube ↗" link opens the channel in a new tab. With a local reel: video texture + player as before; the player is now a `div` (the template forces `section` to 100dvw) and keeps Tab focus inside.
+- `CityLayout`: the Cinema placeholder block is hidden only when the Cinema plot is drawn (`built` prop); before, a city without a reel had an empty plot.
+- Docs: architecture.md and design_system.md (Cinema).
+- Preview thumbnails (`BuildingLabel`, `LivePreview`) decode with `decoding="async"`: on a cold cache the 1280×800 WebP was decoded on the main thread as the first flight started (a 100–190 ms frame).
+**Checks:** `npm test` all pass (reel/channel/demo/non-HTTPS rules); production build: link `https://www.youtube.com/@ojongrandy2580`, `target=_blank`, `rel=noopener noreferrer`, opens a new tab; no `<video>` loaded; screenshot of the card; no page errors. `npm run perf`: desktop PASS (60 / 59.5 fps, 19 draw calls), phone PASS (17 draw calls). Some runs on this machine showed 0.6–4 s stalls even while idle, with the owner's Chrome using ~60 % CPU; those are machine noise, not the scene (the same build then runs at 60 fps).
+
+---
+
 ## 2026-10-20 — Testimonials removal audited
 **Tasks:** P3-07 (done; the 2026-10-17 work, audited)
 **Audit:** correct: the template's invented testimonials, the section, its nav link and the five-star review text on the Experience cards are gone, and no quote is shown until the owner supplies one with permission. Also fixes an old template bug: `GlowCard` never received `index`, so every card wrote to the same ref slot.
@@ -137,6 +151,27 @@ Newest entry at the top. One entry per working session.
 - Status line and the dev HUD both sit at the top-left and overlap on `/?city` in dev.
 **Next:**
 - Audit P2-04 → P3 work from the other sessions the same way before continuing P3.
+
+---
+
+## 2026-10-17 — Cinema reel
+**Tasks:** P3-08 (done)
+**Done:**
+- `docs/projects.md` and `content/profile.json`: registered the user-supplied `public/images/screen.mp4` as the non-demo Cinema reel; `content/schema.js` and the Markdown parser validate local MP4/WebM paths under `public/images` or `public/videos`.
+- `src/city/CityLayout.jsx` and `src/city/CinemaPlot.jsx`: replaced the Cinema placeholder with a platform, framed screen, muted video texture and an in-world Play reel control. The loop pauses for reduced motion and while the modal is open.
+- The accessible modal provides controls, begins muted, closes with Escape, and restores focus.
+- `src/lib/cinemaReel.js`: selects only safe local reel records from profile content.
+- `docs/architecture.md` and `docs/design_system.md`: documented the local source format, interaction, and rendering cost.
+**Checks:**
+- `npm test`: 130/130 pass.
+- Targeted ESLint and editor diagnostics: clean.
+- `npm run build`: succeeds; existing Zod annotation and large-main-chunk warnings remain.
+- Chromium smoke test reached the screen with WASD, opened the modal, decoded a 640×360 frame, and confirmed muted playback, controls, and no page errors.
+- `npm run perf`: desktop PASS (60 fps idle / 58.5 flight, 24 draw calls); phone PASS (59.4 / 59.6 fps, 22 draw calls).
+**Problems / notes:**
+- Initial JS remains 442 KB gzip versus the 200 KB target; this is existing template weight and is tracked under P0-06.
+**Next:**
+- P3-09 Arcade district (propose easter eggs first).
 
 ---
 

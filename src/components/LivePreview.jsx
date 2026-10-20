@@ -22,7 +22,7 @@ const LivePreview = ({ name, preview, live }) => {
                     sandbox="allow-forms allow-same-origin allow-scripts"
                 />
             ) : (
-                preview && <img className="mt-2 aspect-video w-full rounded-md border border-mist/15 bg-black/30 object-cover object-top" src={preview} alt={`Screenshot of the ${name} website`} loading="lazy" />
+                preview && <img className="mt-2 aspect-video w-full rounded-md border border-mist/15 bg-black/30 object-cover object-top" src={preview} alt={`Screenshot of the ${name} website`} loading="lazy" decoding="async" />
             )}
             {live && !loaded && (
                 <button

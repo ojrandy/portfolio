@@ -163,6 +163,7 @@
         {
             "title": "YouTube channel",
             "link": "https://www.youtube.com/@ojongrandy2580",
+            "file": null,
             "role": "filming and editing",
             "tools": [
                 "Premiere Pro",
@@ -174,6 +175,7 @@
         {
             "title": "Showreel 2026",
             "link": "TODO(content)",
+            "file": null,
             "role": "edit, colour, sound",
             "tools": [
                 "Premiere Pro"
@@ -184,6 +186,7 @@
         {
             "title": "Event highlight film",
             "link": "TODO(content)",
+            "file": null,
             "role": "edit, motion titles",
             "tools": [
                 "Premiere Pro",
@@ -195,6 +198,7 @@
         {
             "title": "Product promo for a client",
             "link": "TODO(content)",
+            "file": null,
             "role": "script and edit",
             "tools": [
                 "CapCut"

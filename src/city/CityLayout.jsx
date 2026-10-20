@@ -14,7 +14,10 @@ const DETAIL_Y = 0.02; // parks and lane markings sit just above roads/pavement
 
 const tile = (r, y, color) => ({ position: [r.x, y, r.z], scale: [r.width, 1, r.depth], color });
 
-const toInstances = (layout) => ({
+const NONE = [];
+
+// `built`: districts whose own scene replaces the placeholder block (P3-08: the Cinema plot).
+const toInstances = (layout, built) => ({
     // Roads, pavements and district pads never overlap, so they share one height and one mesh.
     surfaces: [
         ...layout.roads.map((r) => tile(r, ROAD_Y, LAYOUT_COLORS[r.kind])),
@@ -25,7 +28,7 @@ const toInstances = (layout) => ({
         ...layout.parks.map((p) => tile({ ...p, width: p.size, depth: p.size }, DETAIL_Y, LAYOUT_COLORS.park)),
         ...layout.markings.map((m) => tile(m, DETAIL_Y, LAYOUT_COLORS.marking)),
     ],
-    placeholders: layout.districts.map(({ placeholder: p }) => ({
+    placeholders: layout.districts.filter(({ id }) => !built.includes(id)).map(({ placeholder: p }) => ({
         position: [p.x, 0, p.z], scale: [p.width, p.height, p.depth], color: p.color,
     })),
 });
@@ -41,11 +44,11 @@ const syncWet = (material, lighting) => {
 };
 
 /**
- * @param {{ layout: ReturnType<import('../lib/layout.js').layoutCity>, lighting: object }} props
- *   lighting: live lighting (liveLighting.js); streets follow lighting.wet
+ * @param {{ layout: ReturnType<import('../lib/layout.js').layoutCity>, lighting: object, built?: string[] }} props
+ *   lighting: live lighting (liveLighting.js); streets follow lighting.wet. built: district ids drawn elsewhere (memoise it)
  */
-const CityLayout = ({ layout, lighting }) => {
-    const parts = useMemo(() => toInstances(layout), [layout]);
+const CityLayout = ({ layout, lighting, built = NONE }) => {
+    const parts = useMemo(() => toInstances(layout, built), [layout, built]);
     const surfaces = useRef(null);
 
     useFrame(() => surfaces.current && syncWet(surfaces.current, lighting));

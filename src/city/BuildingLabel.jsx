@@ -20,7 +20,7 @@ const BuildingLabel = ({ lot, project }) => {
             >
                 <p className="text-sm font-semibold leading-tight">{name}</p>
                 {stack && <p className="font-mono text-[11px] leading-tight text-mist/75">{stack}</p>}
-                {preview && <img className="mt-2 aspect-video w-full rounded object-cover" src={preview} alt="" loading="lazy" />}
+                {preview && <img className="mt-2 aspect-video w-full rounded object-cover" src={preview} alt="" loading="lazy" decoding="async" />}
             </div>
         </Html>
     );

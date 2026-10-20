@@ -60,7 +60,7 @@ Each task ID matches a prompt in `/prompt.md`. Commit messages start with the ta
 - [x] **P3-05** Replace logo marquee with real tools/clients (or remove)
 - [x] **P3-06** Replace ability cards with featured case studies (placeholder cards removed; awaiting complete featured case-study content)
 - [x] **P3-07** Replace testimonials with real, attributed quotes (or one strong quote; section removed until permission is confirmed)
-- [ ] **P3-08** Cinema district: rooftop screen with video-editing reel
+- [x] **P3-08** Cinema district: rooftop screen with video-editing reel (links to the YouTube channel; plays a local reel once one is added to `docs/projects.md` section 5)
 - [ ] **P3-09** Arcade district: easter eggs hub (+ optional mini-game)
 - [ ] **P3-10** School district: teaching, tutorials, mentoring
 - [ ] **P3-11** Pitch district: kickable football; goal opens contact

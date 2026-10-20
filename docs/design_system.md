@@ -50,9 +50,9 @@ Placement is **deterministic** (seeded by slug), so the city looks the same for 
 - Everyone else: `hash(slug) % freeLots` is the preferred lot; if taken, the next free lot (linear probing, slugs processed in sorted order). Adding/removing one project moves at most a few buildings; changing size step reshuffles.
 - Empty lots become parks (green pads).
 - Main road (4 wide) runs east–west along Downtown's front and across all plots; Career Road (3 wide, 30 long) runs south from its centre to the entrance (camera start, `layout.entrance`). Dashed centre lines skip the junction.
-- District plots (16 × 16, 1 from the roads): Cinema NW, School NE (beside Downtown, north of the main road); Arcade SW, Pitch SE (south of it). Placeholder blocks until P3-08 → P3-11.
+- District plots (16 × 16, 1 from the roads): Cinema NW, School NE (beside Downtown, north of the main road); Arcade SW, Pitch SE (south of it). Cinema has a low-poly platform and a framed screen on the NW plot: the owner's reel when there is a local one (muted loop, off with reduced motion; click → player with sound), otherwise a "Video work" card linking to the owner's YouTube channel (P3-08). School, Arcade, and Pitch remain placeholders until P3-09 → P3-11.
 - Colours: ground basalt + 25 % fako-green; streets ash; main road ash + 10 % mist; Career Road ash + 20 % indigo; pavement ash + 15 % mist; parks fako-green; plot pads ash + 25 % of the district colour (cinema indigo, school window, arcade ember, pitch fako-green).
-- Rendering: 3 draw calls (surfaces, parks + markings, placeholders).
+- Rendering: 3 base draw calls (surfaces, parks + markings, placeholders); Cinema adds 3 (platform, frame, screen) and replaces its placeholder.
 
 **Backdrop (P1-04, `src/lib/backdrop.js`):** Fako, sky dome, ground and fog. 4 draw calls (sky, ground, mountain, mist).
 - Fako: a low-poly ridge, not a cone: an ellipse with semi-axes 230 × 110 and a height of 72, tilted 0.3 rad so the east end recedes north (SW–NE ridge). The summit is broad and flat-topped, with 7 seeded cinder cones along the ridge and small per-vertex noise. Flat shading, vertex colours only, about 3k triangles. Its rim sits below the ground.

@@ -196,6 +196,25 @@ test('FAQ answers with or without "A:" and teaching/video lines', () => {
     assert.deepEqual(profile.video[0].tools, ['Premiere Pro', 'CapCut']);
 });
 
+test('video records accept a local file under public media directories', () => {
+    const { errors, profile } = parseProjectsMd(doc({
+        video: '- **Cinema reel**: file: public/images/screen.mp4',
+    }));
+    assert.deepEqual(errors, []);
+    assert.equal(profile.video[0].file, 'public/images/screen.mp4');
+    assert.equal(profile.video[0].link, null);
+    const files = toFiles(parseProjectsMd(doc({ video: '- **Cinema reel**: file: public/images/screen.mp4' })));
+    assert.deepEqual(checkContent(files).errors, []);
+});
+
+test('video file paths reject traversal and unsupported formats', () => {
+    for (const file of ['public/videos/../private.mp4', 'public/videos/reel.avi', 'https://example.com/reel.mp4']) {
+        const parsed = parseProjectsMd(doc({ video: `- **Reel**: file: ${file}` }));
+        const { errors } = checkContent(toFiles(parsed));
+        assert.ok(errors.length > 0, file);
+    }
+});
+
 test('GitHub accounts for the city: defaults to the username; lists, URLs and hides are read; bad names are errors', () => {
     assert.deepEqual(parseProjectsMd(doc()).profile.github, { accounts: ['tester'], hide: [] });
 

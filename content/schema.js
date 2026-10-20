@@ -16,6 +16,7 @@ const text = z.string().trim().min(1);
 const url = z.url({ protocol: /^https?$/ });
 const slug = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'must be lowercase-with-dashes');
 const month = z.string().regex(/^\d{4}(?:-(?:0[1-9]|1[0-2]))?$/, 'expected YYYY-MM or YYYY');
+const localVideo = z.string().regex(/^public\/(?:images|videos)\/(?:[A-Za-z0-9_-]+\.)*[A-Za-z0-9_-]+\.(?:mp4|webm)$/i, 'expected a local MP4/WebM under public/images or public/videos');
 
 const dates = z.strictObject({
     start: orTodo(month),
@@ -89,6 +90,7 @@ const teachingSchema = z.strictObject({
 const videoSchema = z.strictObject({
     title: text,
     link: z.union([url, z.null(), todo]),
+    file: z.union([localVideo, z.null(), todo]),
     role: z.union([text, z.null()]),
     tools: z.array(text),
     ...demoMeta,

@@ -17,6 +17,13 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-20 — Testimonials removal audited
+**Tasks:** P3-07 (done; the 2026-10-17 work, audited)
+**Audit:** correct: the template's invented testimonials, the section, its nav link and the five-star review text on the Experience cards are gone, and no quote is shown until the owner supplies one with permission. Also fixes an old template bug: `GlowCard` never received `index`, so every card wrote to the same ref slot.
+**Content note:** the Experience cards themselves still mix owner edits with template data (e.g. "React Native Developer, March 2019 – May 2020"); to be checked against `docs/projects.md` in P3-12.
+
+---
+
 ## 2026-10-20 — Featured case studies audited
 **Tasks:** P3-06 (done; the 2026-10-17 work, audited)
 **Audit:** correct: the template's ability cards (invented claims) are removed. No featured project has a complete, publishable case study yet, so nothing replaces them; the case studies live in the city's project panels (P3-01).
@@ -130,6 +137,23 @@ Newest entry at the top. One entry per working session.
 - Status line and the dev HUD both sit at the top-left and overlap on `/?city` in dev.
 **Next:**
 - Audit P2-04 → P3 work from the other sessions the same way before continuing P3.
+
+---
+
+## 2026-10-17 — Unapproved testimonials removed
+**Tasks:** P3-07 (done)
+**Done:**
+- `src/App.jsx`, `src/constants/index.js` and `src/sections/Testimonial.jsx`: removed the standalone testimonial section, its navigation link, hardcoded template quotes and unused component.
+- `src/components/GlowCard.jsx`, `src/sections/ExperienceSection.jsx` and `src/constants/index.js`: removed unapproved review text and five-star decorations from Experience cards while preserving the career section structure.
+**Checks:**
+- `npm test`: 126/126 pass.
+- Targeted ESLint and editor diagnostics: clean.
+- `npm run build`: succeeds; existing Zod annotation and large-main-chunk warnings remain.
+- Browser: no testimonial headings, links, old review quotes or star images; no page errors.
+**Problems / notes:**
+- `content/profile.json` has no testimonial with confirmed permission and attribution, so the section stays absent until the owner updates `docs/projects.md`.
+**Next:**
+- P3-08 Cinema district.
 
 ---
 

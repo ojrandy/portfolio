@@ -11,10 +11,6 @@ const navLinks = [
         name: "Skills",
         link: "#skills",
     },
-    {
-        name: "Testimonials",
-        link: "#testimonials",
-    },
 ];
 
 const words = [
@@ -86,7 +82,6 @@ const techStackIcons = [
 
 const expCards = [
     {
-        review: "OJ brought creativity and technical expertise to the team, significantly improving our frontend performance. His work has been invaluable in delivering faster experiences.",
         imgPath: "/images/exp1.png",
         logoPath: "/images/logo1.png",
         title: "Frontend Developer at Bethuel Tech",
@@ -99,7 +94,6 @@ const expCards = [
     },
 
     {
-        review: "Randy’s contributions to Flutter applications have been outstanding. He approaches challenges with a problem-solving mindset.",
         imgPath: "/images/exp2.png",
         logoPath: "/images/logo3.png",
         title: "FLutter Developer",
@@ -111,7 +105,6 @@ const expCards = [
         ],
     },
     {
-        review: "Randy’s work on Appwrite’s mobile app brought a high level of quality and efficiency. He delivered solutions that enhanced our mobile experience & meet our product goals.",
         imgPath: "/images/exp3.png",
         logoPath: "/images/logo2.png",
         title: "React Native Developer",
@@ -139,107 +132,6 @@ const expLogos = [
     },
 ];
 
-const testimonials = [
-    {
-        name: "Alicia Morgan",
-        mentions: "@aliciamorgan",
-        review:
-            "Randy did an incredible job designing and developing our website using WordPress and custom JavaScript. The layout was clean, responsive, and perfectly matched our brand. His ability to combine design and development skills made the process smooth.",
-        imgPath: "/images/client1.png",
-    },
-    {
-        name: "Joshua Reed",
-        mentions: "@joshreed",
-        review:
-            "Working with Randy was a great experience. He built a fast and modern React website for our business and paid close attention to performance and user experience. His HTML and CSS skills really helped bring the design to life.",
-        imgPath: "/images/client3.png",
-    },
-    {
-        name: "Nina Patel",
-        mentions: "@ninapatel",
-        review:
-            "Randy designed our mobile app UI in Figma and handled the branding in Photoshop. The visuals were clean, professional, and user-friendly. He clearly understands how design impacts user engagement.",
-        imgPath: "/images/client2.png",
-    },
-    {
-        name: "Samuel Brooks",
-        mentions: "@samuelbrooks",
-        review:
-            "Randy built our landing pages from scratch using HTML, CSS, and JavaScript. The pages load fast, look great on all devices, and convert well. His attention to detail really stands out.",
-        imgPath: "/images/client5.png",
-    },
-    {
-        name: "Laura Kim",
-        mentions: "@laurakim",
-        review:
-            "We hired Randy to develop a Flutter app and design the UI. He delivered a polished product with smooth navigation and a consistent design system. Communication was clear throughout the project.",
-        imgPath: "/images/client4.png",
-    },
-    {
-        name: "David Okoye",
-        mentions: "@davidokoye",
-        review:
-            "Randy handled both our website redesign and brand visuals. Using WordPress, Figma, and Photoshop, he created a modern digital presence that truly represents our business. Highly professional and reliable.",
-        imgPath: "/images/client6.png",
-    },
-    {
-        name: "Olivia Martinez",
-        mentions: "@oliviamartinez",
-        review:
-            "Randy created a beautiful and responsive website for our brand using WordPress and custom CSS. He understood our goals clearly and delivered a clean, professional result ahead of schedule.",
-        imgPath: "/images/client1.png",
-    },
-    {
-        name: "Ethan Williams",
-        mentions: "@ethanwilliams",
-        review:
-            "Randy built our web application using React and JavaScript, and the performance improvements were noticeable immediately. The UI is smooth, intuitive, and works perfectly across devices.",
-        imgPath: "/images/client3.png",
-    },
-    {
-        name: "Grace Chen",
-        mentions: "@gracechen",
-        review:
-            "From Figma wireframes to final delivery, Randy handled our app design with precision. The UI/UX flow was well thought out, and the branding done in Photoshop gave our product a premium feel.",
-        imgPath: "/images/client2.png",
-    },
-    {
-        name: "Patrick Mensah",
-        mentions: "@patrickmensah",
-        review:
-            "Randy developed our company website using pure HTML, CSS, and JavaScript. The site is lightweight, fast, and exactly what we needed for our online presence. His technical skills are impressive.",
-        imgPath: "/images/client5.png",
-    },
-    {
-        name: "Isabella Rossi",
-        mentions: "@isabellarossi",
-        review:
-            "Randy designed and developed our Flutter mobile app with great attention to detail. The interface is clean, user-friendly, and consistent with our brand identity.",
-        imgPath: "/images/client4.png",
-    },
-    {
-        name: "Benjamin Clarke",
-        mentions: "@benjaminclarke",
-        review:
-            "We worked with Randy on a full website rebrand. Using WordPress, Figma, and Photoshop, he delivered a modern look that significantly improved our online credibility and user engagement.",
-        imgPath: "/images/client6.png",
-    },
-    {
-        name: "Fatima Bello",
-        mentions: "@fatimabello",
-        review:
-            "Randy’s ability to combine frontend development with strong visual design is rare. Our landing pages built with HTML, CSS, and JavaScript look amazing and convert very well.",
-        imgPath: "/images/client1.png",
-    },
-    {
-        name: "Lucas Brown",
-        mentions: "@lucasbrown",
-        review:
-            "Randy handled both the design and development of our React-based website. The result was a fast, scalable, and visually appealing platform that exceeded our expectations.",
-        imgPath: "/images/client3.png",
-    },
-];
-
 const socialImgs = [
     {
         name: "insta",
@@ -263,7 +155,6 @@ export {
     words,
     expCards,
     expLogos,
-    testimonials,
     socialImgs,
     techStackIcons,
     techStackImgs,

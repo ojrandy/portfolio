@@ -5,7 +5,6 @@ import NavBar from "./components/NavBar.jsx";
 import LogoSection from "./sections/LogoSection.jsx";
 import ExperienceSection from "./sections/ExperienceSection.jsx";
 import TechStack from "./sections/TechStack.jsx";
-import Testimonial from "./sections/Testimonial.jsx";
 import Contact from "./sections/Contact.jsx";
 import Footer from "./sections/Footer.jsx";
 import LoadingScreen from "./components/LoadingScreen.jsx";
@@ -33,7 +32,6 @@ const App = () => {
            <LogoSection />
            <ExperienceSection />
            <TechStack />
-           <Testimonial />
            <Contact />
            <Footer />
        </>

@@ -248,6 +248,10 @@ const lookAhead = (state, me, slow) => {
             if (next && stopAt > end - STOP_MARGIN && !gateOpen(state, me, seg, end, seg === me.seg)) stopAt = end - STOP_MARGIN;
         } else {
             next = seg.toLane;
+            // On a turn: whoever took another turn out of the same lane stays ahead until the paths part.
+            if (seg === me.seg) {
+                for (const other of seg.fromLane.out) if (other !== seg) for (const v of onSeg(state, other)) if (v.s > me.s) ahead(v, offset);
+            }
         }
         if (stopAt < Infinity || !next) break;
         offset += seg.length;
@@ -261,7 +265,7 @@ const addVehicle = (state, type, seg, s, v, age) => {
     const id = state.nextId++;
     const kit = VEHICLE_TYPES[type];
     const vehicle = {
-        id, type, seed: `traffic-${id}`, length: kit.length, gap: GAP[type] ?? DEFAULT_GAP, speedFactor: SPEED_FACTOR[type] ?? 1,
+        id, type, seed: `traffic-${id}`, length: kit.length, width: kit.width, gap: GAP[type] ?? DEFAULT_GAP, speedFactor: SPEED_FACTOR[type] ?? 1,
         seg, s, v, age, waited: 0, scale: 1, braking: false, reserved: [], claim: [], choices: new Map(), random: createRandom(`${state.seed}:vehicle:${id}`),
     };
     state.vehicles.push(vehicle);
@@ -332,6 +336,19 @@ export const stepTraffic = (state, dt, { target = 0, rain = 0 } = {}) => {
         return { v, ds: Math.min(v * dt, Math.max(0, stopAt)) };
     });
 
+    // Last word, whatever the plan said: nobody moves its body into a vehicle in front of it (full size, any road).
+    // Checked in order against everyone's already decided positions, so two moves can't meet half-way.
+    const feet = state.vehicles.map((v) => footprint(v));
+    state.vehicles.forEach((me, i) => {
+        const move = moves[i];
+        if (move.ds <= 0) return;
+        const here = feet[i];
+        const there = footprint(me, move.ds);
+        const blocked = feet.some((o, j) => j !== i && (o.x - here.x) * here.ax.x + (o.z - here.z) * here.ax.z > 0 && footprintsOverlap(there, o));
+        if (blocked) Object.assign(move, { v: 0, ds: 0 });
+        else feet[i] = there;
+    });
+
     const gone = new Set();
     state.vehicles.forEach((me, i) => {
         const { v, ds } = moves[i];
@@ -377,6 +394,21 @@ export const stepTraffic = (state, dt, { target = 0, rain = 0 } = {}) => {
         spawn(state, rain);
     }
     return state;
+};
+
+/** A vehicle's body on the ground (oriented rectangle), `ahead` units further along its heading. */
+export const footprint = (v, ahead = 0) => {
+    const { x, z, rotationY } = vehiclePose(v);
+    const ax = { x: Math.sin(rotationY), z: Math.cos(rotationY) };
+    return { x: x + ax.x * ahead, z: z + ax.z * ahead, ax, hl: v.length / 2, hw: v.width / 2 };
+};
+
+/** Do two footprints overlap? (separating axis test) */
+export const footprintsOverlap = (a, b) => {
+    if (Math.hypot(a.x - b.x, a.z - b.z) > a.hl + b.hl + a.hw + b.hw) return false;
+    const axes = [a.ax, { x: -a.ax.z, z: a.ax.x }, b.ax, { x: -b.ax.z, z: b.ax.x }];
+    const radius = (f, n) => f.hl * Math.abs(f.ax.x * n.x + f.ax.z * n.z) + f.hw * Math.abs(-f.ax.z * n.x + f.ax.x * n.z);
+    return axes.every((n) => Math.abs((a.x - b.x) * n.x + (a.z - b.z) * n.z) < radius(a, n) + radius(b, n));
 };
 
 /** Where a vehicle is: centre on the ground and heading (rotationY; 0 faces +z). */

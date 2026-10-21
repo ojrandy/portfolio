@@ -76,8 +76,8 @@ const hasWebGL = () => {
 };
 
 /**
- * @param {{ debug?: (state: { status, error, data, layout, focusName }) => { scene?: React.ReactNode, overlay?: React.ReactNode, at?: number | null } }} props
- *   debug.at: a fixed time (epoch ms) for the dev time-of-day preview.
+ * @param {{ debug?: (state: { status, error, data, layout, focusName }) => { scene?: React.ReactNode, overlay?: React.ReactNode, at?: number | null, traffic?: boolean } }} props
+ *   debug.at: a fixed time (epoch ms) for the dev time-of-day preview; debug.traffic false hides the traffic.
  */
 const CityExperience = ({ debug }) => {
     const { status, data, fetchedAt, error, retry } = useCityData();
@@ -211,7 +211,7 @@ const CityExperience = ({ debug }) => {
                             )}
                             <Lamps layout={layout} lighting={lighting} />
                             {/* Phones get about half the traffic. */}
-                            <Traffic layout={layout} lighting={lighting} offsetMs={offsetMs} at={extra.at} share={touch ? 0.5 : 1} />
+                            {extra.traffic !== false && <Traffic layout={layout} lighting={lighting} offsetMs={offsetMs} at={extra.at} share={touch ? 0.5 : 1} />}
                             <Buildings
                                 placed={layout.lots}
                                 lighting={lighting}

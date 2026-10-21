@@ -5,7 +5,7 @@ import { toBuildings } from './buildings.js';
 import { layoutCity, TIERS, BLOCK_LOTS, FEATURED_LOTS } from './layout.js';
 import { buildRoadGraph, signalState, SIGNAL } from './roadGraph.js';
 import {
-    createTraffic, stepTraffic, trafficDensity, targetCount, pickType, bueaMinutes, vehiclePose, MAX_VEHICLES,
+    createTraffic, stepTraffic, trafficDensity, targetCount, pickType, bueaMinutes, footprint, footprintsOverlap, MAX_VEHICLES,
 } from './traffic.js';
 import { VEHICLE_TYPES } from './vehicles.js';
 import { createRandom } from './random.js';
@@ -22,25 +22,12 @@ const realLayout = () => {
 };
 const graphs = [...tierLayouts, realLayout()].map(buildRoadGraph);
 
-// Oriented footprint of a vehicle (a little smaller than the body, so touching bumpers don't count).
-const footprint = (v) => {
-    const { x, z, rotationY } = vehiclePose(v);
-    const kit = VEHICLE_TYPES[v.type];
-    return { x, z, ax: { x: Math.sin(rotationY), z: Math.cos(rotationY) }, hl: kit.length * 0.45, hw: kit.width * 0.45 };
-};
-const overlap = (a, b) => {
-    if (Math.hypot(a.x - b.x, a.z - b.z) > a.hl + b.hl + a.hw + b.hw) return false;
-    const axes = [a.ax, { x: -a.ax.z, z: a.ax.x }, b.ax, { x: -b.ax.z, z: b.ax.x }];
-    const radius = (f, n) => f.hl * Math.abs(f.ax.x * n.x + f.ax.z * n.z) + f.hw * Math.abs(-f.ax.z * n.x + f.ax.x * n.z);
-    return axes.every((n) => Math.abs((a.x - b.x) * n.x + (a.z - b.z) * n.z) < radius(a, n) + radius(b, n));
-};
-
 /** Run the traffic for `seconds`, calling `check(state, before)` every step. */
-const run = (graph, { seconds, target = MAX_VEHICLES, rain = 0, seed = 'test', check }) => {
+const run = (graph, { seconds, target = MAX_VEHICLES, rain = 0, seed = 'test', dt = DT, check }) => {
     const state = createTraffic(graph, { seed, count: target, rain });
-    for (let i = 0; i < seconds / DT; i++) {
+    for (let i = 0; i < seconds / dt; i++) {
         const before = new Map(state.vehicles.map((v) => [v, { seg: v.seg, s: v.s }]));
-        stepTraffic(state, DT, { target, rain });
+        stepTraffic(state, dt, { target, rain });
         check?.(state, before);
     }
     return state;
@@ -75,16 +62,17 @@ test('mix: taxis and motos most common, rain halves the motos', () => {
     for (const t of Object.keys(dry)) assert.ok(VEHICLE_TYPES[t], t);
 });
 
-test('no two vehicles ever overlap, on every tier and the real city', () => {
-    for (const graph of graphs) {
+test('no two vehicles ever touch (full-size bodies), on every tier and the real city, at 30 and 10 fps', () => {
+    for (const graph of graphs) for (const dt of [DT, 0.1]) {
         run(graph, {
             seconds: 90,
+            dt,
             check: (state) => {
-                const feet = state.vehicles.map(footprint);
+                const feet = state.vehicles.map((v) => footprint(v));
                 for (let i = 0; i < feet.length; i++) {
                     for (let j = i + 1; j < feet.length; j++) {
                         const [a, b] = [state.vehicles[i], state.vehicles[j]];
-                        if (overlap(feet[i], feet[j])) assert.fail(`t=${state.t.toFixed(2)} ${a.type}@${a.seg.id} vs ${b.type}@${b.seg.id}`);
+                        if (footprintsOverlap(feet[i], feet[j])) assert.fail(`t=${state.t.toFixed(2)} ${a.type}@${a.seg.id} vs ${b.type}@${b.seg.id}`);
                     }
                 }
             },

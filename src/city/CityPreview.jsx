@@ -43,6 +43,7 @@ const CityPreview = () => {
         ),
         at,
         weather: weatherOverride,
+        traffic: !SHOW_VEHICLES, // the showroom parks on the main road
         overlay: (
             <div className="pointer-events-none absolute left-4 top-16 z-10 rounded bg-black/60 px-3 py-2 font-mono text-xs text-mist">
                 <p>City preview (dev only)</p>

@@ -17,6 +17,17 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-21 — Traffic fix: vehicles passing through each other
+**Tasks:** P3B-03 (fix, owner report)
+**Done:**
+- The overlap test shrank bodies to 90 % and missed real contacts. At full size the one case left in the simulation was a driver following someone who turned another way out of the same lane: drivers on a turn now keep their gap to them.
+- Safety net in `stepTraffic`: before moving, each vehicle checks its full-size body against every vehicle in front of it (any road, already decided moves first) and stops if they would touch. `footprint` / `footprintsOverlap` are exported and used by the test.
+- The dev showroom (`?vehicles`) turns the live traffic off (it drove through the parked rows).
+- Test: full-size bodies, every tier + the real city, at 30 and 10 fps (long frames).
+**Checks:** `npm test` 201/201; lint clean on changed files; full-size overlap scan 0 contacts; longest wait unchanged (≤ 27 s); Playwright: traffic drives as before, no console errors (the dev API returned 500 on two runs, fine on retry).
+
+---
+
 ## 2026-10-21 — Traffic
 **Tasks:** P3B-03 (done)
 **Decisions (owner):** plan approved with the default numbers: up to 30 vehicles at rush hour on desktop, about 12 at midday, about 4 late at night, half on phones. Drive mode stays in P3B-09.

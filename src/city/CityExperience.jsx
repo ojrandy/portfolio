@@ -17,10 +17,14 @@ import DayNight from './DayNight.jsx';
 import CinemaPlot, { CinemaModal } from './CinemaPlot.jsx';
 import ArcadePlot from './ArcadePlot.jsx';
 import SchoolPlot from './SchoolPlot.jsx';
+import PitchPlot from './PitchPlot.jsx';
+import CareerRoad from './CareerRoad.jsx';
+import AboutHouse from './AboutHouse.jsx';
+import Traffic from './Traffic.jsx';
 import { createLighting } from './liveLighting.js';
 import useBuea from '../hooks/useBuea.js';
 import useEasterEggs from '../hooks/useEasterEggs.js';
-import useDeviceTier from '../hooks/useDeviceTier.js';
+import useDeviceTier, { deviceInfo } from '../hooks/useDeviceTier.js';
 import { LEVELS, QUALITY, stepQuality } from '../lib/quality.js';
 import ProjectPanel from '../components/ProjectPanel.jsx';
 import LoadingScreen from '../components/LoadingScreen.jsx';
@@ -28,6 +32,9 @@ import StatusLine from '../components/StatusLine.jsx';
 import CityProjectList from '../components/CityProjectList.jsx';
 import ArcadeHub from '../components/ArcadeHub.jsx';
 import SchoolPanel from '../components/SchoolPanel.jsx';
+import ContactPanel from '../components/ContactPanel.jsx';
+import CareerPanel from '../components/CareerPanel.jsx';
+import AboutPanel from '../components/AboutPanel.jsx';
 import EggToast from '../components/EggToast.jsx';
 import useCityData from '../hooks/useCityData.js';
 import { toBuildings } from '../lib/buildings.js';
@@ -37,6 +44,9 @@ import { weatherFx } from '../lib/weatherFx.js';
 import { xrayLayers as layersForXRay } from '../lib/projectSummary.js';
 import { cinemaReel } from '../lib/cinemaReel.js';
 import { schoolContent } from '../lib/schoolContent.js';
+import { contactLinks } from '../lib/contactLinks.js';
+import { careerRoles } from '../lib/careerRoad.js';
+import { aboutContent } from '../lib/aboutContent.js';
 import useCityStore from '../store/useCityStore.js';
 import useArcadeStore from '../store/useArcadeStore.js';
 import profile from '../../content/profile.json';
@@ -48,9 +58,12 @@ const PERF = params.has('perf');
 const PINNED = PERF && LEVELS.includes(params.get('quality')) ? params.get('quality') : null;
 const CINEMA_REEL = cinemaReel(profile);
 const SCHOOL = schoolContent(profile);
+const CONTACT = contactLinks(profile);
+const CAREER = careerRoles(profile);
+const ABOUT = aboutContent(profile);
 // Districts whose own scene replaces the placeholder block: Cinema (with a reel or channel), the Arcade (P3-09) and
-// the School (P3-10, with teaching content).
-const BUILT_DISTRICTS = [CINEMA_REEL && 'cinema', 'arcade', SCHOOL && 'school'].filter(Boolean);
+// the School (P3-10, with teaching content) and the Pitch (P3-11).
+const BUILT_DISTRICTS = [CINEMA_REEL && 'cinema', 'arcade', SCHOOL && 'school', 'pitch'].filter(Boolean);
 const GAMING = profile.hobbies?.find((hobby) => hobby.name === 'Gaming')?.text;
 
 const hasWebGL = () => {
@@ -75,8 +88,15 @@ const CityExperience = ({ debug }) => {
     const [arcadeHovered, setArcadeHovered] = useState(false);
     const [schoolOpen, setSchoolOpen] = useState(false);
     const [schoolHovered, setSchoolHovered] = useState(false);
+    const [contact, setContact] = useState(null); // { scored } while the contact panel is open
+    const [pitchHovered, setPitchHovered] = useState(false);
+    const [careerOpen, setCareerOpen] = useState(null); // index of the sign that opened the career panel
+    const [careerHovered, setCareerHovered] = useState(false);
+    const [aboutOpen, setAboutOpen] = useState(false);
+    const [aboutHovered, setAboutHovered] = useState(false);
     const hubOpen = useArcadeStore((s) => s.hubOpen);
     const tier = useDeviceTier();
+    const [touch] = useState(() => deviceInfo().touch);
     const [quality, setQuality] = useState(PINNED ?? tier);
     const viewport = useRef(null);
     const [lighting] = useState(createLighting);
@@ -100,6 +120,8 @@ const CityExperience = ({ debug }) => {
     const cinemaPlot = layout?.districts.find((district) => district.id === 'cinema');
     const arcadePlot = layout?.districts.find((district) => district.id === 'arcade');
     const schoolPlot = layout?.districts.find((district) => district.id === 'school');
+    const pitchPlot = layout?.districts.find((district) => district.id === 'pitch');
+    const careerRoad = layout?.roads.find((road) => road.kind === 'career');
     const labelSlug = hovered ?? focus;
     const focusName = projects.get(focus)?.name;
     const openProjectData = projects.get(openSlug);
@@ -120,7 +142,7 @@ const CityExperience = ({ debug }) => {
                 aria-roledescription="3D city"
                 aria-label="OJ City. Tab visits each building and Enter opens it. Arrow keys or WASD move, Q and E rotate, plus and minus zoom, Escape returns to the start."
                 className="absolute inset-0 outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-window"
-                style={{ cursor: hovered || cinemaHovered || arcadeHovered || schoolHovered ? 'pointer' : undefined }}
+                style={{ cursor: hovered || cinemaHovered || arcadeHovered || schoolHovered || pitchHovered || careerHovered || aboutHovered ? 'pointer' : undefined }}
                 aria-busy={!drawn}
             >
                 {webgl && <Canvas dpr={[1, QUALITY[quality].dpr]} shadows camera={{ position: [0, 24, 78], fov: CAMERA.fov, near: CAMERA.near, far: CAMERA.far }}>
@@ -161,7 +183,35 @@ const CityExperience = ({ debug }) => {
                                     onHover={setSchoolHovered}
                                 />
                             )}
+                            {pitchPlot && (
+                                <PitchPlot
+                                    plot={pitchPlot}
+                                    onGoal={() => setContact({ scored: true })}
+                                    onContact={() => setContact({ scored: false })}
+                                    onHover={setPitchHovered}
+                                />
+                            )}
+                            {careerRoad && CAREER.length > 0 && (
+                                <CareerRoad
+                                    road={careerRoad}
+                                    roles={CAREER}
+                                    lighting={lighting}
+                                    onOpen={setCareerOpen}
+                                    onHover={setCareerHovered}
+                                />
+                            )}
+                            {careerRoad && ABOUT && (
+                                <AboutHouse
+                                    road={careerRoad}
+                                    about={ABOUT}
+                                    lighting={lighting}
+                                    onOpen={() => setAboutOpen(true)}
+                                    onHover={setAboutHovered}
+                                />
+                            )}
                             <Lamps layout={layout} lighting={lighting} />
+                            {/* Phones get about half the traffic. */}
+                            <Traffic layout={layout} lighting={lighting} offsetMs={offsetMs} at={extra.at} share={touch ? 0.5 : 1} />
                             <Buildings
                                 placed={layout.lots}
                                 lighting={lighting}
@@ -200,6 +250,28 @@ const CityExperience = ({ debug }) => {
             )}
             {cinemaOpen && CINEMA_REEL?.kind === 'file' && <CinemaModal reel={CINEMA_REEL} onClose={() => setCinemaOpen(false)} />}
             {schoolOpen && SCHOOL && <SchoolPanel school={SCHOOL} onClose={() => setSchoolOpen(false)} />}
+            {careerOpen !== null && <CareerPanel roles={CAREER} selected={careerOpen} onClose={() => setCareerOpen(null)} />}
+            {/* The house is below the desktop start view, so About is also one click away from the screen.
+                Bottom left: on phones the house itself shows at the bottom right. */}
+            {drawn && ABOUT && (
+                <button
+                    type="button"
+                    onClick={() => setAboutOpen(true)}
+                    className="absolute bottom-4 left-4 z-10 border border-mist/25 bg-black/50 px-3 py-1.5 font-mono text-xs text-mist backdrop-blur-[2px] hover:bg-black/75 focus-visible:outline-2 focus-visible:outline-window"
+                >
+                    About {ABOUT.name?.split(' ')[0] ?? ''}
+                </button>
+            )}
+            {aboutOpen && ABOUT && (
+                <AboutPanel
+                    about={ABOUT}
+                    links={CONTACT.links}
+                    onCareer={CAREER.length > 0 ? () => { setAboutOpen(false); setCareerOpen(0); } : undefined}
+                    onContact={() => { setAboutOpen(false); setContact({ scored: false }); }}
+                    onClose={() => setAboutOpen(false)}
+                />
+            )}
+            {contact && <ContactPanel contact={CONTACT} scored={contact.scored} onClose={() => setContact(null)} />}
             {hubOpen && <ArcadeHub gaming={GAMING} />}
             <EggToast />
             {extra.overlay}

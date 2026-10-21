@@ -270,6 +270,84 @@ for my review first. Keep it short and personal. Then build it for both modes.
 
 ---
 
+## Phase 3-B: Interactive City
+> Read ADR-013 and "Interactive city" in docs/design_system.md first. Every task stays inside the performance budget
+> (instancing, phone tier with about half the traffic/people, reduced motion) and re-runs `npm run perf`.
+
+### P3B-01: Road and lane graph 🧭
+```
+Task P3B-01. Build src/lib/roadGraph.js: turn layout roads into a lane graph. Two lanes per road, drive on the right;
+junctions with allowed turns (U-turn at dead ends), traffic-light phases at downtown crossings (never green both ways),
+crosswalks, and entry/exit points at the main-road ends and the entrance. Deterministic for every downtown tier, with
+tests (lanes on the road and on the right, no dead ends, same city ⇒ same graph). Dev-only ?lanes overlay to check it.
+```
+
+### P3B-02: Vehicle kit 🧭
+```
+Task P3B-02. Build the vehicle kit in code (flat-shaded, palette colours, no brands): sedan, SUV, pickup, yellow taxi,
+bendskin moto-taxi with rider, Hiace minibus, bus, timber/banana truck, police car, ambulance. One merged geometry and
+one InstancedMesh per type, colour per instance. Show me a dev-only lineup (?vehicles) before they go on the roads.
+```
+
+### P3B-03: Traffic
+```
+Task P3B-03. Put the vehicles on the lane graph: lane following, safe gaps, give way at junctions, stop at red lights,
+motos may filter. Density by Buea time (busy 07–09 and 16–19 WAT, quiet 01–05). Night: headlight/tail-light glow
+sprites, no real lights. Rain: slower, fewer motos. Simulation logic in src/lib with tests; the scene only draws it.
+Reduced motion: vehicles parked.
+```
+
+### P3B-04: Pedestrians and animals
+```
+Task P3B-04. Pedestrians walking the pavements and using crosswalks (wait for traffic), umbrellas in rain, fewer at
+night; goats and chickens wandering at the edge of town. Simple low-poly, instanced. Reduced motion: standing still.
+```
+
+### P3B-05: Street props and billboards
+```
+Task P3B-05. Street props: trees/palms, benches, taxi/bus stops, phone-credit kiosks, a fuel station, placed
+deterministically without blocking roads or buildings. Billboards show real content only: featured projects, GitHub
+numbers with their source, the weather. Merge or instance everything; tell me the draw-call cost.
+```
+
+### P3B-06: City interactions 🧭
+```
+Task P3B-06. Interactions: click a vehicle → follow cam (Esc / button leaves); "Hail a taxi" → choose a district → a
+short taxi ride there (expose it so the AI guide can call it in P4-04); click a car to honk, a goat to bleat (sound
+only if sound is on); clickable traffic lights; propose 2–3 new eggs for the Arcade hub. Keyboard and touch friendly.
+```
+
+### P3B-07: Market district 🧭
+```
+Task P3B-07. Market district on a new plot SW of the entrance, with a taxi/bus drop-off: a Buea-style open market,
+wooden stalls with colourful tarps, a crowd. One stall per service from docs/projects.md (add a "Services" section to
+the converter + schema); a stall opens a panel: what I deliver, links to example buildings, prices only if I gave them,
+"Ask for a quote" → contact panel. Seller call-outs in Pidgin use only my approved lines. No invented services:
+missing content stays TODO(content). No cultural motifs without confirmation (ADR-009).
+```
+
+### P3B-08: Outskirts and the road out
+```
+Task P3B-08. Make it feel like a real town: low residential houses beyond the districts (one merged mesh, not
+clickable), a road out towards Douala/Limbe where traffic enters and leaves (extend the lane graph), and ground-floor
+shopfronts with awnings downtown, lit at night.
+```
+
+### P3B-09: Drive mode 🧭
+```
+Task P3B-09. Optional drive mode, off by default: drive a taxi or bendskin with WASD / arrows or a touch joystick,
+camera follows; stay on the ground and inside the city bounds; other traffic reacts. Eggs: "visit every district" and
+"obey every red light". Clear exit button; not offered with reduced motion.
+```
+
+### P3B-10: Performance pass
+```
+Task P3B-10. Performance pass for Phase 3-B: profile with npm run perf on desktop and the emulated phone, tune the
+phone tier (traffic, people, props), check reduced motion everywhere, and report draw calls and fps vs the budget.
+```
+
+---
+
 ## Phase 4: Ask My Portfolio (AI)
 > Load the `claude-api` skill before any code in this phase.
 

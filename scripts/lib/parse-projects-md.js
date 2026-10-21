@@ -213,8 +213,10 @@ const parseMonth = (raw) => {
 const toTree = (lines) => {
     const items = [];
     const paras = [];
+    let gap = false; // a blank line since the last paragraph line
     for (const { text, n } of lines) {
         const body = text.trim();
+        if (!body) gap = paras.length > 0;
         if (!body || /^-{3,}$/.test(body)) continue;
         const indent = text.match(/^[ \t]*/)[0].replace(/\t/g, '    ').length;
         if (BULLET_RE.test(body) && !body.startsWith('|')) {
@@ -222,7 +224,8 @@ const toTree = (lines) => {
             if (indent > 0 && items.length) items.at(-1).children.push(item);
             else items.push(item);
         } else {
-            paras.push({ n, text: body });
+            paras.push({ n, text: body, gap });
+            gap = false;
         }
     }
     return { items, paras };
@@ -411,7 +414,10 @@ export const parseProjectsMd = (md, file = 'docs/projects.md') => {
         for (const block of blocks) {
             const title = block.title.toLowerCase();
             const { items, paras } = toTree(block.lines);
-            const paragraph = () => paras.map((p) => p.text).join(' ').trim();
+            // A blank line starts a new paragraph; other line breaks are spaces.
+            const paragraph = () => paras
+                .filter((p) => !/^_.*_$/.test(p.text)) // _notes for the owner_
+                .map((p, i) => (i === 0 ? '' : p.gap ? '\n\n' : ' ') + p.text).join('').trim();
             const bullets = () => items.map((i) => {
                 const { v, demo } = readValue(i.text);
                 return { v, demo, n: i.n };

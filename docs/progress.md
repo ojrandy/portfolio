@@ -17,6 +17,115 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-21 — Traffic
+**Tasks:** P3B-03 (done)
+**Decisions (owner):** plan approved with the default numbers: up to 30 vehicles at rush hour on desktop, about 12 at midday, about 4 late at night, half on phones. Drive mode stays in P3B-09.
+**Done:**
+- `src/lib/traffic.js` (pure, seeded): lane following, smooth braking for the vehicle ahead and for lights, junction booking (conflicting turns from the lane graph, room beyond the junction, short lanes booked straight through), give way at tees and for left turns, a 6 s patience rule with fair claims so side streets aren't starved; density by Buea time (`trafficDensity`, `targetCount`), Buea mix (`pickType`, rain halves motos), rain slows everyone by up to 30 %; vehicles enter at the map edges and fade in/out.
+- `src/lib/traffic.test.js` (7 tests): density curve, mix, no overlaps (oriented footprints), no red-light entries after the all-red second and nobody stopped in a junction, no gridlock (longest wait < 35 s, vehicles keep leaving), density target and rain, deterministic.
+- `src/city/Traffic.jsx`: one InstancedMesh per type written every frame + head/tail glow sprites (additive billboards, fade in with the lamps; tail-lights brighter when braking). No shadows (static shadow map), no pointer hits; reduced motion keeps them parked. Mounted in `CityExperience` (phones `share` 0.5).
+- Vehicle geometry and materials moved into `vehicleGeometry.js` (shared by the showroom and the traffic).
+**Checks:** `npm test` 201/201; lint clean on changed files. Production build: traffic only in the lazy city chunk (58.4 KB gzip). Playwright on the dev server (GPU): vehicles drive on the right at 08:00, headlights at 20:30–21:00, fewer motos and slower in rain, showroom still fine, reduced motion frames identical, no console errors (one run hit a transient 500 from the dev API). `npm run perf`: first run desktop FAIL (flight 54.4 fps; machine busy: VS Code, Chrome, another dev server), re-run PASS on both (desktop 60 / 55.8 fps, 28 draw calls; phone 50.5 / 48.3 fps, 23).
+**Problems / notes:**
+- Tuning found real jams on the 3 × 3 city: the main road is the only way in and out, and through traffic has to book three junctions at once by Career Road. Rarer exits, the patience/claim rule and "only the front driver deals with the junction" fixed them (longest wait 42 s → 23 s).
+- The simulation costs about 0.3–1 ms a frame for 30 vehicles (timings noisy on this machine); the phone is ~3–4 fps lower than before. P3B-10 can trim it (e.g. step at 30 Hz).
+- Vehicles appear and leave at the entrance, near the start view; P3B-08's road out will take that over.
+- In the dev showroom (`?vehicles`) the live traffic drives past the parked rows.
+**Next:** P3B-04 pedestrians and animals (plan first).
+
+---
+
+## 2026-10-21 — Vehicle kit
+**Tasks:** P3B-02 (done)
+**Decisions (owner):** police cars are dark blue with one white stripe reading "POLICE" (as in Cameroon); timber and banana trucks are two types with differently shaped loads, kept light; taxis stay the standard yellow.
+**Done:**
+- `src/lib/vehicles.js` (pure): 11 types (sedan, taxi, police, SUV, pickup, bendskin moto, minibus, bus, timber truck, banana truck, ambulance) as lists of boxes / cylinders / blobs; sizes, head and tail light points (for P3B-03) and colour variants; `pickVariant(type, seed)` is deterministic. No brands; no red cross on the ambulance (protected emblem); the "Hiace" is a generic minibus.
+- `src/city/vehicleGeometry.js`: merges a type into one geometry (vertex colours, `aTint` so only body parts take the instance colour, decal UVs for the police lettering); `Vehicles.jsx` draws one `InstancedMesh` per type (police lettering from a small canvas texture).
+- `src/lib/vehicles.test.js` (6 tests): the 11 types, every one fits a street lane and is short enough to turn, parts above the ground and wheels on it, lights front/back, variants valid and deterministic, ≤ 600 triangles per type (banana truck 13 bunches and six-sided wheels to get under it).
+- Dev showroom `/?city&vehicles` (`VehicleShowroom.jsx` via `CityPreview`).
+**Checks:** `npm test` 194/194; lint clean on the new files (the 3 old template components still fail, unchanged). Playwright on the dev server, day and night: every type reads at the start view and close up, westbound row faces west, "POLICE" legible on the stripe, no console errors; the vehicles add up to 11 draw calls. Production build: no vehicle code in any chunk (not used in the live city until P3B-03). `npm run perf`: desktop PASS (60 / 56.3 fps, 23 draw calls), phone PASS (53.3 / 52.3 fps, 21).
+**Problems / notes:**
+- Headless Playwright doesn't take the WASD keys (no focus); zoom with small wheel steps towards the target instead.
+**Next:** P3B-03 traffic (plan first): lane following, lights, density by Buea time, glow sprites at the light points.
+
+---
+
+## 2026-10-21 — Road and lane graph
+**Tasks:** P3B-01 (done)
+**Done:**
+- `src/lib/roadGraph.js`: `buildRoadGraph(layout)` → nodes (cross / tee / corner / edge), two lanes per road piece on the right, turn links (curves, never straight back), crosswalks, entries/exits; `signalState(node, t)` for the lights (NS 8 s green, 2 s amber, 1 s all red, then EW; offset per crossing). Junctions are found from the road rectangles, so the market road and the road out (P3B-07/08) join by themselves. Coordinates are snapped so roads meeting at x = 0 share one node (a −0 vs 0 key split them at first).
+- `src/lib/roadGraph.test.js` (7 tests, every tier + the real city): lanes on their road and on the right, every lane reachable from an entry and leading to an exit, lights never green/amber both ways, crosses → lights, tees → the through/main road has priority, Career Road a T on odd tiers and a crossing on even ones, crosswalks outside the junction, deterministic.
+- `src/city/LaneDebug.jsx` via `CityPreview` (dev only): `/?city&lanes` draws lanes by road kind with arrows, turns, crosswalks and live light dots.
+**Checks:** `npm test` 188/188; lint clean on changed files. Production build: no lane code in any chunk (city chunk 48.9 KB, unchanged). Top-down renders of tier 3 and 4 and the 3D overlay on the real 4 × 4 city look right, no console errors. `npm run perf`: first run desktop FAIL (flight 50.1 fps, another dev server running on :5173); re-run PASS on both (desktop 60 / 55.3 fps, 23 draw calls; phone 55.7 / 52 fps, 21).
+**Problems / notes:**
+- On odd tiers the main-road stretch between Career Road's T and the next T is only 0.9 long: P3B-03 must not let a car enter a junction without room beyond it.
+- Initial JS is still 445 KB gzip (budget 200), unchanged; P0-06.
+**Next:** P3B-02 vehicle kit (plan first).
+
+---
+
+## 2026-10-20 — Phase 3-B Interactive City planned
+**Tasks:** P3-B phase added (P3B-01 … P3B-10, all todo)
+**Decisions (owner, ADR-013):** traffic + people + market before Phase 4; vehicles built in code in the flat style; drive mode included; Market = services market (one stall per service → contact), SW of the entrance; Pidgin call-outs with owner-approved lines.
+**Done:** tracker phase + tasks; "Interactive city" rules in design_system.md; ADR-013.
+**Needs (owner):** services list for the market stalls (+ prices if wanted) and Pidgin call-out lines in `docs/projects.md`.
+**Next:** plan and build P3B-01 (lane graph).
+
+---
+
+## 2026-10-20 — About house and origin story; zoom to cursor
+**Tasks:** P3-13 (done); camera fix (wheel/pinch zoom)
+**Content (owner):** origin story supplied (Osing village in Bayangi, Orocko father, Tiko, Buea since 2020, cyber café → HND → CS50 / JavaScript Mastery → degree, AWS, Udemy Dart/Flutter, Master's in Information Security planned). Owner asked for all wording to be professional: bio and origin rewritten for grammar, with no change of meaning. Degree confirmed: Software Engineering, First Class, University of Buea, 2026 ([DEMO] removed). Smart Meal stays in the bio as a breakthrough ("which I am shipping now").
+**Decisions (owner):** About house at the entrance, beside Career Road (the story starts where the road starts).
+**Done:**
+- Converter: a blank line in the bio/origin sections starts a new paragraph (`\n\n`), and `_italic notes_` are skipped there (+1 test).
+- `src/lib/aboutContent.js` (+4 tests): name, title, place, roots, degree (each hidden while demo/TODO), bio, origin paragraphs, hobby → district list.
+- `src/city/AboutHouse.jsx`: small house east of Career Road, 7 north of the entrance (3 draw calls); drawn front with the "About" sign and the owner's name; windows lit at night; house or "About" button opens the panel.
+- `src/components/AboutPanel.jsx`: bio, facts, origin story, "Around the city", Career / Contact / LinkedIn / GitHub, via the shared `Dialog`.
+- "About Ojong" button at the bottom left of the screen: the house is below the desktop start view.
+- `CameraRig`: `dollyToCursor`. Wheel and pinch used to zoom towards the downtown target only, so the School and Pitch couldn't be zoomed into (owner report). They now zoom towards the pointer.
+**Checks:** `npm test` 181/181; lint clean on changed files. Playwright on the production build (GPU): the button opens the panel with no TODO/DEMO text, focus on Close, Career hands over to the career panel, Escape returns focus to the button, wheel zoom over the right of the screen moves there; Pixel 7: house in the start view at the bottom right, tapping it or its button opens the panel, no horizontal scroll (with and without the panel); no console errors. `npm run perf`: desktop PASS (59.6 / 55.6 fps, 22 draw calls), phone PASS (55.4 / 50.1 fps, 20).
+**Problems / notes:**
+- `npm run perf` reports initial JS at 444 KB gzip (budget 200). Not from this task (the About code is in the lazy city chunk, 49 KB); worth a look before P5.
+- The hobby lines in section 1 (e.g. Football, Gaming) are still in the owner's rough wording; the About panel doesn't show them, but the Arcade hub quotes the Gaming line.
+**Next:** owner reviews the rewritten bio/origin; P4-01 knowledge builder.
+
+---
+
+## 2026-10-20 — Career Road timeline
+**Tasks:** P3-12 (done; perf re-run pending, see notes)
+**Content (owner):** the three role titles confirmed ([DEMO] removed); the first role's company is "Freelance"; section 2 spelling and wording fixed with the owner's OK (e.g. "Took on HR duties: assigned tasks to the team with Gantt charts", "Turko Banix Inc", end dates "2025" / "Present"). "multi ecommerce" was read as "multi-vendor e-commerce" (matches the project block); owner to correct if wrong.
+**Decisions (owner):** oldest role nearest the entrance, newest next to downtown (walking up the road moves forward in time).
+**Done:**
+- `src/lib/careerRoad.js` (+ 6 tests): `careerRoles` (non-demo roles, newest first, no demo fields / TODO text, "Mar 2021 – Sep 2024" labels), `careerSigns` (between the lamps, alternating sides, turned towards the road), `signParts`.
+- `src/city/CareerRoad.jsx`: a signpost per role (2 draw calls: instanced posts + boards, one merged front mesh on a canvas atlas: years, company, role); fronts glow a little at night. A sign, or the "Career" button above the newest one, opens the panel.
+- `src/components/CareerPanel.jsx`: the roles newest first via the shared `Dialog`; the clicked role is outlined.
+**Checks:** `npm test` 176/176; lint clean on changed files. Playwright on the production build (GPU), first run: the signs read well at night in the start view (newest two in frame), "Career" opens the panel with the three roles and no TODO/DEMO text, focus on Close, Escape closes and focus returns, clicking the middle sign opens the panel on Turko Banix; Pixel 7: no horizontal scroll, panel fits; no console errors. 22 draw calls in the start view (was 20).
+**Problems / notes:**
+- On the phone the "Career" button (first placed at the newest sign's foot) covered the oldest sign; moved above the newest board.
+- Later runs were unreliable: the machine was at 100 % CPU (a java process, VS Code, desktop Chrome, and another session's `scripts/optimize-images.mjs --recompress`). Headless frames stalled (screenshots timed out, camera didn't move, sign clicks were lost), and `npm run perf` reported FAIL (desktop idle 60 fps but flight 39 fps at medium quality; phone 27 fps, 60 s to load), then couldn't load the page at all. Not attributed to this change (2 draw calls, static geometry); **re-run `npm run perf` on an idle machine.**
+**Next:** re-run `npm run perf`; P3-13 About / origin story.
+
+---
+
+## 2026-10-20 — Pitch district
+**Tasks:** P3-11 (done)
+**Decisions (owner):** a goal opens a contact panel now (email + links); the server form stays P5-03, and the EmailJS form isn't reused. Kick by clicking where you strike the ball; a simple keeper; scoring is a 7th egg, "Top corner".
+**Done:**
+- `src/lib/pitchKick.js` (+ 8 tests): penalty rules (aim from the strike offset, friction, hop, keeper reaction, goal/save/post/wide, settling in the net). Tests: a centre strike is always saved, the far corner beats the keeper, the keyboard kick scores at every moment tried.
+- `src/city/PitchPlot.jsx`: the pitch on the SE plot (5 draw calls, replaces the placeholder): drawn grass and lines, goal frame, net, keeper, faceted ball. Click/tap the ball (larger invisible tap target; offset measured on screen); "Kick" (always scores) and "Contact" buttons; result line in a live region; reduced motion resolves at once with a still keeper.
+- `src/lib/contactLinks.js` (+ 3 tests) and `src/components/ContactPanel.jsx`: email (mailto + Copy) and HTTPS LinkedIn/GitHub/X, via the shared `Dialog`. No availability shown (still `[DEMO]`).
+- `arcadeEggs.js`: 7th egg `goal`. `PerfProbe`: `screenOf(name)` for browser checks.
+**Checks:** `npm test` 170/170; lint clean on changed files; Playwright on the production build (GPU), camera panned to the pitch with the keyboard: centre clicks saved, an off-centre click scored and opened "Goal! Kick off a project", toast "Easter egg 1/7: Top corner", Kick button scores, Contact opens the panel (focus on Close, mailto + LinkedIn + GitHub, no TODO/DEMO text), Escape closes and focus returns; reduced motion: Kick → goal → panel; Pixel 7: no horizontal scroll, panel fits; no console errors. 24 draw calls with the pitch in view. `npm run perf`: desktop PASS (60 / 59.6 fps, 20 draw calls), phone PASS (15).
+**Problems / notes:**
+- The first keeper tuning saved most corners; slowed (reaction 0.25 s, 2 units/s, reach 0.9) so the corner away from him usually scores.
+- Like the Arcade, the Pitch is off-screen from the start view (found by looking around), and its buttons stay in the Tab order while off-screen (P5 accessibility).
+- The ball is small from far away; zooming in helps, and the Kick/Contact buttons don't need aiming.
+- `public/previews/handyman-do-it.webp` was already modified in the tree (not this task); left uncommitted.
+**Next:** P3-12 Career Road timeline.
+
+---
+
 ## 2026-10-20 — School district
 **Tasks:** P3-10 (done)
 **Content (owner):** the four TUIB courses in section 4 confirmed real ([DEMO] removed; dates still `TODO(content)`, so hidden); "Institue" → "Institute" and "Experince Lecturer … cources" → "Experienced lecturer … courses" corrected; no tutorials or mentoring to list yet.

@@ -1,5 +1,6 @@
 // Constrained orbit + fly-to driven by useCityStore (P1-05). Rules in src/lib/camera.js.
-// Mouse: drag rotates, right-drag moves, wheel zooms. Touch: one finger rotates, pinch zooms, two-finger drag moves.
+// Mouse: drag rotates, right-drag moves, wheel zooms to the cursor. Touch: one finger rotates, pinch zooms (to the
+// pinch centre), two-finger drag moves.
 // Keyboard (on `keyTarget`, the focusable element around the canvas): arrows/WASD move, Q/E rotate, +/- zoom,
 // Tab/Shift+Tab visit buildings, Enter opens the project panel, Esc closes it, then returns to the start view.
 import { useEffect, useMemo, useRef } from 'react';
@@ -112,6 +113,7 @@ const CameraRig = ({ layout, keyTarget }) => {
         <CameraControls
             ref={controls}
             makeDefault
+            dollyToCursor // wheel/pinch zooms towards what's under the pointer, not the downtown target
             minDistance={CAMERA.minDistance}
             maxDistance={CAMERA.maxDistance}
             minPolarAngle={CAMERA.minPolar}

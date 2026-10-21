@@ -38,13 +38,19 @@ _Every public repo of these accounts becomes a building automatically, using rea
 - **CV (PDF) path or link:** [DEMO] /cv/ojong-randy-cv.pdf
 - **Years coding:** 5+
 - **Languages spoken:** [DEMO] English (fluent), French (working), Pidgin (fluent)
-- **Degree:** [DEMO] B.Tech/B.Eng Software Engineering, First Class — <institution>, <year>
+- **Degree:** Software Engineering, First Class — University of Buea, 2026
 
 ### Short bio (2–3 sentences)
- I so much believe that with 0 & 1, we can together make the world a better if not the best place. I have a degree in Software Engineering with a 1st Class degree. have build countless projects but yet keeping a simple and easy life. I am much like a techpreneur with my biggest brake throught project being Vital Pulse and Smart Meal 
+ I believe that with 0s and 1s, together, we can make the world a better place, if not the best one. I hold a First Class degree in Software Engineering from the University of Buea, and I have built many projects while keeping a simple, easy life. I see myself as a techpreneur: my biggest breakthroughs are Vital Pulse and Smart Meal, which I am shipping now.
 
-### Origin story (why you code, Buea, Bayangi roots), 
- i see coding as a source of strength as most of my friends and always say, my powers are in my fingers. I also take security seriously and never trust anything coming from the client side. 
+### Origin story (why you code, Buea, Bayangi roots)
+_Blank lines separate paragraphs on the site._
+
+ I'm Ojong, from Osing village in Bayangi. My dad is Orocko, so which tribe I really belong to is a running father-and-son debate at home, all in good fun. I grew up in Tiko, where I studied the sciences in secondary school, and moved to Buea in 2020.
+
+ I started with basic computing at a cyber café, then earned an HND in Software Engineering. Harvard's CS50 with Prof. David J. Malan gave me the best introduction to computer science, and JavaScript Mastery on YouTube taught me JavaScript, its frameworks and Three.js, the library this city is built with. Today I hold a degree in Software Engineering, the AWS Cloud Practitioner certification and several Udemy certificates in Dart and Flutter.
+
+ I see coding as a source of strength; as my friends always say, my powers are in my fingers. Security is at the heart of how I work: I never trust anything that comes from the client side, and I am preparing a Master's in Information Security. I am the software engineer who builds on cloud infrastructure and protects the data and information that live on it.
 
 ### Services you offer clients
 - Web & Mobile Development 
@@ -71,35 +77,35 @@ _Every public repo of these accounts becomes a building automatically, using rea
 _Copy this block per role, newest first. The heading is just a label._
 
 ### Web Spectron Ltd
-- **Role:** [DEMO] Software Developer
+- **Role:** Software Developer
 - **Company:** Web Spectron Ltd
-- **Dates:** 2026-06 → Present-
+- **Dates:** 2026-06 → Present
 - **Location:** Remote
 - **What you did (3 bullets max):**
-  - Software development 
-  - Work as the HR, where i use Chantt chart to asign task 
-- **Proudest result:** Build the Trek Cameroon web app, Build the Computer Solution website, Build a banking langing page, Build vital Pulse App, Build Sns Glam and many more 
+  - Software development
+  - Took on HR duties: assigned tasks to the team with Gantt charts
+- **Proudest result:** Built the Trek Cameroon web app, the Computer Solutions website, a banking landing page, the Vital Pulse app, SNS Glam and many more
 
-### Turko banix Inc
-- **Role:** [DEMO] Software Developer
-- **Company:** Turko banix Inc
-- **Dates:** 2024-11 → 2025-
+### Turko Banix Inc
+- **Role:** Software Developer
+- **Company:** Turko Banix Inc
+- **Dates:** 2024-11 → 2025
 - **Location:** Remote
 - **What you did (3 bullets max):**
-  - Software development 
-  - Work as the HR, where i use Chantt chart to asign task 
-- **Proudest result:**  Build multiple and contribute in the PICKUP App
+  - Software development
+  - Took on HR duties: assigned tasks to the team with Gantt charts
+- **Proudest result:** Built multiple apps and contributed to the PICKUP app
 
 ### First role (Buea)
-- **Role:** [DEMO] Full-stack Developer & IT Technician
-- **Company:** TODO(content)
+- **Role:** Full-stack Developer & IT Technician
+- **Company:** Freelance
 - **Dates:** 2021-03 → 2024-09
-- **Location:** Buea Cameroon 
+- **Location:** Buea, Cameroon
 - **What you did (3 bullets max):**
-  - Use React and nextJs to build interative dashboards
-  - Also use native PHP to contribute in the APP development of Learn Contri talk. 
-  - Did networking and camera installing 
-- **Proudest result:** Build a hospital management system, build a multi ecommerce app, for Revival IT centre buea, Build multiple wordpress site for frenlance clients
+  - Used React and Next.js to build interactive dashboards
+  - Used native PHP to contribute to the Learn Contri Talk app
+  - Did networking and camera installation
+- **Proudest result:** Built a hospital management system and a multi-vendor e-commerce app for Revival IT Centre Buea, and multiple WordPress sites for freelance clients
 
 ---
 

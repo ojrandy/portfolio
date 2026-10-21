@@ -11,6 +11,7 @@ Each task ID matches a prompt in `/prompt.md`. Commit messages start with the ta
 | 1 | The City | 1–2 | [~] |
 | 2 | Live Buea | 2 | [x] |
 | 3 | Content, Districts & X-Ray | 3 | [~] |
+| 3-B | Interactive City | 3–4 | [~] |
 | 4 | Ask My Portfolio (AI) | 4 | [ ] |
 | 5 | Recruiter Mode & Polish | 5 | [ ] |
 | 6 | Hardening & Launch | 6 | [ ] |
@@ -64,9 +65,25 @@ Each task ID matches a prompt in `/prompt.md`. Commit messages start with the ta
 - [x] **P3-09** Arcade district: easter eggs hub (cabinet, hub, 5 eggs: Arcade, cheat code, Fako, Night owl, Explorer; mini-game split out to P3-09b)
 - [x] **P3-09b** Arcade mini-game: "Code runner" (endless runner through Buea streets dodging bugs; keyboard + touch, lazy-loaded, reduced-motion aware)
 - [x] **P3-10** School district: teaching, tutorials, mentoring (school building + Lessons panel with the four confirmed TUIB courses; tutorials/mentoring: none yet, add lines to section 4)
-- [ ] **P3-11** Pitch district: kickable football; goal opens contact
-- [ ] **P3-12** Experience/career shown as the road into the city (timeline)
-- [ ] **P3-13** About / origin story: Buea, Bayangi roots, why code
+- [x] **P3-11** Pitch district: kickable football; goal opens contact (penalty vs a simple keeper, strike where you click; Kick button always scores; contact panel with email + links, form in P5-03; 7th egg "Top corner")
+- [x] **P3-12** Experience/career shown as the road into the city (timeline) (signpost per role, oldest at the entrance; sign or "Career" button → career panel)
+- [x] **P3-13** About / origin story: Buea, Bayangi roots, why code
+
+## Phase 3-B — Interactive City
+A real, busy Buea-style city, not just buildings (ADR-013). Rules in design_system.md "Interactive city".
+- [x] **P3B-01** Road and lane graph from the layout: lanes, directions, junctions, crosswalks, traffic-light points (+ tests) (`roadGraph.js`, 7 tests, dev `?lanes` overlay)
+- [x] **P3B-02** Vehicle kit, built in code (flat-shaded): sedan, SUV, pickup, yellow taxi, bendskin moto-taxi, Hiace minibus, bus, timber/banana truck, police car, ambulance; one instanced mesh per type, colour variants (`vehicles.js`, 11 types, 6 tests, dev `?vehicles` showroom)
+- [x] **P3B-03** Traffic: lane following, spacing, give way, traffic lights at downtown crossings; density by Buea time (rush hours, quiet nights); headlights/tail-lights at night (glow sprites); rain slows traffic, fewer motos (`traffic.js`, 7 tests, `Traffic.jsx`)
+- [ ] **P3B-04** Pedestrians (pavements, crosswalks, umbrellas in rain) and animals (goats, chickens on the edge of town)
+- [ ] **P3B-05** Street props: trees/palms, benches, taxi/bus stops, phone-credit kiosks, fuel station; billboards with real content only (featured projects, live GitHub numbers, weather)
+- [ ] **P3B-06** Interactions: click a vehicle → follow cam (Esc leaves); hail a taxi → ride to a district (reusable by the AI guide in P4-04); honk / goat bleat; clickable traffic lights; new eggs
+- [ ] **P3B-07** Market district (SW of the entrance): Buea-style open market; each stall = a service the owner offers → panel (what's delivered, linked example buildings, "Ask for a quote" → contact panel); prices only if owner-supplied; Pidgin seller call-outs written/approved by the owner; taxi/bus drop-off
+- [ ] **P3B-08** Outskirts: residential filler houses (one merged mesh, not clickable), road out towards Douala/Limbe where traffic enters and leaves; ground-floor shopfronts downtown
+- [ ] **P3B-09** Drive mode: drive a taxi or bendskin (WASD / touch joystick), camera follows; eggs ("visit every district", "obey every red light")
+- [ ] **P3B-10** Performance pass: phone tier (about half the traffic/people), reduced motion (vehicles parked, people still), `npm run perf` within budget
+
+**Done when:** traffic, people and the market make the city feel lived-in at every Buea time and weather, clicks on them do something, and `npm run perf` still passes on desktop and phone.
+**Needs from the owner:** list of services for the market stalls (+ prices if wanted) and the Pidgin call-out lines, in `docs/projects.md`.
 
 ## Phase 4 — Ask My Portfolio (AI)
 - [ ] **P4-01** Knowledge builder: content → compact knowledge doc used as the cached system context

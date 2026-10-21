@@ -93,6 +93,22 @@ test('tolerates the formatting slips in owner-written markdown', () => {
     assert.equal(profile.links.githubUsername, 'tester');
 });
 
+test('a blank line in the origin story starts a new paragraph; wrapped lines join with a space', () => {
+    const { errors, profile } = parseProjectsMd(doc({
+        profile: `
+### Origin story
+_A note for the owner._
+
+ First line,
+ same paragraph.
+
+ Second paragraph.`,
+    }));
+    assert.deepEqual(errors, []);
+    assert.equal(profile.origin, 'First line, same paragraph.\n\nSecond paragraph.');
+    assert.equal(profile.bio, 'Hello.');
+});
+
 test('"2025-" end dates keep the year; blanks become TODO(content), "—" becomes null', () => {
     const { errors, projects } = parseProjectsMd(doc({
         projects: project('A', `

@@ -3,8 +3,14 @@
 import { useRef, useState } from 'react';
 import { useFrame } from '@react-three/fiber';
 import CityExperience from './CityExperience.jsx';
+import LaneDebug from './LaneDebug.jsx';
+import VehicleShowroom from './VehicleShowroom.jsx';
 import { DISTRICT_PLOTS } from '../lib/layout.js';
 import { bueaClock, bueaTimeToday, cityLightsAt, parsePreviewOverride, sunState } from '../lib/dayNight.js';
+
+// ?lanes: the lane graph overlay (P3B-01). ?vehicles: the vehicle showroom (P3B-02).
+const SHOW_LANES = new URLSearchParams(window.location.search).has('lanes');
+const SHOW_VEHICLES = new URLSearchParams(window.location.search).has('vehicles');
 
 const round = (v) => v.toArray().map((n) => n.toFixed(1)).join(', ');
 
@@ -28,7 +34,13 @@ const CityPreview = () => {
     const lights = cityLightsAt(sun);
 
     const debug = ({ status, error, data, layout, focusName }) => ({
-        scene: <Stats onChange={setStats} />,
+        scene: (
+            <>
+                <Stats onChange={setStats} />
+                {SHOW_LANES && layout && <LaneDebug layout={layout} />}
+                {SHOW_VEHICLES && layout && <VehicleShowroom layout={layout} />}
+            </>
+        ),
         at,
         weather: weatherOverride,
         overlay: (

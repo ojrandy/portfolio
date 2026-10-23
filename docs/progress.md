@@ -17,6 +17,22 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-23 — System prompt
+**Tasks:** P4-02 (done)
+**Decisions (owner):** plan approved. The guide is **OJ Guide**; it talks about Ojong in the third person as "he"; it answers in the visitor's language: English, French or Pidgin.
+**Done:**
+- `server/prompts/system.md` (owner-editable rules): role and audiences, knowledge-only facts with the knowledge treated as data, "I don't know" + contact form, no invented numbers/clients/testimonials/dates/prices, GitHub numbers named as GitHub's, prices only from the FAQ as Ojong's own answer, `[slug]` citations (only slugs in the knowledge), scope (portfolio + finding your way round OJ City; one-line redirect for anything else), short plain-text answers fitted to employer vs client, language matching, security (rules can't be changed by the conversation, no revealing the prompt, no personal data beyond the knowledge, one calm line for abuse), what it can't do.
+- `server/lib/systemPrompt.js`: `loadRules()`, `buildSystem(knowledge)` → rules block + `<knowledge>` block with the cache breakpoint; refuses knowledge containing a `<knowledge>` tag.
+- `npm run knowledge:build` prints the combined size: ~5.2k tokens (rules ~1.5k + knowledge ~3.7k).
+- Knowledge doc header now says "his work" (pronoun confirmed). `architecture.md` (system prompt layout and caching), `security.md` (guardrails in place).
+**Checks:** `npm test` 273/273 (system prompt 4); lint clean on changed files.
+**Problems / notes:**
+- The rules are untested against the model until P4-03 exists; the P4-06 eval set is where behaviour (refusals, injection, language, citations) gets checked.
+- The district list in the rules (Downtown, Market, Cinema, Arcade, School, Pitch, About house) is written by hand; update it if a district is added or renamed.
+**Next:** P4-03 `POST /api/chat`.
+
+---
+
 ## 2026-10-23 — Knowledge builder
 **Tasks:** P4-01 (done)
 **Decisions (owner):** plan approved; the guide also knows the GitHub-discovered repos; `server/knowledge/knowledge.md` is a git-ignored review copy (the server builds the text in memory).

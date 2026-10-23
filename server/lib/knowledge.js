@@ -278,7 +278,7 @@ export const buildKnowledge = ({ profile, projects, buildings = null }) => {
     const name = oneLine(profile.name) ?? 'the owner';
     return [
         `# Knowledge: ${name}`,
-        `Everything the guide knows about ${name} and their work. Facts only come from here.`,
+        `Everything the guide knows about ${name} and his work. Facts only come from here.`,
         ...Object.values(sections),
         unknownSection(profile, sections),
     ].filter(Boolean).join('\n\n') + '\n';

@@ -88,7 +88,7 @@ A real, busy Buea-style city, not just buildings (ADR-013). Rules in design_syst
 
 ## Phase 4 — Ask My Portfolio (AI)
 - [x] **P4-01** Knowledge builder: content → compact knowledge doc used as the cached system context (`server/lib/knowledge.js` 7 tests, `npm run knowledge:build`, `router.buildings()`; ~3.7k tokens today)
-- [ ] **P4-02** System prompt: scope, citing projects, honesty ("I don't know"), tone, refusal of off-topic/abuse
+- [x] **P4-02** System prompt: scope, citing projects, honesty ("I don't know"), tone, refusal of off-topic/abuse (`server/prompts/system.md`, `server/lib/systemPrompt.js` 4 tests; OJ Guide, "he", English/French/Pidgin)
 - [ ] **P4-03** `POST /api/chat`: streaming (SSE), zod-validated, per-IP rate limit, message/length caps, daily spend cap
 - [ ] **P4-04** Tools: `fly_to_project`, `open_case_study`, `open_contact`, `switch_mode`, handled on the client
 - [ ] **P4-05** Chat UI: floating guide, suggested questions, citations as chips, works in both modes

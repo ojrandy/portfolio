@@ -336,6 +336,9 @@ export const parseProjectsMd = (md, file = 'docs/projects.md') => {
         bio: TODO,
         origin: TODO,
         services: [],
+        marketCalls: [],
+        taxiLines: { pickup: [], arrival: [] },
+        policeLines: { chase: [], pullOver: [] },
         hobbies: [],
         motifs: [],
         experience: [],
@@ -428,7 +431,62 @@ export const parseProjectsMd = (md, file = 'docs/projects.md') => {
                 profile.origin = P.text(paragraph());
             } else if (title.includes('service')) {
                 warnStray(paras);
-                profile.services = bullets().map((b) => b.v).filter(Boolean);
+                // One stall each in the Market (P3B-07): the name, then optional Delivered / Examples sub-bullets.
+                profile.services = items.flatMap((item) => {
+                    const { v: name, demo } = readValue(item.text);
+                    if (!name) return [];
+                    const service = { name, delivered: null, examples: [], demo, demoFields: [] };
+                    for (const c of item.children) {
+                        const f = splitField(c.text);
+                        const key = f && normKey(f.key);
+                        const { v, demo: cdemo } = readValue(f?.value);
+                        if (key === 'delivered') {
+                            service.delivered = v === '' || isNone(v) ? null : P.text(v);
+                            if (cdemo) service.demoFields.push('delivered');
+                        } else if (key === 'examples') {
+                            if (v === '' || isNone(v) || isTodo(v)) continue;
+                            for (const raw of splitList(v)) {
+                                const s = raw.trim();
+                                if (/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(s)) service.examples.push({ slug: s, n: c.n });
+                                else at(c.n).err(`Examples: expected project slugs (lowercase-with-dashes), got "${s}"`);
+                            }
+                        } else {
+                            at(c.n).err(`unknown service field "${c.text}" (expected "Delivered:" or "Examples:")`);
+                        }
+                    }
+                    return [service];
+                });
+            } else if (title.includes('police')) {
+                // Police chase (P3B-11): "Chase:" / "Pull over:" with one line per sub-bullet.
+                warnStray(paras);
+                for (const item of items) {
+                    const f = splitField(item.text);
+                    const key = f && normKey(f.key);
+                    const which = key === 'chase' ? 'chase' : key === 'pull over' || key === 'pull-over' ? 'pullOver' : null;
+                    if (!which) {
+                        at(item.n).err(`expected "Chase:" or "Pull over:", got "${item.text}"`);
+                        continue;
+                    }
+                    const lines = [readValue(f.value).v, ...item.children.map((c) => readValue(c.text).v)];
+                    profile.policeLines[which].push(...lines.filter((v) => v && !isTodo(v)));
+                }
+            } else if (title.includes('driver')) {
+                // Taxi rides (P3B-06): "Pick-up:" / "Arrival:" with one line per sub-bullet.
+                warnStray(paras);
+                for (const item of items) {
+                    const f = splitField(item.text);
+                    const key = f && normKey(f.key);
+                    const which = key === 'pick-up' || key === 'pickup' ? 'pickup' : key === 'arrival' ? 'arrival' : null;
+                    if (!which) {
+                        at(item.n).err(`expected "Pick-up:" or "Arrival:", got "${item.text}"`);
+                        continue;
+                    }
+                    const lines = [readValue(f.value).v, ...item.children.map((c) => readValue(c.text).v)];
+                    profile.taxiLines[which].push(...lines.filter((v) => v && !isTodo(v)));
+                }
+            } else if (title.includes('call-out') || title.includes('callout')) {
+                warnStray(paras);
+                profile.marketCalls = bullets().map((b) => b.v).filter((v) => v && !isTodo(v));
             } else if (title.includes('hobb')) {
                 warnStray(paras);
                 profile.hobbies = bullets().flatMap(({ v, n }) => {
@@ -723,6 +781,15 @@ export const parseProjectsMd = (md, file = 'docs/projects.md') => {
             const a = readValue(m[2]);
             profile.faq.push({ q: P.text(q.v), a: P.text(a.v), demo: q.demo || a.demo, demoFields: [] });
         }
+    }
+
+    // Service examples must name a project block in section 3 (GitHub-only repos have no stable slug here).
+    const slugs = new Set(projects.map((p) => p.slug));
+    for (const service of profile.services) {
+        for (const { slug: s, n } of service.examples) {
+            if (!slugs.has(s)) at(n).err(`Examples: no project with slug "${s}" in section 3`);
+        }
+        service.examples = [...new Set(service.examples.map((e) => e.slug))];
     }
 
     return { profile, projects, errors, warnings };

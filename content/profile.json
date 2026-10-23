@@ -29,14 +29,144 @@
     "bio": "I believe that with 0s and 1s, together, we can make the world a better place, if not the best one. I hold a First Class degree in Software Engineering from the University of Buea, and I have built many projects while keeping a simple, easy life. I see myself as a techpreneur: my biggest breakthroughs are Vital Pulse and Smart Meal, which I am shipping now.",
     "origin": "I'm Ojong, from Osing village in Bayangi. My dad is Orocko, so which tribe I really belong to is a running father-and-son debate at home, all in good fun. I grew up in Tiko, where I studied the sciences in secondary school, and moved to Buea in 2020.\n\nI started with basic computing at a cyber café, then earned an HND in Software Engineering. Harvard's CS50 with Prof. David J. Malan gave me the best introduction to computer science, and JavaScript Mastery on YouTube taught me JavaScript, its frameworks and Three.js, the library this city is built with. Today I hold a degree in Software Engineering, the AWS Cloud Practitioner certification and several Udemy certificates in Dart and Flutter.\n\nI see coding as a source of strength; as my friends always say, my powers are in my fingers. Security is at the heart of how I work: I never trust anything that comes from the client side, and I am preparing a Master's in Information Security. I am the software engineer who builds on cloud infrastructure and protects the data and information that live on it.",
     "services": [
-        "Web & Mobile Development",
-        "Video editing",
-        "CCTV Camera installation",
-        "Graphics design with Figma and Adobe XD",
-        "Leverage the use of AI for the best study experience",
-        "SEO and Google map integration",
-        "Experienced lecturer in computer science and related IT courses"
+        {
+            "name": "Frontend development",
+            "delivered": "Fast, responsive interfaces in React, Next.js and Tailwind CSS that look sharp on every screen.",
+            "examples": [
+                "anointed-plc",
+                "computer-solution",
+                "food-app-website"
+            ],
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "name": "Backend development",
+            "delivered": "Secure APIs and servers in Node.js and Express, with validated input and well-designed databases.",
+            "examples": [
+                "vital-pulse",
+                "navoraglobalfreight",
+                "iot-sentinelf"
+            ],
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "name": "Web app development",
+            "delivered": "Complete web applications, from the database to the dashboard, deployed and ready for real users.",
+            "examples": [
+                "sns-glam",
+                "wvl",
+                "novatransport"
+            ],
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "name": "Mobile app development",
+            "delivered": "Android and iOS apps built with Flutter or React Native, ready to publish to the stores.",
+            "examples": [
+                "vital-pulse",
+                "expense-tracker",
+                "food-recipe2"
+            ],
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "name": "Graphics design",
+            "delivered": "Logos, flyers, social media visuals and app screens, designed in Figma and Adobe XD.",
+            "examples": [],
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "name": "Cloud infrastructure",
+            "delivered": "Hosting, domains, databases and backups set up in the cloud, secured and ready to grow.",
+            "examples": [],
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "name": "AI infrastructure",
+            "delivered": "AI built into your product: chat assistants, smart search and automations on today's leading models.",
+            "examples": [
+                "threejs"
+            ],
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "name": "QA & QC",
+            "delivered": "Testing that catches bugs before your users do: test plans, automated tests and a clear report.",
+            "examples": [],
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "name": "Project management",
+            "delivered": "Your project planned, tracked and delivered, with clear milestones and regular updates.",
+            "examples": [],
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "name": "Video editing",
+            "delivered": "Clean edits for adverts, events and social media, cut in Premiere Pro and CapCut.",
+            "examples": [],
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "name": "CCTV installation",
+            "delivered": "CCTV cameras installed for homes and businesses, set up so you can watch from your phone.",
+            "examples": [],
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "name": "SEO & Google Maps",
+            "delivered": "Get found on Google: on-page SEO, and your business on Google Maps and on your website.",
+            "examples": [
+                "computer-solution"
+            ],
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "name": "IT lecturing & training",
+            "delivered": "Computer science and IT courses taught clearly, from first steps to real projects.",
+            "examples": [],
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "name": "AI for studying",
+            "delivered": "Learn to use AI tools to study smarter: research, summaries and exam revision.",
+            "examples": [],
+            "demo": false,
+            "demoFields": []
+        },
+        {
+            "name": "And many more",
+            "delivered": "Need something tech that isn't on a stall? Tell me what you need.",
+            "examples": [],
+            "demo": false,
+            "demoFields": []
+        }
     ],
+    "marketCalls": [
+        "I wan buy",
+        "Who they here"
+    ],
+    "taxiLines": {
+        "pickup": [],
+        "arrival": []
+    },
+    "policeLines": {
+        "chase": [],
+        "pullOver": []
+    },
     "hobbies": [
         {
             "name": "Coding",

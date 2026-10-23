@@ -29,10 +29,21 @@ export const DISTRICT_PLOTS = {
     pitch: { side: 1, row: 'south', color: COLORS.fakoGreen, height: 0.6 },
 };
 
+// Market (P3B-07): west of Career Road beside the entrance, on red earth. `setback` from the road's edge keeps it
+// clear of the Career Road signs (0.8 out, 3 wide) and leaves the roadside to the lamps, palms and the taxi stop.
+export const MARKET = { width: 13, depth: 9, setback: 4.6, back: 0.5, color: mixHex(COLORS.ash, '#9A5B3C', 0.45) };
+
+// Outskirts (P3B-08): Career Road carries on `length` south past the entrance to a T with the road to Limbe (west)
+// and Douala (east), as Buea's road runs down to Mutengene; the main road runs on `reach` past the plots each way.
+// Traffic enters and leaves at the far ends, out of the start view. Houses may use `north` beyond the town's north
+// edge and `south` beyond the T.
+export const ROAD_OUT = { length: 24, reach: 30, north: 30, south: 16 };
+
 export const LAYOUT_COLORS = {
     ground: mixHex(COLORS.basalt, COLORS.fakoGreen, 0.25),
     street: COLORS.ash,
     main: mixHex(COLORS.ash, COLORS.mist, 0.1),
+    out: mixHex(COLORS.ash, COLORS.mist, 0.05),
     career: mixHex(COLORS.ash, COLORS.indigo, 0.2),
     marking: COLORS.mist,
     pavement: mixHex(COLORS.ash, COLORS.mist, 0.15),
@@ -139,6 +150,10 @@ export const layoutCity = (buildings) => {
         const size = id === 'pitch' ? PLOT * 0.6 : PLOT * 0.35;
         return { ...plot, placeholder: { x: plot.x, z: plot.z, width: size, depth: size * (id === 'pitch' ? 0.6 : 1), height: d.height, color: d.color } };
     });
+    const marketX1 = -CAREER_ROAD / 2 - MARKET.setback;
+    const marketZ1 = careerEnd - MARKET.back;
+    const market = rect('district', marketX1 - MARKET.width, marketZ1 - MARKET.depth, marketX1, marketZ1, { id: 'market', color: MARKET.color });
+    districts.push({ ...market, placeholder: { x: market.x, z: market.z, width: 4, depth: 3, height: 1.2, color: COLORS.ember } });
 
     const roads = [
         rect('street', -outer, -outer, outer, -half), // north
@@ -147,6 +162,16 @@ export const layoutCity = (buildings) => {
         rect('main', -plotOuter, mainZ0, plotOuter, mainZ1),
         rect('career', -CAREER_ROAD / 2, mainZ1, CAREER_ROAD / 2, careerEnd),
     ];
+    // Roads out: the same widths as the roads they continue, so the lanes line up (roadGraph joins them end to end).
+    const reach = plotOuter + ROAD_OUT.reach;
+    const teeZ0 = careerEnd + ROAD_OUT.length;
+    const teeZ1 = teeZ0 + MAIN_ROAD;
+    roads.push(
+        rect('out', -reach, mainZ0, -plotOuter, mainZ1),
+        rect('out', plotOuter, mainZ0, reach, mainZ1),
+        rect('out', -CAREER_ROAD / 2, careerEnd, CAREER_ROAD / 2, teeZ0),
+        rect('out', -reach, teeZ0, reach, teeZ1), // Limbe (west) – Douala (east)
+    );
     for (let i = 1; i < blocks; i++) {
         const a = -half + i * BLOCK + (i - 1) * STREET;
         roads.push(rect('street', a, -half, a + STREET, half)); // between columns
@@ -158,6 +183,11 @@ export const layoutCity = (buildings) => {
         ...dashes(-plotOuter, -CAREER_ROAD / 2 - DASH, 'x', mainCentre),
         ...dashes(CAREER_ROAD / 2 + DASH, plotOuter, 'x', mainCentre),
         ...dashes(mainZ1, careerEnd, 'z', 0),
+        ...dashes(-reach, -plotOuter, 'x', mainCentre),
+        ...dashes(plotOuter, reach, 'x', mainCentre),
+        ...dashes(careerEnd, teeZ0 - DASH, 'z', 0),
+        ...dashes(-reach, -CAREER_ROAD / 2 - DASH, 'x', teeZ0 + MAIN_ROAD / 2),
+        ...dashes(CAREER_ROAD / 2 + DASH, reach, 'x', teeZ0 + MAIN_ROAD / 2),
     ];
 
     return {
@@ -172,5 +202,10 @@ export const layoutCity = (buildings) => {
         // Where Career Road starts; the camera rig (P1-05) begins here.
         entrance: { x: 0, z: careerEnd },
         bounds: { minX: -plotOuter, maxX: plotOuter, minZ: -outer, maxZ: careerEnd },
+        // Where the camera target may go: the town and the road out down to the T.
+        reach: { minX: -plotOuter, maxX: plotOuter, minZ: -outer, maxZ: teeZ1 },
+        // The T where the road out meets the Limbe–Douala road, and the area the outskirts' houses may use.
+        roadOut: { x: 0, z: (teeZ0 + teeZ1) / 2, width: MAIN_ROAD, reach },
+        outskirts: { minX: -reach, maxX: reach, minZ: -outer - ROAD_OUT.north, maxZ: teeZ1 + ROAD_OUT.south },
     };
 };

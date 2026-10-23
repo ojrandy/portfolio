@@ -25,6 +25,13 @@ export const initialQuality = ({ cores, memoryGb, touch = false } = {}) => {
     return modest ? 'medium' : 'high';
 };
 
+/**
+ * Share of the full crowd (vehicles, people, shoppers) for this device (P3B-10): phones and weak devices get half.
+ * Decided once from the first guess, not the live level: a new share rebuilds the traffic and everyone would jump.
+ * @param {{ touch?: boolean, tier?: string }} device
+ */
+export const crowdShare = ({ touch = false, tier } = {}) => (touch || tier === 'low' ? 0.5 : 1);
+
 /** One level up (dir = 1) or down (dir = -1), clamped. */
 export const stepQuality = (level, dir) => {
     const i = LEVELS.indexOf(level);

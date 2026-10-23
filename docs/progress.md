@@ -17,6 +17,211 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-23 — Police chase
+**Tasks:** P3B-11 (done)
+**Decisions (owner):** plan approved. Two eggs (Escape artist, Good citizen); the officer's lines go in `docs/projects.md` for the owner to write, with "Pull over!" / "Red means stop. Drive safe!" until then; no chase with reduced motion.
+**Done:**
+- `src/lib/chase.js` (pure): `navGrid` (1-unit grid of the drive world, roads 1 / grass 3, blocked where a 0.8 square touches a solid; built shape by shape, 9–45 ms, checked cell by cell against `collision` in the tests), A* `findPath` (reused buffers, no allocation per push; a replan ~25 away takes 0.7 ms), `createChase` (takes over a traffic police car within 40, else a road 20–30 away, behind you if it can), `stepChase` (path-follow / direct pursuit, stop 2 short, back up when stuck; lose = 16 for 4 s, or 32 before it has been within 16; pull over = stopped within 3 for 2 s; waits 3 s; drives off to a road 20–30 away and fades over 8 s). `HANDLING.police` (4.2, turns wider). `drive.js` exports `touches`.
+- `traffic.js`: `player` takes a list of footprints (you and the police car: drivers stop, walkers wait); `takeVehicle`.
+- `Drive.jsx`: starts the chase on a red (not with reduced motion), steps it, your car can't go through it, bubbles ("Pull over!" after 1.2 s, the pull-over line, "You lost them."), eggs, siren while chasing, `streets.chase`, store `chase` for the chip; `?perf` only: `__cityPerf.redRun = true` counts as a red (browser checks). `Traffic.jsx` draws the police car as one more instance and its roof lights (new beacon glow mesh, blue/red, 5 Hz, only while chasing). `citySound.js` `startSiren`. `StreetControls.jsx` chip: "Police! Lose them or pull over · n away" / "Pulled over" (phase in an aria-live region). Store: `chase`, `setChase`.
+- Content: "Police lines (Pidgin)" in `docs/projects.md` (Chase / Pull over, TODO(content)), parser + schema → `profile.policeLines`.
+- Eggs 12 → 14 (Escape artist, Good citizen).
+**Checks:** `npm test` 262/262 (chase 4, traffic +1, content +1); lint clean on changed files; build OK. Playwright on the production build at 18:40: Drive → Taxi, `redRun` → chip "Police! … 23 away", it came and stopped behind the waiting taxi in ~9 s → "Pulled over" + "Easter egg 1/14: Good citizen", the chip goes and it drives off (draw calls 49 → 50 while chasing → 49), a second chase ends cleanly on Esc; the police car turning in with its roof light flashing; 60 fps during the chase (worst frame 30 ms); no console errors.
+**Problems / notes:**
+- The owner needs to write the officer's lines in `docs/projects.md` ("Police lines (Pidgin)"), then `npm run content:build`.
+- In the browser the chase was started with the perf-only `redRun` flag, not by really running a red (that path is the existing `trackTrip`, unit-tested). Losing it was tested in the unit tests only, not in the browser; the siren wasn't listened to (headless).
+- Pulled over in the chase view, the police car stops between your car and the camera and fills the bottom of the screen for those 3 s.
+- `npm run perf` wasn't re-run with a chase on (it doesn't drive); the machine was still heavily loaded.
+**Next:** P0-06 initial JS (446 KB, budget 200), or the next phase.
+
+---
+
+## 2026-10-23 — Performance pass
+**Tasks:** P3B-10 (done)
+**Decisions (owner):** plan approved; low-tier devices get the half crowd too (not only phones); the T sign and Market bulbs notes were fixed here.
+**Found:** the phone half (vehicles, people, shoppers) and nearly all reduced-motion handling were already in from P3B-03/04/07. Every `useFrame` was checked: the only thing still moving under reduced motion was the featured billboard turning over. The real gap was `npm run perf`: it used the real Buea time, so a run at 03:00 measured ~4 vehicles and passed without saying anything about rush hour, and it never measured dusk glows, the zoomed-out view or reduced motion.
+**Done:**
+- `quality.js` `crowdShare({ touch, tier })`: 0.5 on touch devices and when the first quality guess is low, 1 otherwise; used by Traffic, Pedestrians and MarketPlot (was `touch ? 0.5 : 1` in three places). Decided once on load, not on PerformanceMonitor step-downs (a new share rebuilds the traffic). +1 test.
+- `?perf&time=HH:MM` pins Buea time in the production build (perf runs only, reuses `parsePreviewOverride`). `scripts/perf.mjs`: default `--time=17:30` (rush hour at dusk: full crowd, lamps and head/tail-light glows; `--time=live` for the clock); a third sample zoomed right out (hold '-' from the start view); `--reduced-motion` runs with prefers-reduced-motion and fails if any vehicle or person moves (`PerfProbe` `crowd()`); prints the crowd size and the zoomed-out draw calls.
+- `StreetProps.jsx`: the featured billboard doesn't turn over with reduced motion.
+- T sign (`Outskirts.jsx`): one place per row with its arrow on its side and a rule between ("← Douala" over "Limbe →"); board 1.4 tall (was 1), texture 1024 × 840.
+- Market (`MarketPlot.jsx`): three bulbs just in front of each tarp's edge instead of one under it (same draw call).
+- `design_system.md`: phones and weak devices, reduced motion list, perf defaults, T sign, Market bulbs.
+**Checks:** `npm test` 256/256; lint clean on changed files; build OK (initial JS 446 KB, lazy 96 KB). `npm run perf`, all PASS on desktop (quality medium) and phone (Pixel 7, 4× throttle, low):
+- 17:30 default: desktop 56.4 / 56.3 / 60 fps (idle / flight / zoomed out), 43 draw calls (60 zoomed out), 30 vehicles + 39 people; phone 53.1 / 53.7 / 59.7, 41 calls, 15 + 19.
+- `--weather=storm`: desktop 59.7 / 56.9 / 60, 45 calls (62 out); phone 58.2 / 54.3 / 55.4, 43.
+- `--reduced-motion`: nobody moved; desktop 60 / 59.6 / 59.5; phone 49.6 / 38.2 / 48.3.
+- `--time=03:00`: 4 vehicles, 2 people; desktop 60 / 56.6 / 60; phone 56 / 41.9 / 48.4.
+- Playwright on the production build at 18:50: Market stalls show their bulbs from above, the T sign reads "← Limbe" over "Douala →" from the town side, no page errors.
+**Problems / notes:**
+- The machine was at 100 % CPU with < 1 GB free memory (VS Code, Chrome) during the runs: two runs timed out before loading, and the phone reduced-motion / 03:00 numbers (less work, lower fps) are noise. Worth one re-run on an idle machine.
+- On the phone the zoomed-out sample shows the same draw calls as the start view: the portrait start view is probably already near the maximum distance.
+- The reduced-motion check was only run where it should pass; it wasn't tried against moving traffic.
+- Initial JS is still 446 KB gzip (budget 200); P0-06.
+**Next:** P3B-11 police chase, or P0-06 initial JS.
+
+---
+
+## 2026-10-23 — Drive mode
+**Tasks:** P3B-09 (done); P3B-11 added (police chase, later)
+**Decisions (owner):** plan approved. Roads and grass are drivable, not pavements or buildings; chase view by default plus the driver's seat for the taxi; Model driver = every set of lights in one drive with no red; running a red only says "Red light!" and clears the count for now (the police coming after you is P3B-11, later); stopped next to a building, Enter (or the chip) opens its project.
+**Done:**
+- `src/lib/drive.js` (pure): arcade handling (taxi top 4, bendskin 4.4, 60 % on grass), solid shapes from the layout in a grid (pavements, plots, fuel station parts, stops, kiosks, benches, trunks, lamps, poles, sign and billboard posts, About house, pens, outskirts houses, the T sign), bounds = `layout.outskirts`, slide along walls / stop head-on, sub-steps of 0.12; `chaseView` (comes in when a building is behind), `nearBuilding`, `districtAt`, `trackTrip` (districts, crossings passed, red runs). `drive.test.js` (8 tests: start spot, 90 s random driving on every tier never leaves the bounds or ends inside anything, walls / sliding / reverse / grass, vehicles and people, red lights and the egg, districts and the tour, chase camera vs buildings and the building you stop by, deterministic).
+- `traffic.js`: `stepTraffic` takes `player` (your footprint): drivers who see it ahead stop behind it, nobody moves into it; `crosswalkClear` keeps walkers back while your car is within 1. Traffic test: parked in a lane and in a crossing for 90 s, nobody drives into it, traffic still flows, walkers wait.
+- `Drive.jsx` (keys, joystick input, bump honks, "End of OJ City. Turn back!", "Red light!", eggs, engine hum), `Traffic.jsx` draws your car as one more instance (no extra draw calls), `CameraRig.jsx` chase view / driver's seat, Esc parks and the view comes back, `TaxiCabin.jsx` driver's-seat cabin with a spoked wheel that turns (2 draw calls, only in that view), `StreetControls.jsx` Drive menu, chip (Open <project>, View, Horn, Park), touch joystick. Store: `driving`, `driveNear`, `startDrive` / `stopDrive` / `setDriveView` / `peekProject`. Eggs 10 → 12 (Tour guide, Model driver). `honkText` moved to `vehicles.js`.
+**Checks:** `npm test` 255/255; lint clean on changed files; build OK. `npm run perf`: desktop PASS (60 / 59.5 fps, 40 draw calls), phone PASS (59 / 53.6 fps, 40); initial JS 445.8 KB (unchanged), city chunk 93.2 KB (was 87.6). Playwright on the production build (:3105), 16/16: Drive → Taxi, the city gets the keys, up Career Road into downtown, stopped by Learn Contri Talk → Open → panel opens while still driving, V → driver's seat, H → "Beep beep!", Esc parks, bendskin (no seat view) + Park, Pixel 7 joystick drives, no horizontal scroll, no console errors.
+**Problems / notes:**
+- First look from the driver's seat had the wheel filling the windscreen: the wheel is now lower and nearer the dashboard, and your eyes sit a little further back.
+- The eggs were tested in the unit tests, not by driving them in the browser.
+- Drivers wait behind your car as long as it stays in their lane (no overtaking in the simulation).
+- The T sign reads "Douala·Limbe" squeezed together from far away (P3B-08), worth a look in P3B-10.
+- Initial JS is still 446 KB gzip (budget 200); P0-06.
+**Next:** P3B-10 performance pass, or P3B-11 police chase.
+
+---
+
+## 2026-10-23 — Outskirts and the road out
+**Tasks:** P3B-08 (done)
+**Decisions (owner):** plan approved. Career Road carries on south to a T: Limbe west, Douala east (the real Buea → Mutengene roads); the main road runs on through the outskirts too; shopfronts carry each project's own name (real content); the goats and chickens stay by Career Road.
+**Done:**
+- `layout.js`: `ROAD_OUT`; four `out` roads (main road +30 each way, Career Road +24 to the T, the 4-wide Limbe–Douala road), dashed centre lines, `layout.reach` (camera target down to the T, used by `CameraRig`), `layout.roadOut`, `layout.outskirts`. `layout.bounds` is unchanged, so props, pens, plots and the start view stay where they were.
+- `roadGraph.js`: pieces of one road laid end to end are joined into one line (no junction between Career Road and its road out). Edges are now the four far ends; the T is a give-way tee.
+- `traffic.js`: `SPEED.out` 3.2; every entry equally likely (no more "fewer from the entrance"); `index.town` = lanes town traffic can reach. Drop-offs only on those, and bookings only take taxis already in town (a taxi still on the Douala road had made an About ride take 105 s). Corners: the two turns always conflict (two buses touched on a corner, an old case the new traffic pattern exposed).
+- `pedestrians.js`: someone who has waited a whole light cycle may start crossing later in the red (more turning traffic had someone waiting 39.6 s on tier 6).
+- `src/lib/outskirts.js` + `src/city/Outskirts.jsx` (3 draw calls): about 150 houses (240 on tier 8), rows facing the roads out plus a thinning grid, zinc gable roofs (new `roof` part in `propGeometry.js`), verandas, yard walls, lit windows at night; the Limbe / Douala sign at the T.
+- `src/lib/shopfronts.js` + `src/city/Shopfronts.jsx` (3 draw calls): two shops per building, project name on the fascia, awning, door, display window lit at night; `Buildings.jsx` leaves out those ground-floor windows; hidden for a building in X-Ray.
+- Tests: `outskirts.test.js` (3: houses clear of town, roads, each other, the sign and the start view on every tier; the sign; shopfronts face roads), a roads-out traffic test (vehicles appear and vanish only far out), layout + graph tests updated for the new edges and the T.
+**Checks:** `npm test` 246/246; lint clean on changed files; build OK (city chunk 87.6 KB gzip, was 81.2). `npm run perf`: desktop PASS (59.4 / 58.5 fps, 40 draw calls), phone PASS (60 / 60 fps, 40). Playwright on the dev server: start view with houses either side of downtown under Fako, zoomed-out view of the roads out, the T and its sign; shopfronts by day and lit at 20:30 ("Smart Meal" fascia); phone portrait at 17:30 in rain with no house in the foreground; peak 59 draw calls fully zoomed out; no console errors. Ride simulations on every tier: all places reached, longest 96.9 s on tier 8 (limit 100).
+**Problems / notes:**
+- About 25 of the 30 vehicles are in town at any moment now (5 are on the roads out). If downtown feels thin, turning out of town can be made rarer (`EXIT_WEIGHT`).
+- Taxi booking falls back to a new taxi at the nearest entry, which is now ~45 away by road; it only happens when no free taxi in town can go.
+- Rides on the 8 × 8 downtown are close to the 100 s test limit (96.9 s).
+- Initial JS is still 446 KB gzip (budget 200), unchanged; P0-06.
+**Next:** P3B-09 drive mode (can reuse the cabin, the inside view and the roads out), or P3B-10 performance pass.
+
+---
+
+## 2026-10-23 — Riding inside the taxi
+**Tasks:** P3B-06 (rework, owner request)
+**Owner request:** booking a taxi should feel real: the taxi takes you to the place and you are inside it, not a camera trick. Confirmed this is not P3B-09 (drive mode = you drive with WASD/joystick); it builds on P3B-06.
+**Decisions (owner):** full real drive (30–75 s, Skip any time), front passenger seat, the driver says owner-written Pidgin lines (none yet).
+**Done:**
+- `traffic.js`: route rides are back (`planRoute`, `startRide`, `bookTaxi`: the followed taxi, the nearest free taxi that can go, or a new one at an entry); the quick-trip jump is gone. `RIDE.max` 120 s.
+- `src/lib/passenger.js` (pure): seat (right-hand front seat, the driver on the left), field of view, head-turn limits, `passengerView` (eye + target). `passenger.test.js` (2 tests: the eye stays inside the cabin in every heading; look limits and directions).
+- `CameraRig.jsx`: during a ride the camera is your eyes (camera-controls disabled and kept at your seat, so stepping out flies on from there); drag or arrows/WASD/Q/E turn your head and it settles back to the road; Esc / "Get out" leave the ride.
+- `TaxiCabin.jsx` (1 draw call, only during a ride): hood, dashboard and dials, ring steering wheel, pillars, doors, roof lining, mirror and the driver. `Traffic.jsx` hides your taxi's toy-scale shell and its own light glows (they flared across the windscreen); clicks on other vehicles during a ride honk without throwing you out; 1.2 s at the stop before you step out.
+- Engine hum while riding (`citySound.js` `startEngine`, Sound on only). Driver lines: `docs/projects.md` "Taxi driver lines (Pidgin)" (Pick-up / Arrival, TODO(content) for now) → `profile.taxiLines` (parser + schema + 1 content test); the driver stays silent until the owner writes them.
+- Store watchdog: no taxi after 1.5 s, or still riding after 125 s → straight to the place (store tests updated). `say()` takes a duration (driver lines stay 3 s).
+- Ride tests: back to the real-drive test (every place from every entry; rush-hour rides with crossing buttons pressed arrive in < 80 s, 100 s on tier 8, no touching, no red-light running).
+**Checks:** `npm test` 241/241; lint clean on changed files; `content:check` OK. Production build, Playwright from the passenger seat: first attempt showed the toy-scale cabin filling the screen (yellow roof and hood, a black slab of dashboard, a block-stack wheel), fixed with the hidden shell + roomier cabin + torus wheel. Rides: Market 65 s, Pitch 39 s, School (20:00, night) 55 s, Cinema (noon) 57 s; arrival + "Taxi!"; no console errors.
+**Problems / notes:**
+- The owner needs to write driver lines (pick-up and arrival) in `docs/projects.md`, then `npm run content:build`.
+- Two dev servers were running (:5173 and :5174); the store changed, so restart `npm run dev:all` and hard-refresh.
+**Next:** P3B-08 outskirts, or P3B-09 drive mode (can reuse the cabin and the inside view).
+
+---
+
+## 2026-10-22 — Quick taxi rides (owner report)
+**Tasks:** P3B-06 (fix)
+**Owner report:** booking a taxi took too long and in the end no ride came. A ride must not take even 5 s.
+**Causes:** the taxi drove the real route through traffic, obeying every light and give-way (30–75 s, up to 90 s before the give-up). And any arrow/WASD key during a ride silently cancelled it, leaving you halfway with no arrival.
+**Decision (owner):** "Quick trip" (over a 10× time-lapse). The taxi picks you up (camera follows it 1 s), jumps to the drop-off while the camera glides after it, pulls up, and you're there. At most 5 s, whatever happens.
+**Done:**
+- `traffic.js`: `nearestTaxi` (free taxi within 40 of the camera target), `jumpToRide` (lands up to 2.5 before the stop, only where the body and the stretch to the stop are clear, 3 from the lane start if someone is turning in, and nobody behind would have to brake hard; a new taxi when none is near). `RIDE` gets `near`, `pickup`, `pullIn`, `max`. Route planning (`planRoute`, `startRide`, `hailTaxi`) removed.
+- `Traffic.jsx`: quick-trip flow, retries the jump next frame when there's no room, 5 s wall-clock cap → the camera goes to the place. `CameraRig.jsx`: keys (or losing the taxi) during a ride skip to the place; Esc / Stop still leave the ride.
+- Tests: the busy-traffic ride test is now "every place within 5 s" on every tier at rush hour with crossing buttons pressed (taxi stops at the drop-off, no touching, no red-light running). This replaces yesterday's 80 s / 100 s limits.
+**Checks:** `npm test` 236/236; lint clean on changed files. Production build, Playwright at 08:00 WAT (rush hour), timed in the page from click to arrival with no Skip: Market 2.7 s, Pitch 1.4, Cinema 2.4, School 2.5, Arcade 2.4, Downtown 2.2, About house 2.4, Market again 3.2; the chip shows at once; no console errors.
+**Follow-up (same day, owner: still slow and "no ride"):** reproduced on the owner's own dev server (:5173) at Buea's real time (night): rides did arrive in 0.5–2.9 s (also 0.6–3.5 s at 6× CPU throttle), but frame captures showed why it didn't feel like a ride. The follow cam dived to street level among dark buildings, the taxi was hidden behind the TAXI/BUS sign, and the camera then jumped to the place. Fixes:
+- Ride camera (`CameraRig.jsx` `RIDE_VIEW`): a high chase view (16 back, 0.72 rad) instead of the street-level follow cam. While catching up after the jump it pulls out by up to 24, an arc over the city.
+- "Your taxi" pin and label over the ride taxi (`Traffic.jsx`: window-yellow cone, unlit so it reads at night, bobbing; Html label; only during a ride).
+- Pick-up 1 s → 1.5 s, so you see your taxi drive off.
+- Checked: Windows animation effects are on here (so the browser doesn't ask for reduced motion, which skips the taxi on purpose). Frames now show the pinned taxi downtown → the glide over Career Road → the pinned taxi pulling up at the Market → arrival + "Taxi!" in about 3.5 s. `npm test` 236/236, lint clean, build OK.
+- Two OJ City dev servers were running (:5173 since 10-21 19:19 and :5174 since 10-21 06:16); both serve the current files, but a tab open since before the fix needs a hard refresh.
+
+**Follow-up 2 (owner screenshot: stuck on "Finding a taxi…"):** that label means no taxi ever answered, i.e. the ride step in Traffic's frame loop wasn't running or was throwing. Likely cause: a tab left open across the ride-code changes; hot reload keeps the old ride record (no drop-off target), so the new code throws on every frame. Fixed for good:
+- `useCityStore` watchdog, independent of the 3D loop: no taxi after 1.5 s, or still riding after 5.5 s → arrive at the place (`useCityStore.test.js`, 2 tests with mocked timers, incl. an old ride's timers leaving a newer ride alone).
+- `Traffic.jsx`: the ride step is wrapped (any error ends the ride at the place and is logged), a leftover ride without a target ends at once, and with no taxi within 40 the nearest free taxi anywhere answers (a Downtown run had gone straight there with no taxi). No taxi yet → retry next frame instead of skipping the ride.
+- Checked on the owner's dev server at 1920 × 946 with Sound on: all 8 rides (Market, Pitch, Cinema, School, Arcade, Downtown, About house, Market) show the chip at once and arrive in 0.4–3.1 s; no console errors. `npm test` 238/238, lint clean.
+
+**Next:** P3B-08 outskirts, or P3B-09 drive mode.
+
+---
+
+## 2026-10-21 — Market district
+**Tasks:** P3B-07 (done)
+**Decisions (owner):** plan approved. All 15 stalls: the owner's new list (frontend, backend, web app, mobile app, graphics design, cloud infrastructure, AI infrastructure, QA & QC, project management) merged with the earlier one (video editing, CCTV, SEO & Google Maps, IT lecturing, AI for studying), "Graphics" listed twice → one stall, plus "And many more". No prices (they depend on the job). The owner asked Claude to write the "Delivered" lines and approved proposing example projects. Call-outs: "I wan buy" and "Who they here", as written.
+**Done:**
+- Content: `docs/projects.md` services now take **Delivered** / **Examples** sub-bullets, plus a "Market call-outs (Pidgin)" section. The parser makes `services: { name, delivered, examples, demo }[]` and `marketCalls`; unknown example slugs and fields are errors; the schema was updated (+1 content test).
+- `layout.js`: Market plot (`MARKET`, 13 × 9) west of Career Road by the entrance; props, lamps and animals avoid it automatically (district plot). `places.js`: "Market" in Take a taxi, seen from the entrance side; drop-off on Career Road beside the west taxi/bus stop.
+- `src/lib/marketContent.js` (owner content only; demo services, demo fields and demo/unknown examples left out). `src/lib/market.js` (pure, seeded): stall rows, MARKET sign spot, market hours, shoppers walking the aisles, `pickMarket`. `market.test.js` (6 tests: content, plot clear of signs/props/lamps/About house on every tier with 0–8 roles, stalls for 1–18 services, hours, shoppers, clicks).
+- `src/city/MarketPlot.jsx` (4 draw calls) reusing the prop kit helpers now exported from `propGeometry.js`. `MarketPanel.jsx`; `ContactPanel` takes `about` (title "Ask for a quote: <service>", mailto subject "Quote: <service>").
+**Checks:** `npm test` 236/236; lint clean on changed files. Build: Market code only in the lazy city chunk (81.2 KB gzip, was 77.4); initial JS 445.8 KB (services text ~1 KB). Playwright on the production build (scratch script): taxi to the Market, Market button → panel, stall switch, no prices, quote title + mailto subject, example → Vital Pulse panel, 3D clicks on stalls open the right service, shoppers answer "I wan buy" / "Who they here" in turn, dusk view, Pixel 7 no horizontal scroll, no console errors.
+**Problems / notes:**
+- `npm run perf`: phone PASS (55.2 / 49.2 fps, 38 draw calls). Desktop FAIL (40 / 30 fps, 40 draw calls), but an A/B with the Market switched off gave the same (40.9 / 28.5): the machine was busy (VS Code and Chrome using a lot of CPU). **Re-run on an idle machine.**
+- The ride test's 75 s limit broke because a new place changed the order of rides (a tier-3 About ride waited ~20 s at lights whose buttons the test presses at random: 76 s). Now 80 s up to tier 6 and 100 s on tier 8, where rides were already at 74 s.
+- At dusk the stall bulbs sit under the tarps and barely show from above; could be raised in P3B-10.
+- Example names show as written in content (`expense-Tracker`, `food_recipe2`): give those projects proper names in `docs/projects.md` when convenient.
+**Next:** P3B-08 outskirts, or P3B-09 drive mode.
+
+---
+
+## 2026-10-21 — City interactions
+**Tasks:** P3B-06 (done)
+**Decisions (owner):** plan approved with the defaults: the sound module and a muted-by-default toggle now (P5-08 builds on it), the traffic-light click is a crossing button, three new eggs (Taxi!, Goat whisperer, Undercover), no separate Career Road stop (the About house is enough).
+**Done:**
+- `src/lib/cityPicking.js` (pure): ray vs box / sphere hit tests for vehicles (at least 0.5 wide, so motos can be clicked), animals and signal poles. Each joins R3F's events through one invisible hit object with a custom `raycast`, so the nearest thing wins (three's instanced-mesh bounds are computed once and would miss moving vehicles).
+- Follow cam (`CameraRig.jsx`, store `following`): click a vehicle → chase view behind it, still rotatable/zoomable; Esc or Stop goes back to the view from before; keys stay where you are; a vehicle leaving the map ends it.
+- Taxi rides: `traffic.js` `rideTarget` (nearest lane point, never an entry lane), `planRoute` (shortest way over the lane graph, no exits on the way), `startRide` / `hailTaxi` (followed taxi, nearest taxi to the camera target, or a new one at the nearest entry) / `endRide`; the taxi pulls up, waits 1.5 s and emits an `arrived` event. `src/lib/places.js`: Downtown, the four districts, the About house, with the arrival view. Store `rideTo(place)` is the entry point for P4-04. "Take a taxi" menu, "Ride in this taxi", chip with Skip / Stop. Reduced motion: cut to the place.
+- Honk / bleat: speech bubbles (`SpeechBubble.jsx`, also in the live region), `animals.js` `pokeAnimal` (a goat looks at the camera 2.5 s, a hen scurries off inside its pen). `citySound.js`: Web Audio horn / bleat / cluck / button beep, silent unless the new Sound toggle is on (`useSoundStore`, localStorage `oj-city:sound`).
+- Traffic lights: `roadGraph.js` `signalPoles`, `pressSignal` (a green ≥ 2 s old ends now through amber and all red; once a cycle per crossing), `roadGraphFor` (one graph per layout shared by traffic, people and poles). `TrafficLights.jsx`: poles with live lamps and a crossing button, 2 draw calls.
+- Eggs 7 → 10: Taxi! (finish a ride), Goat whisperer, Undercover (follow the police car 20 s).
+- Bottom-left buttons grouped in `StreetControls.jsx` (About, Take a taxi, Sound); the chip sits bottom right (above the buttons on phones).
+**Checks:** `npm test` 229/229; lint clean on changed files (the old template files still have their 5 errors). Build: new code only in the lazy city chunk (77.4 KB gzip by perf, was ~71). `npm run perf`: desktop PASS (60 / 56.2 fps, 39 draw calls), phone PASS (59.2 / 53.6 fps, 35). Playwright on the production build (scratch script, 14/14): ride to the Pitch with the chip, honk on the followed taxi, arrival + "Taxi!" toast, Esc leaves a ride, Skip, sound toggle stored, a hen answers "Bwok bwok!", a pole answers "Beep! The lights change now.", reduced motion cuts to the Cinema, Pixel 7 no horizontal scroll, no console errors.
+**Problems / notes:**
+- The Arcade's nearest lane was the main road's entry lane from the west edge, which nothing on the roads can turn into: drop-offs now skip entry lanes (test: every place from every entry, every tier).
+- A crossing joining a wide and a narrow road put the narrow arm's pole too far out: poles use their own road's width.
+- Clicking the taxi you are riding honks without ending the ride; clicking another vehicle ends it.
+- Pedestrians aren't clickable (not in this task).
+**Next:** P3B-07 Market (needs the owner's services list and Pidgin lines in `docs/projects.md`), or P3B-08 outskirts.
+
+---
+
+## 2026-10-21 — Pedestrians and animals
+**Tasks:** P3B-04 (done)
+**Decisions (owner):** plan approved with the defaults: up to 40 people on desktop (phones half), 2 × 3 goats and 4 + 5 chickens at the edge of today's town, plain clothes colours (no cultural motifs).
+**Done:**
+- `src/lib/pedestrians.js` (pure, seeded): walk network from the block pavements + crosswalks, walking with gaps and keep-right, crossing rules (lights: first 4 s of the red, with time to cross; no lights: give way to drivers near the line for up to 8 s), density by Buea time, rain halves the head count and brings out umbrellas, fade in/out at doorways, two people at each taxi/bus stop by day.
+- `src/lib/traffic.js`: each turn knows the crosswalks it passes; `stepTraffic({ crossing })` stops drivers booking a turn through a busy one; `crosswalkClear` for walkers. `roadGraph.js` crosswalks now have an `id` and the light `phase` that stops traffic across them.
+- `src/lib/animals.js` (pure, seeded): pens near the entrance clear of everything, wander / graze / peck, chickens roost and goats rest at night.
+- `src/lib/figures.js` + `src/city/figureGeometry.js`: person, umbrella, goat, chicken; limbs and heads animated in the vertex shader. `Pedestrians.jsx`, `Animals.jsx` (4 draw calls), mounted in `CityExperience`, sharing a `streets` object with `Traffic.jsx`. Dev showroom `/?city&figures`.
+- Tests: `pedestrians.test.js` (8: density, redLeft vs the lights, walk network on pavement/crosswalks and connected, nobody off the network or starting against the lights, with traffic on every tier: no vehicle ever touches anyone on a crosswalk, longest waits < 30 s on foot and < 50 s driving, head count, stop waiters, deterministic), `animals.test.js` (3), `traffic.test.js` +1 (no turn through a busy crosswalk).
+**Checks:** `npm test` 220/220; lint clean on changed files. Production build: all new code in the lazy city chunk (71.5 KB gzip, was 58.4). `npm run perf`: desktop PASS (59.8 / 55.7 fps, 35 draw calls), phone PASS (55.6 / 53.1 fps, 30). Playwright on the dev server: people walk the pavements mid-stride, cross at the crosswalks, umbrellas in the showroom, goats and chickens visible beside Career Road when zoomed out; no console errors (the dev API returned 500 on some loads, fine on retry).
+**Problems / notes:**
+- First joint run: a driver waited 120 s and a walker 87 s. Causes: people waiting at a corner for a second crosswalk while still on the first, people allowed to start for most of the red (starving turning drivers), and walkers at tees never finding a gap. Fixed by the no-two-crosswalks rule, the 4 s walk window + hurrying across, and an 8 s patience. Drivers now wait up to ~45 s at worst (26 s with no people), since turning drivers give way to people.
+- The animals sit south of the main road, below the start view: they show when zoomed out or travelling along Career Road. If the owner wants them in the first view, move the `HERDS` anchors.
+- Initial JS is still 445 KB gzip (budget 200), unchanged; P0-06.
+**Next:** P3B-06 interactions (plan first): follow cam, hail a taxi, honk / goat bleat.
+
+---
+
+## 2026-10-21 — Street props and billboards
+**Tasks:** P3B-05 (done; desktop perf borderline, see notes). P3B-04 (pedestrians) postponed by the owner.
+**Decisions (owner):** plan approved as proposed: "Call box" kiosks with no network brands or colours, an unbranded "FUEL" station, three billboards (featured project, GitHub numbers, Buea weather).
+**Done:**
+- `src/lib/streetProps.js` (pure, seeded): fuel station, 3 billboards, 2 taxi/bus stops, call boxes, palms, benches, park trees, each at the first free candidate spot clear of roads, blocks, plots, lamps, career signs, the About house and earlier props. `streetProps.test.js` (4 tests, every tier + the real city, 0/3/5 career signs).
+- `src/lib/billboards.js` (+3 tests): featured boards (non-demo, name, stack, HTTPS domain), GitHub numbers (sums over non-demo GitHub projects, source + Buea date), weather (rounded °C, condition, source + time).
+- `src/city/propGeometry.js` (prop kit, merged geometry, text-panel atlas) and `StreetProps.jsx` (3 draw calls; lamps light with the street lamps; panels glow at night; the featured board turns over every 8 s by switching UVs and opens the project on click).
+- `aboutHouseSpot` / `ABOUT_HOUSE` moved into `aboutContent.js` (AboutHouse and the props share them).
+**Checks:** `npm test` 208/208; lint clean on changed files. Playwright on the production build (own server on :3105, `/api/buea` time/weather rewritten for night/rain): boards read "Sns Glam · React · Node", "456 commits · 11 stars across 27 GitHub repositories", "Buea now 25 °C · Overcast"; night glow; clicking the featured board opens Sns Glam's panel (pointer cursor on hover); Pixel 7 no horizontal scroll; no console errors.
+**Problems / notes:**
+- The first placement put the GitHub board behind the fuel station, cut off at the bottom of the start view; all three now stand in a row east of Career Road.
+- `npm run perf`: phone PASS (53.1 / 54.1 fps, 26 draw calls); desktop FAIL on flight (52.5 fps; idle 59.7, 28 draw calls) on a busy machine. An A/B on the same build (props on/off, 4 runs each) gave flight 54.0 vs 56.8 fps and identical idle (60); the long single frames (66–285 ms) happen in both. Repainting the featured board every 8 s (a 9 MB texture upload) was ruled out and replaced by the UV switch anyway. **Re-run `npm run perf` on an idle machine;** if desktop flight stays under 55, P3B-10 can trim (e.g. props stop receiving shadows, smaller atlas).
+- The owner's dev API server (:3001) stopped during the session; checks used a production server on :3105 instead.
+- Weather text and the GitHub board repaint the whole atlas when their data changes (rare).
+**Next:** P3B-04 pedestrians and animals, or P3B-06 interactions (plan first).
+
+---
+
 ## 2026-10-21 — Traffic fix: vehicles passing through each other
 **Tasks:** P3B-03 (fix, owner report)
 **Done:**

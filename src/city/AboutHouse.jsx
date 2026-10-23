@@ -7,11 +7,12 @@ import { useFrame } from '@react-three/fiber';
 import { Html } from '@react-three/drei';
 import * as THREE from 'three';
 import { COLORS, mixHex } from '../lib/palette.js';
+import { ABOUT_HOUSE, aboutHouseSpot } from '../lib/aboutContent.js';
 
 const SIZE = { width: 4.4, height: 2.8, depth: 3.6, roof: 1.5 };
-// Centre this far east of the road's edge (turned walls stay ~1 clear of the lamps) / north of the entrance.
-const PLACE = { roadside: 4, ahead: 7 };
-const FACING = -Math.PI / 2 + 0.5; // front (+z) turned to face the road (west), then a little towards the entrance
+// Placed by aboutHouseSpot: east of the road (turned walls stay ~1 clear of the lamps), 7 north of the entrance;
+// the front (+z) turned to face the road (west), then a little towards the entrance.
+const FACING = ABOUT_HOUSE.facing;
 const BODY_GEOMETRY = new THREE.BoxGeometry(SIZE.width, SIZE.height, SIZE.depth).translate(0, SIZE.height / 2, 0);
 const FRONT_GEOMETRY = new THREE.PlaneGeometry(SIZE.width, SIZE.height).translate(0, SIZE.height / 2, SIZE.depth / 2 + 0.01);
 const ROOF_GEOMETRY = (() => {
@@ -91,7 +92,8 @@ const AboutHouse = ({ road, about, lighting, onOpen, onHover }) => {
         event.stopPropagation();
         onHover(on);
     };
-    const position = [road.x + road.width / 2 + PLACE.roadside, 0, road.z + road.depth / 2 - PLACE.ahead];
+    const spot = aboutHouseSpot(road);
+    const position = [spot.x, 0, spot.z];
 
     return (
         <group name="about-house" position={position} rotation-y={FACING}>

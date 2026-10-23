@@ -1,12 +1,13 @@
 // Contact panel (P3-11): opened by a goal on the Pitch or its "Contact" button. Email and profile links from
-// contactLinks (owner content only); the server-side form joins it in P5-03.
+// contactLinks (owner content only); the server-side form joins it in P5-03. P3B-07: a Market stall's "Ask for a quote"
+// opens it with the service (`about`) in the title and the email subject.
 import { useState } from 'react';
 import Dialog from './Dialog.jsx';
 
 const LINK_CLASS = 'text-window underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-window';
 
-/** @param {{ contact: ReturnType<import('../lib/contactLinks.js').contactLinks>, scored?: boolean, onClose: () => void }} props */
-const ContactPanel = ({ contact, scored = false, onClose }) => {
+/** @param {{ contact: ReturnType<import('../lib/contactLinks.js').contactLinks>, scored?: boolean, about?: string | null, onClose: () => void }} props */
+const ContactPanel = ({ contact, scored = false, about = null, onClose }) => {
     const [copied, setCopied] = useState(null);
 
     const copy = async () => {
@@ -19,13 +20,15 @@ const ContactPanel = ({ contact, scored = false, onClose }) => {
     };
 
     return (
-        <Dialog id="contact-title" title={scored ? 'Goal! Kick off a project' : 'Kick off a project'} onClose={onClose} className="max-w-md">
-            <p className="mb-4 text-sm text-mist/80">Write to Ojong about a project, a role or a question.</p>
+        <Dialog id="contact-title" title={about ? `Ask for a quote: ${about}` : scored ? 'Goal! Kick off a project' : 'Kick off a project'} onClose={onClose} className="max-w-md">
+            <p className="mb-4 text-sm text-mist/80">
+                {about ? 'Tell Ojong what you need. Prices depend on the job, so every quote is made for you.' : 'Write to Ojong about a project, a role or a question.'}
+            </p>
             {contact.email && (
                 <div className="mb-4 border border-mist/15 p-3">
                     <p className="font-mono text-xs text-mist/60">Email</p>
                     <div className="mt-1 flex flex-wrap items-center gap-3">
-                        <a href={`mailto:${contact.email}`} className={`text-sm break-all ${LINK_CLASS}`}>{contact.email}</a>
+                        <a href={`mailto:${contact.email}${about ? `?subject=${encodeURIComponent(`Quote: ${about}`)}` : ''}`} className={`text-sm break-all ${LINK_CLASS}`}>{contact.email}</a>
                         <button
                             type="button"
                             onClick={copy}

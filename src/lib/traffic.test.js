@@ -3,10 +3,12 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { toBuildings } from './buildings.js';
 import { layoutCity, TIERS, BLOCK_LOTS, FEATURED_LOTS } from './layout.js';
-import { buildRoadGraph, signalState, SIGNAL } from './roadGraph.js';
+import { buildRoadGraph, signalState, SIGNAL, pressSignal } from './roadGraph.js';
 import {
     createTraffic, stepTraffic, trafficDensity, targetCount, pickType, bueaMinutes, footprint, footprintsOverlap, MAX_VEHICLES,
+    bookTaxi, planRoute, rideTarget, vehicleById, vehiclePose, RIDE, crosswalkClear, takeVehicle,
 } from './traffic.js';
+import { cityPlaces } from './places.js';
 import { VEHICLE_TYPES } from './vehicles.js';
 import { createRandom } from './random.js';
 import { buildCity, loadProjects } from '../../server/lib/city.js';
@@ -20,7 +22,8 @@ const realLayout = () => {
     const stats = JSON.parse(readFileSync(new URL('./fixtures/github-stats.json', import.meta.url), 'utf8'));
     return layoutCity(toBuildings(buildCity(loadProjects(), { stats }), { now: NOW }));
 };
-const graphs = [...tierLayouts, realLayout()].map(buildRoadGraph);
+const layouts = [...tierLayouts, realLayout()];
+const graphs = layouts.map(buildRoadGraph);
 
 /** Run the traffic for `seconds`, calling `check(state, before)` every step. */
 const run = (graph, { seconds, target = MAX_VEHICLES, rain = 0, seed = 'test', dt = DT, check }) => {
@@ -142,10 +145,184 @@ test('density follows the target; rain slows traffic', () => {
     assert.ok(speed(1) < speed(0) * 0.85);
 });
 
+test('nobody turns through a crosswalk people are on', () => {
+    for (const graph of [graphs[0], graphs.at(-1)]) {
+        // A quarter of the crosswalks busy for the whole run.
+        const crossing = new Set(graph.crosswalks.filter((_, i) => i % 4 === 0).map((cw) => cw.id));
+        const state = createTraffic(graph, { seed: 'walkers', count: MAX_VEHICLES });
+        let entered = 0;
+        for (let i = 0; i < 60 / DT; i++) {
+            const before = new Map(state.vehicles.map((v) => [v, v.seg]));
+            stepTraffic(state, DT, { target: MAX_VEHICLES, crossing });
+            for (const v of state.vehicles) {
+                if (v.seg.type !== 'link' || before.get(v) === v.seg) continue;
+                entered++;
+                assert.ok(![...v.seg.crosswalks].some((id) => crossing.has(id)), `vehicle ${v.id} drove through ${v.seg.id}`);
+            }
+        }
+        assert.ok(entered > 10, `only ${entered} turns taken`);
+    }
+});
+
 test('deterministic: the same seed gives the same traffic', () => {
     const snapshot = (s) => s.vehicles.map((v) => `${v.type}:${v.seg.id}:${v.s.toFixed(4)}`).join('|');
     const a = run(graphs.at(-1), { seconds: 60 });
     const b = run(graphs.at(-1), { seconds: 60 });
     assert.equal(snapshot(a), snapshot(b));
     assert.notEqual(snapshot(a), snapshot(run(graphs.at(-1), { seconds: 60, seed: 'other' })));
+});
+
+test('roads out (P3B-08): vehicles appear and leave only at the far ends, out in the outskirts', () => {
+    layouts.forEach((layout, i) => {
+        const { bounds } = layout;
+        const outside = (p) => p.x < bounds.minX - 20 || p.x > bounds.maxX + 20 || p.z > bounds.maxZ + 20;
+        const state = createTraffic(graphs[i], { seed: `out-${i}` });
+        const seen = new Set();
+        for (let step = 0; step < 90 / DT; step++) {
+            const before = new Map(state.vehicles.map((v) => [v.id, vehiclePose(v)]));
+            stepTraffic(state, DT, { target: MAX_VEHICLES });
+            for (const v of state.vehicles) {
+                if (!seen.has(v.id)) assert.ok(outside(vehiclePose(v)), `tier ${layout.tier}: vehicle ${v.id} appeared in town`);
+                seen.add(v.id);
+            }
+            const now = new Set(state.vehicles.map((v) => v.id));
+            for (const [id, pose] of before) if (!now.has(id)) assert.ok(outside(pose), `tier ${layout.tier}: vehicle ${id} vanished in town`);
+        }
+        assert.ok(seen.size > 10);
+        // Taxis are booked from the lanes town traffic can reach: never one still driving in on a road out.
+        for (const lane of state.index.entries) assert.ok(!state.index.town.has(lane));
+    });
+});
+
+test('taxi rides: every place has a drop-off beside it that every entry can reach', () => {
+    layouts.forEach((layout, i) => {
+        const state = createTraffic(graphs[i]);
+        for (const place of cityPlaces(layout, { about: true })) {
+            const target = rideTarget(state, place.point);
+            assert.ok(target, place.id);
+            assert.ok(target.s >= RIDE.endRoom - 1e-9 && target.s <= target.lane.length - RIDE.endRoom + 1e-9);
+            const at = vehiclePose({ seg: target.lane, s: target.s });
+            assert.ok(Math.hypot(at.x - place.point.x, at.z - place.point.z) < 13, `${place.id} drop-off too far`);
+            assert.ok(!state.index.entries.includes(target.lane), `${place.id}: drop-off on an entry lane`);
+            for (const lane of state.index.entries) {
+                assert.ok(planRoute({ seg: lane, s: 0, reserved: [] }, target), `tier ${layout.tier}: ${lane.id} → ${place.id}`);
+            }
+        }
+    });
+});
+
+test('riding in a taxi through busy traffic, with crossing buttons pressed: every place reached, the safety rules still hold', () => {
+    layouts.forEach((layout, i) => {
+        const graph = graphs[i];
+        const places = cityPlaces(layout, { about: true });
+        const signals = graph.nodes.filter((n) => n.control === 'signal');
+        const random = createRandom(`rides-${i}`);
+        // A full ride crosses the city and waits at lights whose buttons are pressed at random: 80 s up to tier 6,
+        // 100 s on the 8 × 8 downtown (3 × today's city); RIDE.max gives up at 120 s.
+        const limit = layout.tier > 6 ? 100 : 80;
+        const state = createTraffic(graph, { seed: `rides-${i}`, count: MAX_VEHICLES });
+        let next = 0;
+        let ride = null; // { id, place, since }
+        let longest = 0;
+        const arrived = new Set();
+        for (let step = 0; step < 600 / DT && arrived.size < places.length; step++) {
+            if (!ride) {
+                const place = places[next++ % places.length];
+                const from = vehiclePose(state.vehicles[Math.floor(random() * state.vehicles.length)] ?? { seg: state.index.entries[0], s: 0 });
+                const taxi = bookTaxi(state, { from, point: place.point, place: place.id });
+                assert.ok(taxi, `no taxi for ${place.id}`);
+                ride = { id: taxi.id, place: place.id, since: state.t };
+            }
+            if (signals.length && random() < 0.01) pressSignal(signals[Math.floor(random() * signals.length)], state.t);
+            const before = new Map(state.vehicles.map((v) => [v, { seg: v.seg, s: v.s }]));
+            stepTraffic(state, DT, { target: MAX_VEHICLES });
+
+            for (const event of state.events.splice(0)) {
+                if (event.id !== ride?.id) continue;
+                assert.equal(event.place, ride.place);
+                longest = Math.max(longest, state.t - ride.since);
+                arrived.add(ride.place);
+                ride = null;
+            }
+            if (ride) {
+                assert.ok(vehicleById(state, ride.id), `taxi to ${ride.place} left the map`);
+                assert.ok(state.t - ride.since < limit, `tier ${layout.tier}: taxi to ${ride.place} took over ${limit} s`);
+            }
+            const feet = state.vehicles.map((v) => footprint(v));
+            for (let a = 0; a < feet.length; a++) for (let b = a + 1; b < feet.length; b++) {
+                if (footprintsOverlap(feet[a], feet[b])) assert.fail(`touch at t=${state.t.toFixed(2)}`);
+            }
+            for (const v of state.vehicles) {
+                const was = before.get(v);
+                const lane = was?.seg;
+                const front = (x) => x + v.length / 2;
+                if (lane?.type === 'lane' && lane.control === 'signal' && front(was.s) < lane.length - 0.01 && (v.seg !== lane || front(v.s) >= lane.length - 0.01)) {
+                    const late = [state.t, state.t - SIGNAL.allRed].every((t) => signalState(lane.node, t)[lane.phase] === 'red');
+                    if (late) assert.fail(`ran the red at ${lane.node.id}, t=${state.t.toFixed(2)}`);
+                }
+            }
+        }
+        assert.equal(arrived.size, places.length, `tier ${layout.tier}: only ${[...arrived]}`);
+        assert.ok(longest < limit && longest < RIDE.max, `longest ride ${longest.toFixed(1)} s`);
+    });
+});
+
+test('drive mode (P3B-09): nobody drives into your car, parked in a lane or in a crossing; walkers wait for it', () => {
+    const graph = graphs.at(-1);
+    // A main-road lane in town (the joined lanes out to the map edges are long and quiet).
+    const lane = graph.lanes.filter((l) => l.kind === 'main' && l.length >= 4)
+        .sort((l, m) => Math.hypot(l.points[0].x, l.points[0].z) - Math.hypot(m.points[0].x, m.points[0].z))[0];
+    const [a, b] = [lane.points[0], lane.points.at(-1)];
+    const heading = Math.atan2(b.x - a.x, b.z - a.z);
+    const car = (x, z, rotationY) => ({ x, z, ax: { x: Math.sin(rotationY), z: Math.cos(rotationY) }, hl: 0.52, hw: 0.26 });
+    const node = graph.nodes.find((n) => n.control === 'signal');
+    for (const player of [car((a.x + b.x) / 2, (a.z + b.z) / 2, heading), car(node.x, node.z, 0.7)]) {
+        const state = createTraffic(graph, { seed: 'player', count: MAX_VEHICLES });
+        state.vehicles = state.vehicles.filter((v) => !footprintsOverlap(footprint(v), player));
+        let waited = 0;
+        for (let i = 0; i < 90 / DT; i++) {
+            stepTraffic(state, DT, { target: MAX_VEHICLES, player });
+            for (const v of state.vehicles) {
+                if (footprintsOverlap(footprint(v), player)) assert.fail(`vehicle ${v.id} drove into your car at t=${state.t.toFixed(2)}`);
+                if (v.v < 0.05 && Math.hypot(vehiclePose(v).x - player.x, vehiclePose(v).z - player.z) < 3.5) waited++;
+            }
+        }
+        assert.ok(waited > 0, `someone had to stop for it at ${player.x.toFixed(1)}, ${player.z.toFixed(1)}`);
+        assert.ok(state.exited > 0, 'traffic still flows elsewhere');
+    }
+    const state = createTraffic(graph, { seed: 'walk' });
+    const cw = graph.crosswalks[0];
+    assert.equal(crosswalkClear(state, cw.id), true);
+    stepTraffic(state, DT, { player: car(cw.x, cw.z, 0) });
+    assert.equal(crosswalkClear(state, cw.id), false);
+});
+
+test('police chase (P3B-11): nobody drives into you or the police car; a police car can leave the traffic', () => {
+    const graph = graphs.at(-1);
+    const lane = graph.lanes.filter((l) => l.kind === 'main' && l.length >= 4)
+        .sort((l, m) => Math.hypot(l.points[0].x, l.points[0].z) - Math.hypot(m.points[0].x, m.points[0].z))[0];
+    const [a, b] = [lane.points[0], lane.points.at(-1)];
+    const heading = Math.atan2(b.x - a.x, b.z - a.z);
+    const car = (x, z, rotationY) => ({ x, z, ax: { x: Math.sin(rotationY), z: Math.cos(rotationY) }, hl: 0.52, hw: 0.26 });
+    const node = graph.nodes.find((n) => n.control === 'signal');
+    const players = [car((a.x + b.x) / 2, (a.z + b.z) / 2, heading), car(node.x, node.z, 0.7)];
+    const state = createTraffic(graph, { seed: 'chase', count: MAX_VEHICLES });
+    state.vehicles = state.vehicles.filter((v) => !players.some((p) => footprintsOverlap(footprint(v), p)));
+    const waited = players.map(() => 0);
+    for (let i = 0; i < 90 / DT; i++) {
+        stepTraffic(state, DT, { target: MAX_VEHICLES, player: players });
+        for (const v of state.vehicles) {
+            players.forEach((p, k) => {
+                if (footprintsOverlap(footprint(v), p)) assert.fail(`vehicle ${v.id} drove into car ${k} at t=${state.t.toFixed(2)}`);
+                if (v.v < 0.05 && Math.hypot(vehiclePose(v).x - p.x, vehiclePose(v).z - p.z) < 3.5) waited[k]++;
+            });
+        }
+    }
+    assert.ok(waited.every((n) => n > 0), `someone stopped for each: ${waited}`);
+
+    const police = state.vehicles[0];
+    assert.equal(takeVehicle(state, police.id), police);
+    assert.equal(vehicleById(state, police.id), null);
+    assert.equal(takeVehicle(state, police.id), null);
+    stepTraffic(state, DT, { target: MAX_VEHICLES }); // the rest drive on without it
 });

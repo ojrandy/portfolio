@@ -11,6 +11,10 @@ const CURVE_STEPS = 6;
 // Traffic lights at crossings: north–south, then east–west, with amber and an all-red gap between them.
 export const SIGNAL = { green: 8, amber: 2, allRed: 1 };
 export const SIGNAL_CYCLE = 2 * (SIGNAL.green + SIGNAL.amber + SIGNAL.allRed);
+// The crossing button (P3B-06): a green at least this old ends now (amber, then the usual all-red); once per cycle.
+export const BUTTON = { minGreen: 2, cooldown: SIGNAL_CYCLE };
+// Signal poles: on the pavement at the right of each arm's traffic, just behind the crosswalk.
+export const POLE = { back: 0.15, side: 0.15 };
 
 const ARMS = {
     n: { x: 0, z: -1, axis: 'z' },
@@ -38,12 +42,53 @@ const toLine = (road, index) => {
         : { index, kind: road.kind, axis: 'x', at: snap(road.z), from: x0, to: x1, width: road.depth, x0, x1, z0, z1 };
 };
 
+/**
+ * Join pieces of one road laid end to end (same axis, centre line and width: a road and its road out) into one line,
+ * so there is no junction between them. The joined line keeps the town piece's kind (its speed).
+ */
+const joinLines = (lines) => {
+    const out = [];
+    const sorted = [...lines].sort((a, b) => (a.axis < b.axis ? -1 : a.axis > b.axis ? 1 : 0) || a.at - b.at || a.from - b.from);
+    for (const line of sorted) {
+        const last = out.at(-1);
+        if (last && last.axis === line.axis && last.at === line.at && Math.abs(last.width - line.width) < EPS && Math.abs(last.to - line.from) < EPS) {
+            Object.assign(last, {
+                to: line.to,
+                x0: Math.min(last.x0, line.x0), x1: Math.max(last.x1, line.x1),
+                z0: Math.min(last.z0, line.z0), z1: Math.max(last.z1, line.z1),
+                kind: last.kind === 'out' ? line.kind : last.kind,
+                index: Math.min(last.index, line.index),
+            });
+        } else out.push({ ...line });
+    }
+    return out.sort((a, b) => a.index - b.index);
+};
+
 /** Light colours at a crossing at time `t` (seconds): { ns, ew } as 'green' | 'amber' | 'red'. */
 export const signalState = (node, t) => {
     const p = (((t + node.signal.offset) % SIGNAL_CYCLE) + SIGNAL_CYCLE) % SIGNAL_CYCLE;
     const half = SIGNAL_CYCLE / 2;
     const light = (q) => (q < SIGNAL.green ? 'green' : q < SIGNAL.green + SIGNAL.amber ? 'amber' : 'red');
     return p < half ? { ns: light(p), ew: 'red' } : { ns: 'red', ew: light(p - half) };
+};
+
+/**
+ * Someone pressed the crossing button at time `t`: the green showing now ends (amber, then all red, as usual), so
+ * the other way, and the walkers across this road, get their turn sooner. Shifts the node's cycle in place.
+ * @returns {'changing' | 'busy' | 'wait'} changing = the green ends now; busy = already amber, red or a fresh green;
+ *   wait = pressed less than a cycle ago
+ */
+export const pressSignal = (node, t) => {
+    if (!node?.signal) return 'busy';
+    const since = t - (node.signal.pressedAt ?? -Infinity);
+    if (since >= 0 && since < BUTTON.cooldown) return 'wait'; // (a restarted clock forgets older presses)
+    const half = SIGNAL_CYCLE / 2;
+    const p = (((t + node.signal.offset) % SIGNAL_CYCLE) + SIGNAL_CYCLE) % SIGNAL_CYCLE;
+    const q = p % half; // time into this way's green
+    if (q < BUTTON.minGreen || q >= SIGNAL.green) return 'busy';
+    node.signal.offset += SIGNAL.green - q;
+    node.signal.pressedAt = t;
+    return 'changing';
 };
 
 const turnOf = (din, dout) => {
@@ -71,7 +116,7 @@ const pathLength = (points) => points.slice(1).reduce((sum, p, i) => sum + Math.
  * @returns {{ nodes, lanes, links, crosswalks, entries: string[], exits: string[] }}
  */
 export const buildRoadGraph = (layout) => {
-    const lines = layout.roads.map(toLine);
+    const lines = joinLines(layout.roads.map(toLine));
     const vertical = lines.filter((l) => l.axis === 'z');
     const horizontal = lines.filter((l) => l.axis === 'x');
 
@@ -202,8 +247,11 @@ export const buildRoadGraph = (layout) => {
             const d = ARMS[arm];
             const along = (d.axis === 'x' ? node.halfX : node.halfZ) + CROSSWALK / 2;
             crosswalks.push({
+                id: `${node.id}${arm}`,
                 node: node.id,
                 arm,
+                // The light that stops the traffic crossing it (an n/s arm lies across a north–south road).
+                phase: d.axis === 'z' ? 'ns' : 'ew',
                 x: node.x + d.x * along,
                 z: node.z + d.z * along,
                 width: d.axis === 'x' ? CROSSWALK : line.width,
@@ -221,4 +269,25 @@ export const buildRoadGraph = (layout) => {
         entries: lanes.filter((l) => edges.has(l.from)).map((l) => l.id),
         exits: lanes.filter((l) => edges.has(l.to)).map((l) => l.id),
     };
+};
+
+/** Where the signal poles stand: one per arm of every crossing, facing the traffic that arrives on it. */
+export const signalPoles = (graph) => graph.nodes.filter((n) => n.control === 'signal').flatMap((node) => node.arms.map((arm) => {
+    const d = ARMS[arm];
+    const along = (d.axis === 'x' ? node.halfX : node.halfZ) + CROSSWALK + POLE.back;
+    // The arm's own road (a crossing can join a wide road and a narrow street).
+    const arriving = graph.lanes.find((l) => l.to === node.id && l.heading === OPPOSITE[arm]);
+    const side = (arriving ? arriving.width : d.axis === 'x' ? node.halfZ : node.halfX) + POLE.side;
+    // Arriving traffic heads −d; its right-hand side is (d.z, −d.x).
+    return {
+        node: node.id, arm, phase: d.axis === 'z' ? 'ns' : 'ew',
+        x: node.x + d.x * along + d.z * side, z: node.z + d.z * along - d.x * side, rotationY: Math.atan2(d.x, d.z),
+    };
+}));
+
+// One graph per layout, shared by the traffic, the pedestrians and the signal poles, so a button press reaches all.
+const cache = new WeakMap();
+export const roadGraphFor = (layout) => {
+    if (!cache.has(layout)) cache.set(layout, buildRoadGraph(layout));
+    return cache.get(layout);
 };

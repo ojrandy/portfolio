@@ -20,7 +20,7 @@ const WOOD = '#7A5434';
 const BARK = '#5E4128';
 const LOG_END = '#C9A47A';
 const BANANA = ['#5F8F2E', '#76A23A'];
-const SIREN_RED = '#D8342B';
+export const SIREN_RED = '#D8342B';
 
 const CAR_COLORS = [
     COLORS.paper,
@@ -267,3 +267,6 @@ export const pickVariant = (typeId, seed) => {
     const { variants } = VEHICLE_TYPES[typeId];
     return variants[Math.floor(createRandom(`vehicle:${typeId}:${seed}`)() * variants.length)];
 };
+
+/** What a vehicle says when it honks (speech bubble). */
+export const honkText = (type) => ({ moto: 'Pip pip!', bus: 'Paaarp!', timberTruck: 'Paaarp!', bananaTruck: 'Paaarp!' })[type] ?? 'Beep beep!';

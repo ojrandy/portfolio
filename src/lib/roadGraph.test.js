@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { toBuildings } from './buildings.js';
 import { layoutCity, TIERS, BLOCK_LOTS, FEATURED_LOTS } from './layout.js';
-import { buildRoadGraph, signalState, SIGNAL_CYCLE, CROSSWALK } from './roadGraph.js';
+import { buildRoadGraph, signalState, SIGNAL_CYCLE, SIGNAL, CROSSWALK, pressSignal, signalPoles, roadGraphFor } from './roadGraph.js';
 import { createRandom, shuffledIndices } from './random.js';
 import { buildCity, loadProjects } from '../../server/lib/city.js';
 
@@ -39,10 +39,12 @@ test('every lane and turn stays on the road, lanes on the right-hand half', () =
     for (const layout of layouts) {
         const graph = buildRoadGraph(layout);
         for (const lane of graph.lanes) {
-            const road = layout.roads[lane.road];
             const d = HEADINGS[lane.heading];
+            const along = (r) => (d.x ? r.width >= r.depth : r.depth > r.width);
             for (const p of lane.points) {
-                assert.ok(inRect(p, road), `${lane.id} leaves its road`);
+                // A lane can run from a road onto its road out (P3B-08): the piece under this point.
+                const road = layout.roads.find((r) => along(r) && inRect(p, r));
+                assert.ok(road, `${lane.id} leaves its road`);
                 // Right of the heading (north → +x, east → +z), inside the road's half.
                 const side = (p.x - road.x) * -d.z + (p.z - road.z) * d.x;
                 assert.ok(side > EPS && side < lane.width + EPS, `${lane.id} is not on the right`);
@@ -115,10 +117,18 @@ test('Career Road meets the main road at a T on odd tiers and a crossing on even
         const main = layout.roads.find((r) => r.kind === 'main');
         const node = graph.nodes.find((n) => Math.abs(n.x) < EPS && Math.abs(n.z - main.z) < EPS);
         assert.equal(node.kind, layout.tier % 2 ? 'tee' : 'cross', `tier ${layout.tier}`);
-        // Entries/exits: both ends of the main road and the entrance.
+        // Entries/exits (P3B-08): the far ends of the main road and of the Limbe–Douala road, never the entrance.
         const edges = graph.nodes.filter((n) => n.kind === 'edge');
-        assert.equal(edges.length, 3);
-        assert.ok(edges.some((n) => Math.abs(n.z - layout.entrance.z) < EPS && Math.abs(n.x) < EPS));
+        assert.equal(edges.length, 4);
+        for (const n of edges) {
+            assert.ok(Math.abs(Math.abs(n.x) - layout.roadOut.reach) < EPS, `edge at x ${n.x}`);
+            assert.ok(Math.abs(n.z - main.z) < EPS || Math.abs(n.z - layout.roadOut.z) < EPS, `edge at z ${n.z}`);
+        }
+        // The road out meets the Limbe–Douala road at a T where it gives way, and joins Career Road with no junction.
+        const tee = graph.nodes.find((n) => Math.abs(n.x) < EPS && Math.abs(n.z - layout.roadOut.z) < EPS);
+        assert.equal(tee.kind, 'tee');
+        assert.equal(tee.through, 'ew');
+        assert.ok(!graph.nodes.some((n) => Math.abs(n.z - layout.entrance.z) < EPS));
     }
 });
 
@@ -144,4 +154,52 @@ test('the same city always gives the same graph', () => {
     const shuffled = shuffledIndices(input.length, createRandom('roads')).map((i) => input[i]);
     assert.deepEqual(buildRoadGraph(layoutCity(input)), buildRoadGraph(layoutCity(shuffled)));
     assert.deepEqual(buildRoadGraph(realLayout()), buildRoadGraph(realLayout()));
+});
+
+test('crossing button: a green ends through amber and all red, never at once, at most once a cycle', () => {
+    const node = { signal: { offset: 0 } };
+    const order = { green: 0, amber: 1, red: 2 };
+    // Pressed early in a green, nothing happens (it just turned green); later it goes to amber.
+    assert.equal(pressSignal(node, 1), 'busy');
+    assert.equal(pressSignal(node, 4), 'changing');
+    assert.deepEqual(signalState(node, 4), { ns: 'amber', ew: 'red' });
+    assert.deepEqual(signalState(node, 4 + SIGNAL.amber + 0.5), { ns: 'red', ew: 'red' });
+    assert.deepEqual(signalState(node, 4 + SIGNAL.amber + SIGNAL.allRed + 0.1), { ns: 'red', ew: 'green' });
+    assert.equal(pressSignal(node, 10), 'wait');
+    // Random presses: each way still goes green → amber → red, and amber always lasts its full time.
+    const random = createRandom('button');
+    const n2 = { signal: { offset: 3 } };
+    let last = signalState(n2, 0);
+    let amberFrom = { ns: null, ew: null };
+    for (let t = 0; t < 600; t += 0.05) {
+        if (random() < 0.02) pressSignal(n2, t);
+        const now = signalState(n2, t);
+        assert.ok(!(now.ns !== 'red' && now.ew !== 'red'), `both ways open at ${t}`);
+        for (const way of ['ns', 'ew']) {
+            if (now[way] !== last[way]) {
+                assert.equal((order[now[way]] - order[last[way]] + 3) % 3, 1, `${way} ${last[way]} → ${now[way]} at ${t}`);
+                if (now[way] === 'amber') amberFrom[way] = t;
+                if (last[way] === 'amber') assert.ok(t - amberFrom[way] >= SIGNAL.amber - 0.06, `short amber at ${t}`);
+            }
+        }
+        last = now;
+    }
+});
+
+test('signal poles: four per crossing, just off the road, facing the arriving traffic', () => {
+    for (const layout of layouts) {
+        const graph = buildRoadGraph(layout);
+        const poles = signalPoles(graph);
+        assert.equal(poles.length, graph.nodes.filter((n) => n.control === 'signal').length * 4);
+        for (const p of poles) {
+            assert.ok(!onSomeRoad(p, layout.roads), `pole ${p.node}${p.arm} on the road`);
+            assert.ok(onSomeRoad(p, layout.roads.map((r) => ({ ...r, width: r.width + 0.4, depth: r.depth + 0.4 }))), 'beside a road');
+            const node = graph.nodes.find((n) => n.id === p.node);
+            const d = HEADINGS[p.arm];
+            assert.ok(Math.abs(Math.sin(p.rotationY) - d.x) < EPS && Math.abs(Math.cos(p.rotationY) - d.z) < EPS);
+            assert.ok((p.x - node.x) * d.x + (p.z - node.z) * d.z > 0, 'on its own arm');
+        }
+    }
+    const layout = realLayout();
+    assert.equal(roadGraphFor(layout), roadGraphFor(layout));
 });

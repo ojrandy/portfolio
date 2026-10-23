@@ -10,7 +10,19 @@ export const EGGS = [
     { id: 'explorer', name: 'Explorer', hint: 'Open three different projects.', found: 'You opened three projects.' },
     { id: 'runner', name: 'Bug squasher', hint: 'Score 10 in Code runner, right here in the Arcade.', found: 'You scored 10 in Code runner.' },
     { id: 'goal', name: 'Top corner', hint: 'Beat the keeper on the Pitch, south-east of downtown.', found: 'You scored past the keeper on the Pitch.' },
+    // City interactions (P3B-06)
+    { id: 'taxi', name: 'Taxi!', hint: 'Yellow cars go anywhere in town. Take one.', found: 'You rode a Buea taxi across OJ City.' },
+    { id: 'goat', name: 'Goat whisperer', hint: 'Goats graze at the edge of town. Say hello.', found: 'A goat stopped to look at you.' },
+    { id: 'police', name: 'Undercover', hint: 'One car in the traffic is rarer than the rest. Follow it a while.', found: 'You followed the police car for 20 seconds.' },
+    // Drive mode (P3B-09)
+    { id: 'tour', name: 'Tour guide', hint: 'Take the wheel and drive to every district in one go.', found: 'You drove yourself to every district of OJ City.' },
+    { id: 'lights', name: 'Model driver', hint: 'Drive through every set of traffic lights in town without running a red.', found: 'Every traffic light in town, and not one red run.' },
+    // Police chase (P3B-11)
+    { id: 'escape', name: 'Escape artist', hint: 'Run a red while you drive. Then get away.', found: 'You lost the police car.' },
+    { id: 'pullover', name: 'Good citizen', hint: 'Run a red while you drive. Then do the right thing.', found: 'You pulled over for the police.' },
 ];
+
+export const FOLLOW_POLICE_SECONDS = 20;
 
 const IDS = new Set(EGGS.map((egg) => egg.id));
 

@@ -102,8 +102,22 @@ test('roads: main road spans the city, Career Road leads in from the entrance', 
     assert.equal(career.x, 0);
     assert.equal(career.z + career.depth / 2, layout.entrance.z);
     assert.equal(layout.entrance.z, layout.bounds.maxZ);
-    assert.deepEqual(layout.districts.map((d) => d.id).sort(), ['arcade', 'cinema', 'pitch', 'school']);
-    for (const m of layout.markings) assert.ok(overlaps(box(m), box(main)) || overlaps(box(m), box(career)));
+    assert.deepEqual(layout.districts.map((d) => d.id).sort(), ['arcade', 'cinema', 'market', 'pitch', 'school']);
+    for (const m of layout.markings) assert.ok(layout.roads.some((r) => r.kind !== 'street' && overlaps(box(m), box(r))));
+});
+
+test('roads out (P3B-08): Career Road runs on to a T, the main road runs on past the plots, all outside the town', () => {
+    for (const layout of [layoutCity(many(10)), layoutCity(many(200))]) {
+        const { bounds, roadOut, reach, outskirts, entrance } = layout;
+        const out = layout.roads.filter((r) => r.kind === 'out');
+        assert.equal(out.length, 4);
+        for (const r of out) assert.ok(!overlaps(box(r), { x0: bounds.minX, x1: bounds.maxX, z0: bounds.minZ, z1: bounds.maxZ }) || r.x === 0);
+        const south = out.find((r) => r.depth > r.width);
+        assert.ok(Math.abs(south.z - south.depth / 2 - entrance.z) < EPS);
+        assert.ok(roadOut.z > entrance.z + 20, 'the T is well behind the start view');
+        assert.ok(Math.abs(reach.maxZ - (roadOut.z + roadOut.width / 2)) < EPS);
+        assert.ok(outskirts.minX < bounds.minX && outskirts.maxX > bounds.maxX && outskirts.minZ < bounds.minZ && outskirts.maxZ > reach.maxZ);
+    }
 });
 
 test('the real content lays out without errors', () => {

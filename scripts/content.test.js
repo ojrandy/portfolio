@@ -247,3 +247,59 @@ test('GitHub accounts for the city: defaults to the username; lists, URLs and hi
     assert.match(bad.errors.join('\n'), /GitHub account name/);
     assert.match(bad.errors.join('\n'), /owner\/repo/);
 });
+
+test('services: one record per bullet with Delivered and Examples; unknown slugs and fields are errors; call-outs list', () => {
+    const { errors, profile } = parseProjectsMd(doc({
+        profile: `
+### Services you offer clients
+- Web apps
+  - **Delivered:** A working site.
+  - **Examples:** my-thing, my-thing
+- [DEMO] Logos
+### Market call-outs (Pidgin)
+- I wan buy
+- TODO(content)`,
+        projects: project('My Thing'),
+    }));
+    assert.deepEqual(errors, []);
+    assert.deepEqual(profile.services.map(({ name, delivered, examples, demo }) => ({ name, delivered, examples, demo })), [
+        { name: 'Web apps', delivered: 'A working site.', examples: ['my-thing'], demo: false },
+        { name: 'Logos', delivered: null, examples: [], demo: true },
+    ]);
+    assert.deepEqual(profile.marketCalls, ['I wan buy']);
+
+    const bad = parseProjectsMd(doc({ profile: '### Services\n- Web\n  - **Examples:** nope, Not A Slug\n  - **Price:** 10' }));
+    assert.equal(bad.errors.length, 3);
+    assert.match(bad.errors.join('\n'), /no project with slug "nope"/);
+    assert.match(bad.errors.join('\n'), /unknown service field/);
+});
+
+test('taxi driver lines: Pick-up and Arrival lists; TODO lines are left out; other fields are errors', () => {
+    const { errors, profile } = parseProjectsMd(doc({
+        profile: `
+### Taxi driver lines (Pidgin)
+- **Pick-up:**
+  - Line one
+  - TODO(content)
+- **Arrival:** Line two`,
+    }));
+    assert.deepEqual(errors, []);
+    assert.deepEqual(profile.taxiLines, { pickup: ['Line one'], arrival: ['Line two'] });
+    assert.deepEqual(parseProjectsMd(doc()).profile.taxiLines, { pickup: [], arrival: [] });
+    assert.equal(parseProjectsMd(doc({ profile: '### Taxi driver lines\n- **Horn:** pip' })).errors.length, 1);
+});
+
+test('police lines: Chase and Pull over lists; TODO lines are left out; other fields are errors', () => {
+    const { errors, profile } = parseProjectsMd(doc({
+        profile: `
+### Police lines (Pidgin)
+- **Chase:**
+  - Line one
+  - TODO(content)
+- **Pull over:** Line two`,
+    }));
+    assert.deepEqual(errors, []);
+    assert.deepEqual(profile.policeLines, { chase: ['Line one'], pullOver: ['Line two'] });
+    assert.deepEqual(parseProjectsMd(doc()).profile.policeLines, { chase: [], pullOver: [] });
+    assert.equal(parseProjectsMd(doc({ profile: '### Police lines\n- **Siren:** wee-woo' })).errors.length, 1);
+});

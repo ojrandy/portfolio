@@ -37,3 +37,12 @@ export const aboutContent = (profile = {}) => {
         districts: DISTRICTS.filter((d) => hobbies.has(d.hobby)).map(({ place, what }) => ({ place, what })),
     };
 };
+
+// The About house (P3-13) stands east of Career Road, this far from the road's edge and north of the entrance.
+export const ABOUT_HOUSE = { roadside: 4, ahead: 7, facing: -Math.PI / 2 + 0.5, radius: 3.2 };
+
+/** Centre of the About house on the ground for Career Road `road` (street props keep `radius` clear of it). */
+export const aboutHouseSpot = (road) => ({
+    x: road.x + road.width / 2 + ABOUT_HOUSE.roadside,
+    z: road.z + road.depth / 2 - ABOUT_HOUSE.ahead,
+});

@@ -2,13 +2,14 @@
 // Pure and deterministic (seeded), no three.js; src/city/Traffic.jsx steps it and draws it every frame.
 // Drivers keep a gap, stop for red (and amber when they can), give way, and only enter a junction when it is clear
 // and there is room beyond it. A lane too short to wait on (the 0.9 main-road stretch) is booked straight through.
+// Pedestrians (P3B-04): nobody books a turn through a crosswalk someone is on; walkers ask crosswalkClear first.
 import { signalState } from './roadGraph.js';
 import { BUEA_UTC_OFFSET_MINUTES } from './dayNight.js';
 import { VEHICLE_TYPES } from './vehicles.js';
 import { createRandom } from './random.js';
 
 export const MAX_VEHICLES = 30; // desktop at the busiest hour; phones get half
-export const SPEED = { main: 3.2, career: 2.4, street: 2.0 }; // cruise speed by road kind, units/s
+export const SPEED = { main: 3.2, career: 2.4, street: 2.0, out: 3.2 }; // cruise speed by road kind, units/s
 export const RAIN_SLOW = 0.3; // full rain takes this much off every speed
 const TURN_SPEED = 1.3;
 const ACCEL = 2.2;
@@ -23,6 +24,13 @@ const FADE = 0.6; // seconds to appear at an edge; units to disappear at one
 const MOVING = 0.3;
 const EXIT_WEIGHT = 0.3;
 const PATIENCE = 6; // seconds; then a give-way driver pulls out in front of anyone who can still stop comfortably
+const CROSSWALK_PAD = 0.35; // a turn passes a crosswalk when it comes this close to it (about half a car's width)
+// Taxi rides (P3B-06, owner 2026-10-22: you ride inside the taxi all the way): the taxi drives a planned route
+// through the lane graph (a signal on the way costs `signalCost` units of distance), obeying every rule, to the
+// drop-off on the lane nearest the place, at least `endRoom` from either end of it; it waits there `wait` seconds.
+// A ride longer than `max` seconds is given up (the camera goes to the place).
+export const RIDE = { wait: 1.5, endRoom: 1, minLane: 2.5, signalCost: 4, max: 120 };
+const ARRIVED = 0.1; // this close to the drop-off and stopped = arrived
 
 // Buea mix: yellow taxis and bendskins first, a few buses and trucks, police and ambulances rare.
 export const MIX = {
@@ -86,15 +94,21 @@ const resample = (seg, step = 0.15) => {
 };
 
 // Two turns through a junction conflict when they merge into one lane or pass closer than CLEARANCE;
-// turns out of the same lane never do (the drivers simply follow each other).
+// turns out of the same lane never do (the drivers simply follow each other). Round a corner the two ways always
+// conflict: a long vehicle on the outer curve cuts across to the inner one (two buses touched there).
 const conflicts = (a, b) => {
     if (a.fromLane === b.fromLane) return false;
-    if (a.toLane === b.toLane) return true;
+    if (a.toLane === b.toLane || a.node.kind === 'corner') return true;
     return a.samples.some((p) => b.samples.some((q) => Math.hypot(p.x - q.x, p.z - q.z) < CLEARANCE));
 };
 
+// A crosswalk as a footprint (see footprint), so it can be tested against vehicle bodies.
+const crosswalkFootprint = (cw) => ({ x: cw.x, z: cw.z, ax: { x: 0, z: 1 }, hl: cw.depth / 2, hw: cw.width / 2 });
+const nearRect = (p, cw, pad) => Math.abs(p.x - cw.x) <= cw.width / 2 + pad && Math.abs(p.z - cw.z) <= cw.depth / 2 + pad;
+
 const indexGraph = (graph) => {
     const nodes = new Map(graph.nodes.map((n) => [n.id, n]));
+    const crosswalks = new Map((graph.crosswalks ?? []).map((cw) => [cw.id, { ...cw, foot: crosswalkFootprint(cw) }]));
     const segs = new Map();
     const incoming = new Map(graph.nodes.map((n) => [n.id, []]));
     for (const lane of graph.lanes) {
@@ -111,6 +125,9 @@ const indexGraph = (graph) => {
             limit: link.turn === 'straight' ? Math.min(fromLane.limit, toLane.limit) : TURN_SPEED, conflicts: new Set(),
         };
         seg.samples = resample(seg);
+        seg.crosswalks = new Set([...crosswalks.values()]
+            .filter((cw) => cw.node === link.node && seg.samples.some((p) => nearRect(p, cw, CROSSWALK_PAD)))
+            .map((cw) => cw.id));
         fromLane.out.push(seg);
         segs.set(link.id, seg);
         byNode.set(link.node, [...(byNode.get(link.node) ?? []), seg]);
@@ -118,10 +135,43 @@ const indexGraph = (graph) => {
     for (const links of byNode.values()) {
         for (const a of links) for (const b of links) if (a !== b && conflicts(a, b)) a.conflicts.add(b);
     }
-    return { segs, incoming, entries: graph.entries.map((id) => segs.get(id)) };
+    return { segs, incoming, crosswalks, entries: graph.entries.map((id) => segs.get(id)), town: townLanes(segs) };
+};
+
+// Lanes a driver already in town can get onto: the town's loop (lanes it can come back to) and everything on from it,
+// such as the ways out. Lanes in from the map edge, and the road up from the T (P3B-08), are only reached from outside.
+const townLanes = (segs) => {
+    const lanes = [...segs.values()].filter((s) => s.type === 'lane');
+    const after = (start) => {
+        const seen = new Set();
+        const queue = start.out.map((l) => l.toLane);
+        while (queue.length) {
+            const lane = queue.shift();
+            if (seen.has(lane)) continue;
+            seen.add(lane);
+            for (const l of lane.out) queue.push(l.toLane);
+        }
+        return seen;
+    };
+    const loop = lanes.filter((lane) => after(lane).has(lane));
+    return new Set([...loop, ...after(loop[0] ?? lanes[0] ?? { out: [] })]);
 };
 
 const stopDistance = (v) => (v * v) / (2 * BRAKE);
+
+// Drive mode (P3B-09): your car isn't on the lanes, so drivers watch for it straight ahead and stop behind it.
+const PLAYER_SIDE = 0.15; // extra room beside a driver's path
+const PLAYER_NEAR = 1; // walkers wait while your car is this close to their crosswalk
+const extent = (f, n) => f.hl * Math.abs(f.ax.x * n.x + f.ax.z * n.z) + f.hw * Math.abs(-f.ax.z * n.x + f.ax.x * n.z);
+const playerStop = (me, player) => {
+    const f = footprint(me);
+    const side = { x: -f.ax.z, z: f.ax.x };
+    const dx = player.x - f.x;
+    const dz = player.z - f.z;
+    const along = dx * f.ax.x + dz * f.ax.z;
+    if (along <= 0 || Math.abs(dx * side.x + dz * side.z) > f.hw + extent(player, side) + PLAYER_SIDE) return Infinity;
+    return along - f.hl - extent(player, f.ax) - me.gap;
+};
 const lightOf = (state, lane) => signalState(lane.node, state.t)[lane.phase];
 const rankOf = (lane, link) => (lane.control === 'yield' ? 0 : link.turn === 'left' ? 1 : 2);
 const onSeg = (state, seg) => state.on.get(seg) ?? [];
@@ -191,6 +241,7 @@ const priorityComing = (state, link, me) => {
 
 /** Can `me` take `link` now? Collects the turns to book in `chain` (more than one through a lane too short to stop on). */
 const canBook = (state, me, link, chain) => {
+    for (const id of link.crosswalks) if (state.crossing.has(id)) return false;
     if (!junctionClear(state, link) || claimedByOther(state, link, me) || priorityComing(state, link, me)) return false;
     chain.push(link);
     const next = link.toLane;
@@ -239,6 +290,10 @@ const lookAhead = (state, me, slow) => {
     for (let i = 0; i < 8 && offset < LOOK; i++) {
         for (const v of onSeg(state, seg)) if (v !== me && (seg !== me.seg || v.s > me.s)) ahead(v, offset);
         let next = null;
+        // A taxi on a ride pulls up at its drop-off (and waits there a moment).
+        if (me.ride && seg === me.ride.lane && (seg !== me.seg || me.s <= me.ride.s + ARRIVED)) {
+            stopAt = Math.min(stopAt, offset + me.ride.s + me.length / 2);
+        }
         if (seg.type === 'lane') {
             const end = offset + seg.length;
             next = chooseLink(me, seg);
@@ -266,7 +321,7 @@ const addVehicle = (state, type, seg, s, v, age) => {
     const kit = VEHICLE_TYPES[type];
     const vehicle = {
         id, type, seed: `traffic-${id}`, length: kit.length, width: kit.width, gap: GAP[type] ?? DEFAULT_GAP, speedFactor: SPEED_FACTOR[type] ?? 1,
-        seg, s, v, age, waited: 0, scale: 1, braking: false, reserved: [], claim: [], choices: new Map(), random: createRandom(`${state.seed}:vehicle:${id}`),
+        seg, s, v, age, waited: 0, scale: 1, braking: false, reserved: [], claim: [], choices: new Map(), ride: null, random: createRandom(`${state.seed}:vehicle:${id}`),
     };
     state.vehicles.push(vehicle);
     return vehicle;
@@ -290,10 +345,8 @@ const spawn = (state, rain) => {
     const { length } = VEHICLE_TYPES[type];
     const lanes = state.index.entries.filter((lane) => fits(state, lane, -1, length + 1));
     if (lanes.length === 0) return;
-    // Fewer from the entrance, which is near the start view (until P3B-08's road out takes over).
-    const weights = lanes.map((lane) => (lane.kind === 'career' ? 0.5 : 1));
-    let r = state.random() * weights.reduce((a, b) => a + b, 0);
-    const lane = lanes.find((_, i) => (r -= weights[i]) < 0) ?? lanes[0];
+    // The map edges are out in the outskirts (P3B-08), away from the start view, so every entry is as likely.
+    const lane = lanes[Math.floor(state.random() * lanes.length)];
     addVehicle(state, type, lane, length / 2, lane.limit * 0.6, 0);
     rebuildBuckets(state);
 };
@@ -304,7 +357,10 @@ const spawn = (state, rain) => {
  */
 export const createTraffic = (graph, { seed = 'oj-city', count = 0, rain = 0 } = {}) => {
     const index = indexGraph(graph);
-    const state = { seed, index, vehicles: [], on: new Map(), booked: new Map(), t: 0, nextId: 0, random: createRandom(`${seed}:traffic`), spawnClock: 0, exited: 0 };
+    const state = {
+        seed, index, vehicles: [], on: new Map(), booked: new Map(), crossing: new Set(), player: [], t: 0, nextId: 0, random: createRandom(`${seed}:traffic`),
+        spawnClock: 0, exited: 0, events: [], // events: { type: 'arrived', id, place } for the scene to pick up
+    };
     const lanes = [...index.segs.values()].filter((s) => s.type === 'lane' && s.length >= 3);
     for (let tries = 0; state.vehicles.length < count && tries < count * 30; tries++) {
         const lane = lanes[Math.floor(state.random() * lanes.length)];
@@ -321,16 +377,24 @@ export const createTraffic = (graph, { seed = 'oj-city', count = 0, rain = 0 } =
 /**
  * Advance the traffic by `dt` seconds. `target` = how many vehicles should be on the roads (see targetCount);
  * new ones enter at the map edges while there are fewer. `rain` 0..1 slows everyone and thins out the motos.
+ * `crossing` = ids of the crosswalks people are on (stepPedestrians): no driver books a turn through them.
+ * `player` = the footprint of the car you drive (drive.js), or a list of footprints (P3B-11: you and the police car
+ * after you), or null: nobody drives into them.
  */
-export const stepTraffic = (state, dt, { target = 0, rain = 0 } = {}) => {
+export const stepTraffic = (state, dt, { target = 0, rain = 0, crossing, player = null } = {}) => {
     if (!(dt > 0)) return state;
     state.t += dt;
+    if (crossing) state.crossing = crossing;
+    const players = [player].flat().filter(Boolean);
+    state.player = players;
     rebuildBuckets(state);
     const slow = 1 - RAIN_SLOW * rain;
 
     // Plan everyone against the same positions, then move.
     const moves = state.vehicles.map((me) => {
-        const { stopAt, vmax } = lookAhead(state, me, slow * me.speedFactor);
+        const ahead = lookAhead(state, me, slow * me.speedFactor);
+        const stopAt = players.reduce((at, p) => Math.min(at, playerStop(me, p)), ahead.stopAt);
+        const { vmax } = ahead;
         const desired = Math.min(vmax, Math.sqrt(2 * BRAKE * Math.max(0, stopAt)));
         const v = Math.max(0, Math.min(me.v + ACCEL * dt, desired));
         return { v, ds: Math.min(v * dt, Math.max(0, stopAt)) };
@@ -344,7 +408,8 @@ export const stepTraffic = (state, dt, { target = 0, rain = 0 } = {}) => {
         if (move.ds <= 0) return;
         const here = feet[i];
         const there = footprint(me, move.ds);
-        const blocked = feet.some((o, j) => j !== i && (o.x - here.x) * here.ax.x + (o.z - here.z) * here.ax.z > 0 && footprintsOverlap(there, o));
+        const blocked = feet.some((o, j) => j !== i && (o.x - here.x) * here.ax.x + (o.z - here.z) * here.ax.z > 0 && footprintsOverlap(there, o))
+            || players.some((p) => footprintsOverlap(there, p) && !footprintsOverlap(here, p));
         if (blocked) Object.assign(move, { v: 0, ds: 0 });
         else feet[i] = there;
     });
@@ -381,6 +446,13 @@ export const stepTraffic = (state, dt, { target = 0, rain = 0 } = {}) => {
         }
         const leaving = me.seg.control === 'exit' ? (me.seg.length - me.s) / FADE : 1;
         me.scale = Math.max(0, Math.min(1, me.age / FADE, leaving));
+
+        const ride = me.ride;
+        if (ride && ride.arrivedAt === null && me.seg === ride.lane && Math.abs(me.s - ride.s) < ARRIVED && me.v < MOVING) {
+            ride.arrivedAt = state.t;
+            state.events.push({ type: 'arrived', id: me.id, place: ride.place });
+        }
+        if (ride && ride.arrivedAt !== null && state.t - ride.arrivedAt >= RIDE.wait) me.ride = null;
     });
     if (gone.size) {
         state.vehicles = state.vehicles.filter((v) => !gone.has(v));
@@ -394,6 +466,26 @@ export const stepTraffic = (state, dt, { target = 0, rain = 0 } = {}) => {
         spawn(state, rain);
     }
     return state;
+};
+
+/**
+ * May a walker step onto crosswalk `id`? Not while any vehicle is on, has booked, or overlaps it. With `look` > 0
+ * (crosswalks without lights) also not while a driver who will cross it is that close to its stop line.
+ */
+export const crosswalkClear = (state, id, { look = 0 } = {}) => {
+    const cw = state.index.crosswalks.get(id);
+    if (!cw) return true;
+    // Your car (or the police car after you) on it, or about to be (drive mode).
+    const wide = { ...cw.foot, hl: cw.foot.hl + PLAYER_NEAR, hw: cw.foot.hw + PLAYER_NEAR };
+    if ((state.player ?? []).some((p) => footprintsOverlap(p, wide))) return false;
+    for (const v of state.vehicles) {
+        if (v.seg.crosswalks?.has(id) || v.reserved.some((l) => l.crosswalks.has(id))) return false;
+        if (footprintsOverlap(footprint(v), cw.foot)) return false;
+        if (look > 0 && v.seg.type === 'lane' && v.seg.to === cw.node && v.seg.length - (v.s + v.length / 2) <= look) {
+            if (chooseLink(v, v.seg)?.crosswalks.has(id)) return false;
+        }
+    }
+    return true;
 };
 
 /** A vehicle's body on the ground (oriented rectangle), `ahead` units further along its heading. */
@@ -415,4 +507,128 @@ export const footprintsOverlap = (a, b) => {
 export const vehiclePose = (vehicle) => {
     const p = pointAt(vehicle.seg, vehicle.s);
     return { x: p.x, z: p.z, rotationY: Math.atan2(p.dx, p.dz) };
+};
+
+/** The vehicle with this id, or null (it may have left the map). */
+export const vehicleById = (state, id) => state.vehicles.find((v) => v.id === id) ?? null;
+
+/**
+ * Where a taxi drops someone off for a place at `point` ({ x, z }): the nearest point on a lane long enough to stop
+ * on. Only on the town's loop: nothing in town can turn into a lane coming in from the map edge.
+ */
+export const rideTarget = (state, point) => {
+    let best = null;
+    for (const lane of state.index.segs.values()) {
+        if (lane.type !== 'lane' || lane.length < RIDE.minLane || !state.index.town.has(lane)) continue;
+        const [a, b] = [lane.points[0], lane.points.at(-1)];
+        const t = ((point.x - a.x) * (b.x - a.x) + (point.z - a.z) * (b.z - a.z)) / (lane.length * lane.length);
+        const s = Math.min(lane.length - RIDE.endRoom, Math.max(RIDE.endRoom, t * lane.length));
+        const p = pointAt(lane, s);
+        const d = Math.hypot(p.x - point.x, p.z - point.z);
+        if (!best || d < best.d) best = { lane, s, d };
+    }
+    return best && { lane: best.lane, s: best.s };
+};
+
+// The lane a driver is committed to next: past any turns it has already booked.
+const committedLane = (me) => {
+    if (me.reserved.length) return me.reserved.at(-1).toLane;
+    return me.seg.type === 'link' ? me.seg.toLane : me.seg;
+};
+
+/**
+ * Shortest way for `me` to `target` (rideTarget), as the turn to take at the end of each lane on the way
+ * (Map lane id → link), or null when there is none. Never leaves the map on the way.
+ */
+export const planRoute = (me, target) => {
+    const start = committedLane(me);
+    // Already on the drop-off lane before the drop-off point: just drive on.
+    if (start === target.lane && (start !== me.seg || me.s <= target.s + ARRIVED)) return new Map();
+    const dist = new Map();
+    const via = new Map(); // lane → the link that reached it
+    const queue = [];
+    for (const link of start.out) {
+        if (link.toLane.control === 'exit' && link.toLane !== target.lane) continue;
+        const d = link.length + (start.control === 'signal' ? RIDE.signalCost : 0);
+        if (d < (dist.get(link.toLane) ?? Infinity)) { dist.set(link.toLane, d); via.set(link.toLane, link); queue.push(link.toLane); }
+    }
+    const done = new Set();
+    while (queue.length) {
+        queue.sort((a, b) => dist.get(a) - dist.get(b));
+        const lane = queue.shift();
+        if (done.has(lane)) continue;
+        done.add(lane);
+        if (lane === target.lane) break;
+        for (const link of lane.out) {
+            const next = link.toLane;
+            if (next.control === 'exit' && next !== target.lane) continue;
+            const d = dist.get(lane) + lane.length + link.length + (lane.control === 'signal' ? RIDE.signalCost : 0);
+            if (d < (dist.get(next) ?? Infinity)) { dist.set(next, d); via.set(next, link); queue.push(next); }
+        }
+    }
+    if (!via.has(target.lane)) return null;
+    const route = new Map();
+    for (let lane = target.lane; ; lane = via.get(lane).fromLane) {
+        const link = via.get(lane);
+        route.set(link.fromLane.id, link);
+        if (link.fromLane === start) break;
+    }
+    return route;
+};
+
+/** Send vehicle `me` to `target` (rideTarget) for `place`. False when it can't get there. */
+export const startRide = (me, target, place) => {
+    const route = planRoute(me, target);
+    if (!route) return false;
+    for (const [laneId, link] of route) me.choices.set(laneId, link);
+    me.ride = { lane: target.lane, s: target.s, place, arrivedAt: null };
+    return true;
+};
+
+/**
+ * Book a taxi for `place` at `point` ({ x, z }), from near `from` ({ x, z }, where the camera looks): `prefer` (the
+ * taxi you follow) if it can go, else the nearest free taxi on the roads that can, else a new one at the nearest
+ * entry. You ride in it all the way. Returns the taxi, or null.
+ */
+export const bookTaxi = (state, { from, point, place, prefer = null }) => {
+    const target = rideTarget(state, point);
+    if (!target) return null;
+    if (prefer && !prefer.ride && prefer.seg.control !== 'exit' && startRide(prefer, target, place)) return prefer;
+    const near = (v) => {
+        const p = vehiclePose(v);
+        return Math.hypot(p.x - from.x, p.z - from.z);
+    };
+    // Only taxis already in town: one still coming in on a road out is a long way off by road (P3B-08).
+    const inTown = (v) => state.index.town.has(v.seg.type === 'link' ? v.seg.toLane : v.seg);
+    const taxis = state.vehicles.filter((v) => v.type === 'taxi' && !v.ride && v.scale >= 1 && v.seg.control !== 'exit' && inTown(v))
+        .sort((a, b) => near(a) - near(b));
+    for (const taxi of taxis) if (startRide(taxi, target, place)) return taxi;
+
+    const { length } = VEHICLE_TYPES.taxi;
+    const entries = state.index.entries.filter((lane) => fits(state, lane, -1, length + 1))
+        .sort((a, b) => Math.hypot(a.points[0].x - from.x, a.points[0].z - from.z) - Math.hypot(b.points[0].x - from.x, b.points[0].z - from.z));
+    for (const lane of entries) {
+        const taxi = addVehicle(state, 'taxi', lane, length / 2, lane.limit * 0.6, 0);
+        if (startRide(taxi, target, place)) {
+            rebuildBuckets(state);
+            return taxi;
+        }
+        state.vehicles.pop();
+    }
+    return null;
+};
+
+/** Take vehicle `id` out of the traffic (P3B-11: the police car that comes after you). Returns it, or null. */
+export const takeVehicle = (state, id) => {
+    const me = vehicleById(state, id);
+    if (!me) return null;
+    state.vehicles = state.vehicles.filter((v) => v !== me);
+    rebuildBuckets(state);
+    return me;
+};
+
+/** A ride was skipped or cancelled: the taxi just drives on (its route so far stays its plan, then it picks again). */
+export const endRide = (state, id) => {
+    const me = vehicleById(state, id);
+    if (me) me.ride = null;
 };

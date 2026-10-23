@@ -123,7 +123,7 @@ export const stepFocus = (order, focus, dir) => {
 export const flightSmoothTime = (distance, f = FLIGHT) =>
     f.minSmoothTime + (f.maxSmoothTime - f.minSmoothTime) * clamp(distance / f.farDistance, 0, 1);
 
-/** Target box for camera-controls' setBoundary: the city footprint, from MIN to MAX target height. */
+/** Target box for camera-controls' setBoundary: the city footprint (layout.reach: down to the T), from MIN to MAX target height. */
 export const targetBounds = (bounds) => ({
     min: [bounds.minX, CAMERA.minTargetY, bounds.minZ],
     max: [bounds.maxX, CAMERA.maxTargetY, bounds.maxZ],

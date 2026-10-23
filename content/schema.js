@@ -137,7 +137,18 @@ export const profileSchema = z.strictObject({
     degree: text,
     bio: text,
     origin: text,
-    services: z.array(text),
+    // Market stalls (P3B-07). No prices: the owner quotes per job.
+    services: z.array(z.strictObject({
+        name: text,
+        delivered: z.union([text, z.null()]),
+        examples: z.array(slug),
+        ...demoMeta,
+    })),
+    marketCalls: z.array(text),
+    // What the taxi driver says on a ride (P3B-06), owner-written only.
+    taxiLines: z.strictObject({ pickup: z.array(text), arrival: z.array(text) }),
+    // What the police officer says in a chase (P3B-11), owner-written only (plain English stand-ins until then).
+    policeLines: z.strictObject({ chase: z.array(text), pullOver: z.array(text) }),
     hobbies: z.array(z.strictObject({ name: text, text })),
     motifs: z.array(text),
     experience: z.array(experienceSchema),

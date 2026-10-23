@@ -53,13 +53,62 @@ _Blank lines separate paragraphs on the site._
  I see coding as a source of strength; as my friends always say, my powers are in my fingers. Security is at the heart of how I work: I never trust anything that comes from the client side, and I am preparing a Master's in Information Security. I am the software engineer who builds on cloud infrastructure and protects the data and information that live on it.
 
 ### Services you offer clients
-- Web & Mobile Development 
-- Video editing 
-- CCTV Camera installation 
-- Graphics design with Figma and Adobe XD
-- Leverage the use of AI for the best study experience
-- SEO and Google map integration 
-- Experienced lecturer in computer science and related IT courses  
+_Each service is a stall in the Market (P3B-07), in this order. Sub-bullets are optional: **Delivered:** one line on what the client gets; **Examples:** project slugs from section 3 whose buildings show this work (demo projects are skipped). No prices: they depend on the job, so every stall says "Ask for a quote"._
+- Frontend development
+  - **Delivered:** Fast, responsive interfaces in React, Next.js and Tailwind CSS that look sharp on every screen.
+  - **Examples:** anointed-plc, computer-solution, food-app-website
+- Backend development
+  - **Delivered:** Secure APIs and servers in Node.js and Express, with validated input and well-designed databases.
+  - **Examples:** vital-pulse, navoraglobalfreight, iot-sentinelf
+- Web app development
+  - **Delivered:** Complete web applications, from the database to the dashboard, deployed and ready for real users.
+  - **Examples:** sns-glam, wvl, novatransport
+- Mobile app development
+  - **Delivered:** Android and iOS apps built with Flutter or React Native, ready to publish to the stores.
+  - **Examples:** vital-pulse, expense-tracker, food-recipe2
+- Graphics design
+  - **Delivered:** Logos, flyers, social media visuals and app screens, designed in Figma and Adobe XD.
+- Cloud infrastructure
+  - **Delivered:** Hosting, domains, databases and backups set up in the cloud, secured and ready to grow.
+- AI infrastructure
+  - **Delivered:** AI built into your product: chat assistants, smart search and automations on today's leading models.
+  - **Examples:** threejs
+- QA & QC
+  - **Delivered:** Testing that catches bugs before your users do: test plans, automated tests and a clear report.
+- Project management
+  - **Delivered:** Your project planned, tracked and delivered, with clear milestones and regular updates.
+- Video editing
+  - **Delivered:** Clean edits for adverts, events and social media, cut in Premiere Pro and CapCut.
+- CCTV installation
+  - **Delivered:** CCTV cameras installed for homes and businesses, set up so you can watch from your phone.
+- SEO & Google Maps
+  - **Delivered:** Get found on Google: on-page SEO, and your business on Google Maps and on your website.
+  - **Examples:** computer-solution
+- IT lecturing & training
+  - **Delivered:** Computer science and IT courses taught clearly, from first steps to real projects.
+- AI for studying
+  - **Delivered:** Learn to use AI tools to study smarter: research, summaries and exam revision.
+- And many more
+  - **Delivered:** Need something tech that isn't on a stall? Tell me what you need.
+
+### Market call-outs (Pidgin)
+_Shoppers in the Market say these when clicked (P3B-07). Only lines written or approved by the owner._
+- I wan buy
+- Who they here
+
+### Taxi driver lines (Pidgin)
+_The driver of the taxi you ride in says one of these when you get in (Pick-up) and when you arrive (Arrival), one per ride, in turn. Only lines written or approved by the owner; the driver stays quiet until there are some._
+- **Pick-up:**
+  - TODO(content)
+- **Arrival:**
+  - TODO(content)
+
+### Police lines (Pidgin)
+_In drive mode, running a red brings a police car after you (P3B-11). The officer says one of these when the chase starts (Chase) and when you pull over for him (Pull over), in turn. Only lines written or approved by the owner; until there are some, he says "Pull over!" and "Red means stop. Drive safe!"._
+- **Chase:**
+  - TODO(content)
+- **Pull over:**
+  - TODO(content)
 
 ### Hobbies
 - Coding: Using JS, Familiar with React, React Native, NextJs and love coding with Threejs and Flutter 

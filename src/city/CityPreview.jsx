@@ -5,12 +5,14 @@ import { useFrame } from '@react-three/fiber';
 import CityExperience from './CityExperience.jsx';
 import LaneDebug from './LaneDebug.jsx';
 import VehicleShowroom from './VehicleShowroom.jsx';
+import FigureShowroom from './FigureShowroom.jsx';
 import { DISTRICT_PLOTS } from '../lib/layout.js';
 import { bueaClock, bueaTimeToday, cityLightsAt, parsePreviewOverride, sunState } from '../lib/dayNight.js';
 
-// ?lanes: the lane graph overlay (P3B-01). ?vehicles: the vehicle showroom (P3B-02).
+// ?lanes: the lane graph overlay (P3B-01). ?vehicles: the vehicle showroom (P3B-02). ?figures: people and animals (P3B-04).
 const SHOW_LANES = new URLSearchParams(window.location.search).has('lanes');
 const SHOW_VEHICLES = new URLSearchParams(window.location.search).has('vehicles');
+const SHOW_FIGURES = new URLSearchParams(window.location.search).has('figures');
 
 const round = (v) => v.toArray().map((n) => n.toFixed(1)).join(', ');
 
@@ -39,11 +41,12 @@ const CityPreview = () => {
                 <Stats onChange={setStats} />
                 {SHOW_LANES && layout && <LaneDebug layout={layout} />}
                 {SHOW_VEHICLES && layout && <VehicleShowroom layout={layout} />}
+                {SHOW_FIGURES && layout && <FigureShowroom layout={layout} />}
             </>
         ),
         at,
         weather: weatherOverride,
-        traffic: !SHOW_VEHICLES, // the showroom parks on the main road
+        traffic: !SHOW_VEHICLES && !SHOW_FIGURES, // the showrooms stand on the main road
         overlay: (
             <div className="pointer-events-none absolute left-4 top-16 z-10 rounded bg-black/60 px-3 py-2 font-mono text-xs text-mist">
                 <p>City preview (dev only)</p>

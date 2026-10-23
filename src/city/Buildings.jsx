@@ -19,6 +19,7 @@ const DIM_WINDOW = mixHex(COLORS.window, UNLIT_WINDOW, 0.45);
 const SKY_IN_GLASS = 0.3;
 const ROOF_HEIGHT = 0.12;
 const NONE = [];
+const NO_SHOPS = new Map();
 
 const withColor = (geometry, hex) => {
     const c = new THREE.Color(hex);
@@ -54,11 +55,15 @@ const toBodies = (placed, highlighted) => placed.map(({ building: b, x, z }) => 
     color: highlighted.includes(b.slug) ? mixHex(b.bodyColor, b.accentColor, HIGHLIGHT) : b.bodyColor,
 }));
 
-/** Building data + grid position → per-part instance lists (bodies are separate, see toBodies). */
-const toInstances = (placed) => {
+/**
+ * Building data + grid position → per-part instance lists (bodies are separate, see toBodies). A face with a shop
+ * (P3B-08, `shops`: slug → Set of faces) has no ground-floor windows: Shopfronts.jsx draws its shop there.
+ */
+const toInstances = (placed, shops) => {
     const parts = { roofs: [], windows: [], cranes: [], beacons: [], flags: [] };
 
-    for (const { building: b, x, z } of placed) {
+    for (const { building: b, x, z, slug } of placed) {
+        const shopFaces = shops.get(slug);
         const { width: w, depth: d, height: h, floors, columns } = b;
         parts.roofs.push({ position: [x, h, z], scale: [w * 1.04, ROOF_HEIGHT, d * 1.04], color: b.accentColor });
 
@@ -70,7 +75,7 @@ const toInstances = (placed) => {
             const angle = (face * Math.PI) / 2;
             const sin = Math.sin(angle);
             const cos = Math.cos(angle);
-            for (let floor = 0; floor < floors; floor++) {
+            for (let floor = shopFaces?.has(face) ? 1 : 0; floor < floors; floor++) {
                 for (let col = 0; col < columns; col++) {
                     const u = -w / 2 + cell * (col + 0.5);
                     const index = face * floors * columns + floor * columns + col;
@@ -149,14 +154,14 @@ const Beacons = ({ items }) => {
  *   onSelect?: (slug: string) => void,
  * }} props
  */
-const Buildings = ({ placed, lighting, highlighted = NONE, onHover, onSelect, xraySlug = null, xrayLayers = NONE }) => {
+const Buildings = ({ placed, lighting, highlighted = NONE, onHover, onSelect, xraySlug = null, xrayLayers = NONE, shops = NO_SHOPS }) => {
     const xrayLot = placed.find((lot) => lot.slug === xraySlug) ?? null;
     const showXRay = Boolean(xrayLot && xrayLayers.length > 1);
     const regularPlaced = useMemo(
         () => (showXRay ? placed.filter((lot) => lot.slug !== xraySlug) : placed),
         [placed, showXRay, xraySlug],
     );
-    const parts = useMemo(() => toInstances(regularPlaced), [regularPlaced]);
+    const parts = useMemo(() => toInstances(regularPlaced, shops), [regularPlaced, shops]);
     const bodies = useMemo(() => toBodies(regularPlaced, highlighted), [regularPlaced, highlighted]);
 
     // Only the bodies are pickable; the nearest hit wins, so a tall building in front catches the pointer.

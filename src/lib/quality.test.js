@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { initialQuality, stepQuality, QUALITY, LEVELS } from './quality.js';
+import { crowdShare, initialQuality, stepQuality, QUALITY, LEVELS } from './quality.js';
 
 test('quality levels: dpr never above 1.5, every level keeps shadows (no recompiles), higher = sharper', () => {
     for (const level of LEVELS) {
@@ -30,4 +30,12 @@ test('stepQuality moves one level and clamps', () => {
     assert.equal(stepQuality('low', -1), 'low');
     assert.equal(stepQuality('low', 1), 'medium');
     assert.equal(stepQuality('high', 1), 'high');
+});
+
+test('crowd share: half on phones and weak devices, full otherwise', () => {
+    assert.equal(crowdShare({ touch: true, tier: 'medium' }), 0.5);
+    assert.equal(crowdShare({ touch: false, tier: 'low' }), 0.5);
+    assert.equal(crowdShare({ touch: false, tier: 'medium' }), 1);
+    assert.equal(crowdShare({ touch: false, tier: 'high' }), 1);
+    assert.equal(crowdShare(), 1);
 });

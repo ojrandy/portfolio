@@ -466,6 +466,9 @@ test('GET /api/city returns merged data, and still works when GitHub is down', a
         assert.equal(body2.statsUpdatedAt, null);
         assert.equal(body2.projects[0].stats.source, 'owner');
         assert.equal(res2.headers.get('cache-control'), 'public, max-age=30');
+
+        assert.deepEqual((await up.buildings()).map((p) => p.slug), body.projects.map((p) => p.slug), 'buildings() matches the route');
+        assert.equal((await down.buildings())[0].stats.source, 'owner');
     } finally {
         console.error = origError;
         for (const s of [a, b]) { s.server.closeAllConnections(); s.server.close(); }

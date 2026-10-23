@@ -87,7 +87,7 @@ A real, busy Buea-style city, not just buildings (ADR-013). Rules in design_syst
 **Needs from the owner:** list of services for the market stalls (+ prices if wanted) and the Pidgin call-out lines, in `docs/projects.md`.
 
 ## Phase 4 — Ask My Portfolio (AI)
-- [ ] **P4-01** Knowledge builder: content → compact knowledge doc used as the cached system context
+- [x] **P4-01** Knowledge builder: content → compact knowledge doc used as the cached system context (`server/lib/knowledge.js` 7 tests, `npm run knowledge:build`, `router.buildings()`; ~3.7k tokens today)
 - [ ] **P4-02** System prompt: scope, citing projects, honesty ("I don't know"), tone, refusal of off-topic/abuse
 - [ ] **P4-03** `POST /api/chat`: streaming (SSE), zod-validated, per-IP rate limit, message/length caps, daily spend cap
 - [ ] **P4-04** Tools: `fly_to_project`, `open_case_study`, `open_contact`, `switch_mode`, handled on the client

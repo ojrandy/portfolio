@@ -12,6 +12,7 @@
     "content:build": "node scripts/build-content.js",
     "content:check": "node scripts/validate-content.js",
     "content:check:strict": "node scripts/validate-content.js --strict",
+    "knowledge:build": "node scripts/build-knowledge.js",
     "previews": "node scripts/capture-previews.js",
     "test": "node --test \"shared/**/*.test.js\" \"scripts/**/*.test.js\" \"server/**/*.test.js\" \"src/**/*.test.js\"",
     "dev:server": "node --watch-path=server --watch-path=content --env-file-if-exists=.env server/dev.js",

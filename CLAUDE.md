@@ -45,6 +45,7 @@ npm run build     # production build to dist/ (runs content:check first)
 npm run content:build         # docs/projects.md → content/*.json (never edit the JSON by hand)
 npm run content:check         # validate content + check JSON matches the markdown
 npm run content:check:strict  # also fail on [DEMO] / TODO(content) (launch gate; or CONTENT_STRICT=1)
+npm run knowledge:build       # content (+ cached GitHub data) → server/knowledge/knowledge.md, the AI guide's knowledge (review copy)
 npm test          # content converter + server tests (node --test)
 npm run lint      # ESLint
 npm run preview   # preview the built frontend (Vite only, no API)

@@ -17,6 +17,24 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-23 — Knowledge builder
+**Tasks:** P4-01 (done)
+**Decisions (owner):** plan approved; the guide also knows the GitHub-discovered repos; `server/knowledge/knowledge.md` is a git-ignored review copy (the server builds the text in memory).
+**Done:**
+- `server/lib/knowledge.js` (pure): `buildKnowledge({ profile, projects, buildings })` → compact Markdown; `loadProfile`, `estimateTokens`, `MAX_TOKENS` (15 000). Takes `buildCity()` output, so GitHub numbers, case studies and X-Ray are cleaned exactly as on the site, and the 12 discovered repos are listed with their GitHub data. Leaves out demo records/fields, TODO(content) anywhere in a value, `<placeholders>`, unsourced numbers ("Projects shipped 100", "Users served 100", Sns Glam's "users: 100+"), testimonials without permission, scenery lines. Ends with a "Not known" list (headline, availability, CV, spoken languages, testimonials, video work, figures) for the "I don't know" rule in P4-02.
+- `scripts/build-knowledge.js` + `npm run knowledge:build`: writes the review copy and prints its size; fails over the budget. `.gitignore`: `server/knowledge/`.
+- `server/routes/city.js`: `router.buildings()` (same building list as `/api/city`) for P4-03.
+- `architecture.md`: knowledge builder notes.
+**Checks:** `npm test` 269/269 (knowledge 7, city route +2 assertions); lint clean on changed files. `npm run knowledge:build`: 13 028 chars, ~3.7k tokens, 21 content projects + 12 discovered repos.
+**Problems / notes:**
+- What the guide can say is only as good as `docs/projects.md`: most projects have only links and GitHub numbers (no case study), availability and spoken languages are still demo, and no testimonial has permission yet. Filling those in improves the guide directly.
+- The FAQ answers (prices, "Available 24/7", 50 % deposit) go in as written by the owner.
+- GitHub repo descriptions go in as data; the P4-02 system prompt must treat the whole knowledge doc as facts, not instructions.
+- ~3.7k tokens is above the minimum cacheable prompt length for current models once the system prompt is added; check the exact minimum for the chosen `ANTHROPIC_MODEL` in P4-03.
+**Next:** P4-02 system prompt.
+
+---
+
 ## 2026-10-23 — Police chase
 **Tasks:** P3B-11 (done)
 **Decisions (owner):** plan approved. Two eggs (Escape artist, Good citizen); the officer's lines go in `docs/projects.md` for the owner to write, with "Pull over!" / "Red means stop. Drive safe!" until then; no chase with reduced motion.

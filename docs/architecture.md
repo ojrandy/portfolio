@@ -34,14 +34,14 @@ One Node.js process on Hostinger serves both the built frontend and the API. All
 ├─ scripts/
 │  ├─ validate-content.js
 │  ├─ capture-previews.js    Playwright → public/previews/
-│  └─ build-knowledge.js     content → server/knowledge/knowledge.md for the AI
+│  └─ build-knowledge.js     content → server/knowledge/knowledge.md (review copy of what the AI knows)
 ├─ shared/                  pure code used by both server and browser (solar.js: sun times + position)
 ├─ server/
 │  ├─ index.js               Express app: static + /api, listens on process.env.PORT
 │  ├─ routes/ city.js · buea.js · chat.js · contact.js · health.js
 │  ├─ lib/ cache.js · github.js · weather.js · anthropic.js · mailer.js · rateLimit.js · validate.js
 │  ├─ prompts/system.md      AI system prompt
-│  └─ knowledge/knowledge.md generated
+│  └─ knowledge/knowledge.md generated review copy, git-ignored (the server builds the text in memory)
 ├─ public/ models/ · previews/ · images/ · cv/
 └─ src/
    ├─ main.jsx · App.jsx     mode router (Explorer / Recruiter)
@@ -122,7 +122,8 @@ All responses are JSON unless noted. All inputs are validated with zod. All endp
 - Implementation: `server/lib/weather.js` (Open-Meteo client with a 4 s timeout and zod check, WMO table, `solarTimes`, `localParts`, pure `bueaState`), `server/routes/buea.js` (cache key `buea-weather`, 15 min TTL, 2 min retry after a failure, a cold start waits ≤ 4.5 s). Tests: `server/buea.test.js` with a real captured response in `server/fixtures/open-meteo-buea.json`.
 
 ## AI chat design
-- **Knowledge:** the full content is small, so the whole `knowledge.md` goes in the system prompt with **prompt caching**. No vector DB/RAG.
+- **Knowledge:** the full content is small, so the whole knowledge doc goes in the system prompt with **prompt caching**. No vector DB/RAG.
+- **Knowledge builder (P4-01):** `server/lib/knowledge.js` `buildKnowledge({ profile, projects, buildings })` → Markdown (pure, tested in `server/knowledge.test.js`). `buildings` is `buildCity()` output, so GitHub numbers, cleaned case studies / X-Ray and discovered repos match `/api/city`; the city router's `router.buildings()` returns it (same cold-start wait as the route). Sections: About, Contact and availability, Services (examples as `[slug]`), Projects (non-demo, sorted by slug, each `### Name [slug]`), More public repos, Experience, Teaching, Video, Hobbies, Tools, Clients, Testimonials, Numbers, FAQ, Not known. Rules: no demo records or demo fields, no `TODO(content)` or `<placeholder>`, numbers only with a source (`auto` stats and unsourced case-study results left out), testimonials only with `permission`, scenery lines (market calls, taxi/police) left out. Output depends only on the input (no timestamps; GitHub dates as YYYY-MM), so the prompt cache holds until the content or the 6 h GitHub data changes. `npm run knowledge:build` writes `server/knowledge/knowledge.md` from the content plus `server/.cache/github-city.json` (if the server has run) and fails above `MAX_TOKENS` (15 000, estimated at 3.5 chars/token).
 - **Model:** `ANTHROPIC_MODEL` env var (start with a current Sonnet; switch to Haiku if cost matters).
 - **Tools** (executed in the browser, not the server): `fly_to_project(slug)`, `open_case_study(slug)`, `open_contact()`, `switch_mode(mode)`.
 - **Limits:** max 12 messages per conversation, 600 chars per user message, max output tokens capped, per-IP rate limit, daily global budget counter; when the budget runs out, the chat shows "the guide is resting, here's the contact form".

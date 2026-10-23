@@ -58,6 +58,12 @@ export const createCityRouter = ({
         });
     });
 
+    // The same building list, for the AI guide's knowledge doc (P4-01); same cold-start wait as the route.
+    router.buildings = async () => {
+        const entry = await withTimeout(githubData(), coldWaitMs);
+        return buildCity(projects, entry?.data, { hide: config.hide, now: now() });
+    };
+
     // Fetch at startup so the first visitor doesn't wait.
     router.warm = () => (contentRefs.length || accounts.length ? githubData() : Promise.resolve(null));
     return router;

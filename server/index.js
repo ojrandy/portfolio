@@ -1,6 +1,7 @@
 import { createApp } from './app.js';
 import { createCityRouter } from './routes/city.js';
 import { createBueaRouter } from './routes/buea.js';
+import { createChatRouter } from './routes/chat.js';
 
 // Hostinger provides PORT (it may be a number or a socket path).
 const port = process.env.PORT || 3001;
@@ -11,7 +12,9 @@ city.warm();
 const buea = createBueaRouter();
 buea.warm();
 
-const server = createApp({ routes: [city, buea] }).listen(port, () => {
+const chat = createChatRouter({ city });
+
+const server = createApp({ routes: [city, buea, chat] }).listen(port, () => {
     const where = /^\d+$/.test(String(port)) ? `http://localhost:${port}` : String(port);
     console.log(`OJ City server listening on ${where} (${mode})`);
 });

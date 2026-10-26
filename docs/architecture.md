@@ -39,7 +39,7 @@ One Node.js process on Hostinger serves both the built frontend and the API. All
 ├─ server/
 │  ├─ index.js               Express app: static + /api, listens on process.env.PORT
 │  ├─ routes/ city.js · buea.js · chat.js · contact.js · health.js
-│  ├─ lib/ cache.js · github.js · weather.js · anthropic.js · mailer.js · rateLimit.js · validate.js
+│  ├─ lib/ cache.js · github.js · weather.js · guide/ (built-in answers) · groq.js · mailer.js · rateLimit.js · validate.js
 │  ├─ prompts/system.md      OJ Guide's rules (owner-editable), read by lib/systemPrompt.js
 │  └─ knowledge/knowledge.md generated review copy, git-ignored (the server builds the text in memory)
 ├─ public/ models/ · previews/ · images/ · cv/
@@ -67,7 +67,7 @@ All responses are JSON unless noted. All inputs are validated with zod. All endp
 | GET | `/api/health` | uptime check | none |
 | GET | `/api/city` | content projects + public repos discovered on GitHub + GitHub stats → building data (ADR-012) | 6 h, stale-while-revalidate, file-persisted |
 | GET | `/api/buea` | Buea local time, sunrise/sunset, current weather (shape below, P2-01) | weather 15 min (file-persisted); time per request |
-| POST | `/api/chat` | `{ messages: [{role, content}] }` → **SSE stream** of text + tool calls | none |
+| POST | `/api/chat` | `{ messages: [{role, content}] }` → **SSE stream** of text + tool calls; built-in guide or Groq (ADR-014) | none |
 | POST | `/api/contact` | `{ name, email, message, turnstileToken, website(honeypot) }` | none |
 
 ### `/api/city` response (shape)
@@ -122,12 +122,14 @@ All responses are JSON unless noted. All inputs are validated with zod. All endp
 - Implementation: `server/lib/weather.js` (Open-Meteo client with a 4 s timeout and zod check, WMO table, `solarTimes`, `localParts`, pure `bueaState`), `server/routes/buea.js` (cache key `buea-weather`, 15 min TTL, 2 min retry after a failure, a cold start waits ≤ 4.5 s). Tests: `server/buea.test.js` with a real captured response in `server/fixtures/open-meteo-buea.json`.
 
 ## AI chat design
-- **Knowledge:** the full content is small, so the whole knowledge doc goes in the system prompt with **prompt caching**. No vector DB/RAG.
+- **Knowledge:** the full content is small, so the whole knowledge doc goes in the AI layer's system prompt, and the built-in guide matches questions against the same content. No vector DB/RAG.
 - **Knowledge builder (P4-01):** `server/lib/knowledge.js` `buildKnowledge({ profile, projects, buildings })` → Markdown (pure, tested in `server/knowledge.test.js`). `buildings` is `buildCity()` output, so GitHub numbers, cleaned case studies / X-Ray and discovered repos match `/api/city`; the city router's `router.buildings()` returns it (same cold-start wait as the route). Sections: About, Contact and availability, Services (examples as `[slug]`), Projects (non-demo, sorted by slug, each `### Name [slug]`), More public repos, Experience, Teaching, Video, Hobbies, Tools, Clients, Testimonials, Numbers, FAQ, Not known. Rules: no demo records or demo fields, no `TODO(content)` or `<placeholder>`, numbers only with a source (`auto` stats and unsourced case-study results left out), testimonials only with `permission`, scenery lines (market calls, taxi/police) left out. Output depends only on the input (no timestamps; GitHub dates as YYYY-MM), so the prompt cache holds until the content or the 6 h GitHub data changes. `npm run knowledge:build` writes `server/knowledge/knowledge.md` from the content plus `server/.cache/github-city.json` (if the server has run) and fails above `MAX_TOKENS` (15 000, estimated at 3.5 chars/token).
 - **System prompt (P4-02):** `server/lib/systemPrompt.js` `buildSystem(knowledge)` → `system` blocks: the rules from `server/prompts/system.md` (fixed), then `<knowledge>…</knowledge>` with `cache_control: ephemeral` on that last block, so tools + the whole system prompt are one cached prefix (~5.2k tokens today; the 5.x models cache from 512). Nothing per request goes in `system` (it would break the cache); anything like Buea time goes after it in `messages`. `buildSystem` refuses knowledge containing a `<knowledge>` tag. The guide is **OJ Guide**: speaks about Ojong in the third person ("he", owner-confirmed), answers in the visitor's language (English, French or Pidgin), cites projects as `[slug]`, says it doesn't know when the knowledge doesn't cover a question. `npm run knowledge:build` prints the combined size.
-- **Model:** `ANTHROPIC_MODEL` env var (start with a current Sonnet; switch to Haiku if cost matters).
+- **Engines (ADR-014):** the built-in guide (no model, always on) answers unless the optional Groq layer is configured and under its daily cap; any Groq failure or timeout falls back to the built-in guide. No paid AI. The P4-02 `buildSystem` blocks carry an Anthropic-style `cache_control`; the Groq layer (P4-03b) sends the same text as one OpenAI-style system message.
 - **Tools** (executed in the browser, not the server): `fly_to_project(slug)`, `open_case_study(slug)`, `open_contact()`, `switch_mode(mode)`.
-- **Limits:** max 12 messages per conversation, 600 chars per user message, max output tokens capped, per-IP rate limit, daily global budget counter; when the budget runs out, the chat shows "the guide is resting, here's the contact form".
+- **Built-in guide (P4-03):** `server/lib/knowledge.js` `knowledgeFacts()` (the cleaned facts; `renderKnowledge()` turns them into the Markdown doc, `buildKnowledge` = both) → `server/lib/guide/`: `text.js` (normalise with tech names joined and `node.js`/`reactjs`/`vuejs` = `node`/`react`/`vue`, `hasPhrase` with plurals and, for names only, one typo in 6+ letter words, `detectLanguage` en/fr/pcm), `phrases.js` (fixed phrases in English and French; Pidgin drafted behind `PIDGIN_APPROVED = false`, so Pidgin questions are answered in English until the owner approves), `index.js` `createGuide(facts).answer(messages)` → `{ text, lang, detected, intent, citations, suggestions }`. Order: rule-change attempts and abuse → a project by name (unique name words, full name or slug; aspects stack / links / GitHub / story) → a word shared by 2–4 projects ("which one?") → a tech term (stack, project name or description; else mentions in services/experience/story/hobbies/tools; else an honest "I don't see it") → a service → an FAQ (2+ shared words) → a follow-up on the one project the last answer cited → the best kind of question (contact, pricing from the FAQ, availability, experience, education, teaching, video, hobbies, tools, languages, CV, testimonials, clients, GitHub, count, the city, greetings) → "I don't know" + contact + 3 suggestions. Answers quote owner text as written; nothing demo or TODO can appear (it never reaches the facts).
+- **`POST /api/chat` (P4-03):** `server/routes/chat.js`: chat rate limits → its own `express.json` (48 KB; `app.js` skips the 16 KB parser for `/chat`) → zod (`chatBody`: 1–12 messages, alternating, first and last from the visitor, visitor ≤ 600 chars, guide ≤ 3,000, control characters stripped, strict objects) → SSE (`Cache-Control: no-cache, no-transform` so compression passes it through): `text {delta}`, `suggestions {items}`, `done {engine: 'guide'}`; any failure → `error {message, fallback: 'contact'}`. The guide is rebuilt only when the facts change (content deploy, GitHub refresh). One log line per answer: engine, kind of question, language; never the text or IP.
+- **Limits:** max 12 messages per conversation, 600 chars per user message, AI output tokens capped, per-IP rate limit, daily AI request cap (`CHAT_DAILY_AI_LIMIT`); past the cap the built-in guide answers, so the chat never goes silent.
 
 ## Data refresh
 - GitHub: fetched at server start and again after 6 h (stale-while-revalidate: old data is served while one background refresh runs). One refresh lists the accounts' repos, then fetches stats for content repos + selected discovered repos (~2–3 requests per repo; needs `GITHUB_TOKEN`). Content and the hide list are applied on every request, so a content deploy shows up immediately; a changed account list, or a repo added to content / un-hidden without stats, triggers an early refresh. A failing account keeps its previous repo list. The last good copy is kept on disk (`server/.cache/github-city.json`, git-ignored; the older `github-stats.json` is no longer read and can be deleted) so a GitHub outage or restart never breaks the city. A repo that fails keeps its previous stats; failed refreshes retry after 5 min. A cold start waits at most 4 s before answering with owner stats.
@@ -146,9 +148,9 @@ All responses are JSON unless noted. All inputs are validated with zod. All endp
 | `NODE_ENV` | server | `production` on Hostinger |
 | `GITHUB_TOKEN` | server | fine-grained, **read-only public repos**; optional (unauthenticated = 60 req/h, one refresh uses 3 per repo) |
 | `GITHUB_USERNAME` | server | optional, currently unused (repo URLs in content name the owner) |
-| `ANTHROPIC_API_KEY` | server | secret |
-| `ANTHROPIC_MODEL` | server | |
-| `CHAT_DAILY_BUDGET_USD` | server | hard stop |
+| `GROQ_API_KEY` | server | secret, optional (ADR-014); no payment method on the account |
+| `GROQ_MODEL` | server | a free-tier model, checked in Groq's console |
+| `CHAT_DAILY_AI_LIMIT` | server | AI answers per day, below Groq's free limit; then the built-in guide answers |
 | `SMTP_HOST` / `SMTP_PORT` / `SMTP_USER` / `SMTP_PASS` | server | Hostinger email (`contact@ojongrandy.com`) |
 | `CONTACT_TO` | server | where messages are delivered |
 | `TURNSTILE_SECRET` | server | secret |

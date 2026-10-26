@@ -68,10 +68,10 @@
             },
             "stack": [
                 "React Native (Expo)",
-                "Node.js",
-                "Express",
-                "PostgreSQL",
-                "Firebase Cloud Messaging"
+                "TypeScript",
+                "Firebase",
+                "TanStack Query",
+                "Zod"
             ],
             "category": [
                 "mobile"
@@ -100,7 +100,6 @@
                 "role",
                 "teamSize",
                 "dates",
-                "stack",
                 "caseStudy.problem",
                 "caseStudy.hardestPart",
                 "caseStudy.decision",
@@ -493,9 +492,9 @@
                 "end": "2026-07"
             },
             "stack": [
-                "React",
-                "Tailwind CSS",
-                "Google Maps embed"
+                "WordPress",
+                "WooCommerce",
+                "Elementor"
             ],
             "category": [
                 "web"
@@ -525,7 +524,6 @@
                 "role",
                 "teamSize",
                 "dates",
-                "stack",
                 "caseStudy.problem",
                 "caseStudy.hardestPart",
                 "caseStudy.decision",
@@ -629,7 +627,6 @@
                 "builtFor",
                 "role",
                 "teamSize",
-                "stack",
                 "caseStudy.problem",
                 "caseStudy.hardestPart",
                 "caseStudy.decision",
@@ -729,9 +726,7 @@
             "media": "public/previews/navoraglobalfreight.webp (captured by P3-02)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": [
-                "stack"
-            ]
+            "demoFields": []
         },
         {
             "slug": "advancedglobal",
@@ -776,9 +771,7 @@
             "media": "TODO(content)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": [
-                "stack"
-            ]
+            "demoFields": []
         },
         {
             "slug": "wvl",
@@ -825,9 +818,7 @@
             "media": "public/previews/wvl.webp (captured by P3-02)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": [
-                "stack"
-            ]
+            "demoFields": []
         },
         {
             "slug": "coretexcore",
@@ -910,9 +901,7 @@
             "media": "TODO(content)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": [
-                "stack"
-            ]
+            "demoFields": []
         },
         {
             "slug": "food-recipe2",
@@ -953,9 +942,7 @@
             "media": "TODO(content)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": [
-                "stack"
-            ]
+            "demoFields": []
         },
         {
             "slug": "expense-tracker",
@@ -996,9 +983,7 @@
             "media": "TODO(content)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": [
-                "stack"
-            ]
+            "demoFields": []
         },
         {
             "slug": "threejs",
@@ -1043,9 +1028,7 @@
             "media": "TODO(content)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": [
-                "stack"
-            ]
+            "demoFields": []
         },
         {
             "slug": "polished-portfolio-pro",
@@ -1090,9 +1073,7 @@
             "media": "TODO(content)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": [
-                "stack"
-            ]
+            "demoFields": []
         },
         {
             "slug": "iot-sentinelf",
@@ -1138,9 +1119,7 @@
             "media": "TODO(content)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": [
-                "stack"
-            ]
+            "demoFields": []
         },
         {
             "slug": "novatransport",
@@ -1187,9 +1166,7 @@
             "media": "public/previews/novatransport.webp (captured by P3-02)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": [
-                "stack"
-            ]
+            "demoFields": []
         },
         {
             "slug": "novaf",
@@ -1234,9 +1211,7 @@
             "media": "TODO(content)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": [
-                "stack"
-            ]
+            "demoFields": []
         },
         {
             "slug": "worldl",
@@ -1281,9 +1256,7 @@
             "media": "TODO(content)",
             "iframe": "TODO(content)",
             "demo": false,
-            "demoFields": [
-                "stack"
-            ]
+            "demoFields": []
         },
         {
             "slug": "rebirth-labs",
@@ -1300,7 +1273,10 @@
                 "start": "TODO(content)",
                 "end": "TODO(content)"
             },
-            "stack": "TODO(content)",
+            "stack": [
+                "WordPress",
+                "WooCommerce"
+            ],
             "category": [
                 "web"
             ],
@@ -1340,7 +1316,11 @@
                 "start": "TODO(content)",
                 "end": "TODO(content)"
             },
-            "stack": "TODO(content)",
+            "stack": [
+                "WordPress",
+                "WooCommerce",
+                "Elementor"
+            ],
             "category": [
                 "web"
             ],
@@ -1420,7 +1400,9 @@
                 "start": "TODO(content)",
                 "end": "TODO(content)"
             },
-            "stack": "TODO(content)",
+            "stack": [
+                "Next.js"
+            ],
             "category": [
                 "web"
             ],

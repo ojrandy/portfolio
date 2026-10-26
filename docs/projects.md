@@ -199,7 +199,8 @@ _Live URL confirmed by the owner on 2026-10-20. The other fields are still the 2
 - **Your role:** [DEMO] founder & lead developer
 - **Team size:** [DEMO] 2
 - **Dates:** [DEMO] 2025-02 → present
-- **Stack:** [DEMO] React Native (Expo), Node.js, Express, PostgreSQL, Firebase Cloud Messaging
+- **Stack:** React Native (Expo), TypeScript, Firebase, TanStack Query, Zod
+_Stack read from the repo's package.json on 2026-10-24; the owner asked for the best available evidence. Edit if wrong._
 - **Category:** mobile
 - **Problem:** [DEMO] Patients managing long-term conditions (hypertension, diabetes) in Cameroon log readings on paper, if at all, so doctors see a few numbers per visit instead of a trend.
 - **Hardest part:** [DEMO] Keeping readings safe and in sync when patients are offline for days on weak mobile networks.
@@ -426,7 +427,8 @@ _Live URL confirmed by the owner on 2026-10-20. The other fields are still the 2
 - **Your role:** [DEMO] developer
 - **Team size:** [DEMO] 2
 - **Dates:** [DEMO] 2026-07
-- **Stack:** [DEMO] React, Tailwind CSS, Google Maps embed
+- **Stack:** WordPress, WooCommerce, Elementor
+_Stack read from the live site's HTML (generator tags) on 2026-10-24; the owner asked for the best available evidence. Edit if wrong._
 - **Category:** web
 - **Problem:** [DEMO] A computer sales and repair shop needed to be found on Google and show its services and location.
 - **Hardest part:** [DEMO] Ranking locally for "computer repair Buea".
@@ -467,7 +469,7 @@ _Live URL confirmed by the owner on 2026-10-20. The other fields are still the 2
 - **Can the live site be shown in an iframe?** yes
 
 ### Anointed Financial PLC
-_Live URL confirmed by the owner on 2026-10-20; merged with the afplc-connect repo block. The stack below is the old placeholder (WordPress) and the repo says React/TanStack; confirm which, then replace each [DEMO] value._
+_Live URL confirmed by the owner on 2026-10-20; merged with the afplc-connect repo block. The stack is the repo's (React/TanStack), confirmed by the owner 2026-10-24; replace each remaining [DEMO] value._
 - **Slug:** anointed-plc
 - **Featured:** no
 - **Status:** live
@@ -477,7 +479,7 @@ _Live URL confirmed by the owner on 2026-10-20; merged with the afplc-connect re
 - **Your role:** [DEMO] solo
 - **Team size:** [DEMO] 1
 - **Dates:** TODO(content)
-- **Stack:** [DEMO] React, TypeScript, TanStack Start, Tailwind CSS, shadcn/ui (Radix), Lovable
+- **Stack:** React, TypeScript, TanStack Start, Tailwind CSS, shadcn/ui (Radix), Lovable
 - **Category:** web
 - **Problem:** [DEMO] A Yaoundé company needed a professional bilingual (English/French) site it could update itself.
 - **Hardest part:** [DEMO] Bilingual content without doubling the editing work.
@@ -528,8 +530,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the details. GitHub: TypeSc
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** [DEMO] React, TypeScript, Vite, Node.js, Express, Leaflet maps
-_Stack read from the repo's package.json on 2026-10-15; confirm or edit, then remove [DEMO]._
+- **Stack:** React, TypeScript, Vite, Node.js, Express, Leaflet maps
+_Stack read from the repo's package.json on 2026-10-15; confirmed by the owner 2026-10-24._
 - **Category:** web
 - **Problem:** 
 - **Hardest part:** 
@@ -555,8 +557,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** [DEMO] React, TypeScript, Vite, Node.js, Express, Leaflet maps
-_Stack read from the repo's package.json on 2026-10-15; confirm or edit, then remove [DEMO]._
+- **Stack:** React, TypeScript, Vite, Node.js, Express, Leaflet maps
+_Stack read from the repo's package.json on 2026-10-15; confirmed by the owner 2026-10-24._
 - **Category:** 
 - **Problem:** 
 - **Hardest part:** 
@@ -582,8 +584,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the details. GitHub: TypeSc
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** [DEMO] React, TypeScript, Vite, Node.js, Express, Leaflet maps
-_Stack read from the repo's package.json on 2026-10-15; confirm or edit, then remove [DEMO]._
+- **Stack:** React, TypeScript, Vite, Node.js, Express, Leaflet maps
+_Stack read from the repo's package.json on 2026-10-15; confirmed by the owner 2026-10-24._
 - **Category:** web
 - **Problem:** 
 - **Hardest part:** 
@@ -635,8 +637,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** [DEMO] Next.js, TypeScript, Tailwind CSS, Three.js (React Three Fiber), GSAP, Framer Motion
-_Stack read from the repo's package.json on 2026-10-15; confirm or edit, then remove [DEMO]._
+- **Stack:** Next.js, TypeScript, Tailwind CSS, Three.js (React Three Fiber), GSAP, Framer Motion
+_Stack read from the repo's package.json on 2026-10-15; confirmed by the owner 2026-10-24._
 - **Category:** 
 - **Problem:** 
 - **Hardest part:** 
@@ -662,8 +664,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** [DEMO] Flutter, Dart
-_Stack read from the repo's pubspec.yaml on 2026-10-15; confirm or edit, then remove [DEMO]._
+- **Stack:** Flutter, Dart
+_Stack read from the repo's pubspec.yaml on 2026-10-15; confirmed by the owner 2026-10-24._
 - **Category:** 
 - **Problem:** 
 - **Hardest part:** 
@@ -689,8 +691,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** [DEMO] Flutter, Dart
-_Stack read from the repo's pubspec.yaml on 2026-10-15; confirm or edit, then remove [DEMO]._
+- **Stack:** Flutter, Dart
+_Stack read from the repo's pubspec.yaml on 2026-10-15; confirmed by the owner 2026-10-24._
 - **Category:** 
 - **Problem:** 
 - **Hardest part:** 
@@ -716,8 +718,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** [DEMO] React, Three.js (React Three Fiber), Node.js, Express, MongoDB, OpenAI API
-_Stack read from the repo's client/ and server/ package.json on 2026-10-15; confirm or edit, then remove [DEMO]._
+- **Stack:** React, Three.js (React Three Fiber), Node.js, Express, MongoDB, OpenAI API
+_Stack read from the repo's client/ and server/ package.json on 2026-10-15; confirmed by the owner 2026-10-24._
 - **Category:** 
 - **Problem:** 
 - **Hardest part:** 
@@ -743,8 +745,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** [DEMO] React, TypeScript, TanStack Start, Tailwind CSS, shadcn/ui (Radix), Lovable
-_Stack read from the repo's package.json + README on 2026-10-15; confirm or edit, then remove [DEMO]._
+- **Stack:** React, TypeScript, TanStack Start, Tailwind CSS, shadcn/ui (Radix), Lovable
+_Stack read from the repo's package.json + README on 2026-10-15; confirmed by the owner 2026-10-24._
 - **Category:** 
 - **Problem:** 
 - **Hardest part:** 
@@ -770,8 +772,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** [DEMO] Arduino (C++ firmware), MQTT, Node.js, Express, MongoDB, Socket.IO, React
-_Stack read from the repo's firmware/, backend/ and frontend/ package.json on 2026-10-15; confirm or edit, then remove [DEMO]._
+- **Stack:** Arduino (C++ firmware), MQTT, Node.js, Express, MongoDB, Socket.IO, React
+_Stack read from the repo's firmware/, backend/ and frontend/ package.json on 2026-10-15; confirmed by the owner 2026-10-24._
 - **Category:** 
 - **Problem:** 
 - **Hardest part:** 
@@ -797,8 +799,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the details. GitHub: TypeSc
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** [DEMO] React, TypeScript, Vite, Node.js, Express, Leaflet maps
-_Stack read from the repo's package.json on 2026-10-15; confirm or edit, then remove [DEMO]._
+- **Stack:** React, TypeScript, Vite, Node.js, Express, Leaflet maps
+_Stack read from the repo's package.json on 2026-10-15; confirmed by the owner 2026-10-24._
 - **Category:** web
 - **Problem:** 
 - **Hardest part:** 
@@ -824,8 +826,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** [DEMO] React, TypeScript, Vite, Node.js, Express, Leaflet maps
-_Stack read from the repo's package.json on 2026-10-15; confirm or edit, then remove [DEMO]._
+- **Stack:** React, TypeScript, Vite, Node.js, Express, Leaflet maps
+_Stack read from the repo's package.json on 2026-10-15; confirmed by the owner 2026-10-24._
 - **Category:** 
 - **Problem:** 
 - **Hardest part:** 
@@ -851,8 +853,8 @@ _Added 2026-10-15 from the GitHub repo list; fill in the name and details. GitHu
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** [DEMO] React, TypeScript, Vite, Node.js, Express, Leaflet maps
-_Stack read from the repo's package.json on 2026-10-15; confirm or edit, then remove [DEMO]._
+- **Stack:** React, TypeScript, Vite, Node.js, Express, Leaflet maps
+_Stack read from the repo's package.json on 2026-10-15; confirmed by the owner 2026-10-24._
 - **Category:** 
 - **Problem:** 
 - **Hardest part:** 
@@ -878,7 +880,8 @@ _Added 2026-10-20: live site confirmed by the owner; fill in the details._
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** 
+- **Stack:** WordPress, WooCommerce
+_Stack read from the live site's HTML on 2026-10-24; the owner asked for the best available evidence. Edit if wrong._
 - **Category:** web
 - **Problem:** 
 - **Hardest part:** 
@@ -904,7 +907,8 @@ _Added 2026-10-20: live site confirmed by the owner; fill in the details._
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** 
+- **Stack:** WordPress, WooCommerce, Elementor
+_Stack read from the live site's HTML (generator tags) on 2026-10-24; the owner asked for the best available evidence. Edit if wrong._
 - **Category:** web
 - **Problem:** 
 - **Hardest part:** 
@@ -956,7 +960,8 @@ _Added 2026-10-20: live site confirmed by the owner; fill in the details._
 - **Your role:** 
 - **Team size:** 
 - **Dates:** 
-- **Stack:** 
+- **Stack:** Next.js
+_Stack read from the live site's HTML (_next/static) on 2026-10-24; the owner asked for the best available evidence. Edit if wrong._
 - **Category:** web
 - **Problem:** 
 - **Hardest part:** 

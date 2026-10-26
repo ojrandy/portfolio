@@ -45,7 +45,9 @@ export const createApp = ({ distDir = DEFAULT_DIST, env = process.env, routes = 
     app.use(compression());
 
     const api = express.Router();
-    api.use(express.json({ limit: '16kb' }));
+    const json = express.json({ limit: '16kb' });
+    // /api/chat parses its own, larger body (a conversation of up to 12 messages).
+    api.use((req, res, next) => (req.path === '/chat' ? next() : json(req, res, next)));
     api.use(healthRouter); // before the limiter so uptime monitors are never blocked
     api.use(limits.api());
     for (const router of routes) api.use(router);

@@ -17,6 +17,25 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-24 — Free guide: /api/chat with the built-in answer engine
+**Tasks:** P4-03 (done)
+**Decisions (owner):** no paid AI model. ADR-014 replaces ADR-004: the built-in guide (A) always answers, and an optional Groq free-tier layer (B, P4-03b) goes in front of it later. Groq chosen over Gemini (free-tier messages may be read by Google reviewers) and Cloudflare (~80 answers/day). Plan approved.
+**Done:**
+- ADR-014; tracker P4-03 / P4-03b; `.env.example` and `architecture.md`/`security.md`: `GROQ_API_KEY`, `GROQ_MODEL`, `CHAT_DAILY_AI_LIMIT` replace the Anthropic variables.
+- `knowledge.js` split into `knowledgeFacts()` (cleaned facts) + `renderKnowledge()`; the Markdown doc is byte-identical to before.
+- `server/lib/guide/` (text, phrases, engine): projects by name and aspect, follow-ups, "which one?", skills with evidence (stack, project names/descriptions, or mentions) and honest "no", services, FAQ answers quoted as written, pricing/availability/contact/experience/education/teaching/video/hobbies/tools/languages/CV/testimonials/clients/GitHub/count/city, greetings, "I don't know" + contact, fixed lines for rule-change attempts and abuse, 3 suggested questions per answer. English and French; Pidgin understood, answered in English until approved.
+- `POST /api/chat` (`routes/chat.js`), wired in `server/index.js`.
+**Checks:** `npm test` 292/292 (guide 12, chat route 7); lint clean on `server/`. 32 real-content questions in English/French/Pidgin all got the right kind of answer. Real server (`node server/index.js` on :3099): SSE answers for "Does he know Flutter?" (Flutter App + Quiz App, Mobile app development) and a French question, uncompressed with `Accept-Encoding: gzip`, rate-limit headers present, log lines without text.
+**Later the same day (owner):** Pidgin approved (`PIDGIN_APPROVED = true`; phrases without a Pidgin version stay English). Asked for the best available knowledge on project stacks; case studies wait until after deployment. Stacks in `docs/projects.md` from evidence only, each with a dated note: the 13 stacks read from repos on 2026-10-15 confirmed (`[DEMO]` removed, Anointed's repo stack chosen over the old WordPress placeholder); Vital Pulse from its repo's package.json (React Native (Expo), TypeScript, Firebase, TanStack Query, Zod; the placeholder's Express/PostgreSQL was wrong); Computer Solutions and Global Sphere Autos (WordPress, WooCommerce, Elementor; the React placeholder was wrong) and Rebirth Labs (WordPress, WooCommerce) from their sites' generator tags; HandyMan Do IT (Next.js) from `_next/static`. Queens Cargo showed nothing readable and coretexcore is empty: both still TODO. A missing project detail now answers with the links and GitHub numbers it does have. Pidgin patterns ("e go", "e don", "e dey"…) detected. Name typo matching skips question words ("hardest" had matched the project "Harvest").
+**Problems / notes:**
+- The guide can only be as good as `docs/projects.md`: most projects have no stack or case study, so "what stack did X use?" often gets "I don't have that detail". Filling stacks in helps both the guide and the city.
+- Typo tolerance is for names only (6+ letters); question keywords match exactly, because "harvest" ≈ "hardest" and "react" ≈ "reach" sent answers the wrong way.
+- Git Bash's `curl` sends "coûte" in the wrong encoding, so that one manual test looked wrong; through Node (UTF-8, as browsers send) it's right.
+- 12 messages is the cap, but alternating turns that start and end with the visitor make 11 the longest real conversation.
+**Next:** P4-03b (Groq layer) or P4-05 (chat UI) so the guide can be used on the site.
+
+---
+
 ## 2026-10-23 — System prompt
 **Tasks:** P4-02 (done)
 **Decisions (owner):** plan approved. The guide is **OJ Guide**; it talks about Ojong in the third person as "he"; it answers in the visitor's language: English, French or Pidgin.

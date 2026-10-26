@@ -1,8 +1,8 @@
-// Knowledge doc for "Ask My Portfolio" (P4-01, ADR-004): owner content + the city's buildings → compact
-// Markdown that goes whole into the cached system prompt. Same honesty rules as the site: demo records,
-// demo fields, TODO(content) and <placeholders> never appear; numbers only with a source; testimonials only
-// with permission. Output depends only on the input (fixed order, no timestamps), so the prompt cache holds
-// until the content or the GitHub data changes.
+// What OJ Guide knows (P4-01, ADR-014): owner content + the city's buildings → cleaned facts, used by the
+// built-in guide (P4-03) and rendered as compact Markdown for the AI layer's system prompt. Same honesty
+// rules as the site, applied once here: demo records, demo fields, TODO(content) and <placeholders> never
+// appear; numbers only with a source; testimonials only with permission. Output depends only on the input
+// (fixed order, no timestamps).
 import { readFileSync } from 'node:fs';
 import { profileFileSchema, TODO } from '../../content/schema.js';
 
@@ -34,13 +34,8 @@ const reader = (record) => {
 };
 
 const list = (items) => (Array.isArray(items) ? items.map(oneLine).filter(Boolean) : []);
-const bullet = (label, value) => (value ? `- ${label}: ${value}` : null);
-const section = (title, lines) => {
-    const body = lines.filter(Boolean);
-    return body.length ? [`## ${title}`, ...body].join('\n') : null;
-};
 
-const DISTRICT_NAMES = { downtown: 'Downtown', cinema: 'Cinema', arcade: 'Arcade', school: 'School', pitch: 'Pitch' };
+export const DISTRICT_NAMES = { downtown: 'Downtown', cinema: 'Cinema', arcade: 'Arcade', school: 'School', pitch: 'Pitch' };
 const month = (iso) => (typeof iso === 'string' && /^\d{4}-\d{2}/.test(iso) ? iso.slice(0, 7) : null);
 
 const dateRange = (dates) => {
@@ -50,236 +45,265 @@ const dateRange = (dates) => {
     return end ? `${start} → ${end}` : `from ${start}`;
 };
 
-const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
-
-const githubNumbers = (stats) => {
+const githubFacts = (stats) => {
     if (stats?.source !== 'github') return null;
-    const parts = [];
-    if (Number.isInteger(stats.commits)) parts.push(plural(stats.commits, 'commit'));
-    if (Number.isInteger(stats.stars)) parts.push(plural(stats.stars, 'star'));
-    if (month(stats.lastPush)) parts.push(`last push ${month(stats.lastPush)}`);
-    return parts.length ? parts.join(', ') : null;
-};
-
-const links = (b) => [b.live && `live ${b.live}`, b.repo && `repo ${b.repo}`].filter(Boolean).join(' · ') || null;
-
-const aboutSection = (profile) => {
-    const field = reader(profile);
-    const origin = (clean(field('origin')) ?? '').split(/\n\s*\n/).map(oneLine).filter(Boolean);
-    return section('About', [
-        bullet('Name', oneLine(field('name'))),
-        bullet('Headline', oneLine(field('title'))),
-        bullet('Based in', oneLine(field('location'))),
-        bullet('Roots', oneLine(field('culture'))),
-        bullet('Degree', oneLine(field('degree'))),
-        bullet('Years coding', oneLine(field('yearsCoding'))),
-        bullet('Spoken languages', list(field('languages')).join(', ')),
-        clean(field('bio')) && `\nBio: ${oneLine(field('bio'))}`,
-        origin.length ? `\nOrigin story:\n${origin.join('\n\n')}` : null,
-    ]);
-};
-
-const AVAILABILITY = { freelance: 'freelance projects', fullTime: 'full-time roles', contract: 'contracts', remote: 'remote work' };
-
-const contactSection = (profile) => {
-    const field = reader(profile);
-    const availability = field('availability');
-    const open = availability ? Object.keys(AVAILABILITY).filter((k) => availability[k]).map((k) => AVAILABILITY[k]) : [];
-    const l = field('links') ?? {};
-    return section('Contact and availability', [
-        availability && bullet('Open to', open.length ? open.join(', ') : 'nothing at the moment'),
-        bullet('Email', clean(field('email'))),
-        bullet('GitHub', clean(l.github)),
-        bullet('LinkedIn', clean(l.linkedin)),
-        bullet('X', clean(l.x)),
-        bullet('YouTube', clean(l.youtube)),
-        bullet('CV (PDF on this site)', clean(field('cv'))),
-    ]);
-};
-
-const servicesSection = (profile, knownSlugs) => section('Services (the Market stalls)', profile.services.map((s) => {
-    const field = reader(s);
-    const name = oneLine(field('name'));
-    if (!name) return null;
-    const examples = (field('examples') ?? []).filter((slug) => knownSlugs.has(slug));
-    const delivered = oneLine(field('delivered'));
-    return `- ${name}${delivered ? `: ${delivered}` : ''}${examples.length ? ` Examples: ${examples.map((x) => `[${x}]`).join(', ')}` : ''}`;
-}));
-
-const experienceSection = (profile) => section('Experience', profile.experience.map((e) => {
-    const field = reader(e);
-    const role = oneLine(field('role'));
-    const company = oneLine(field('company'));
-    if (!role || !company) return null;
-    const head = [`${role}, ${company}`, dateRange(field('dates')), oneLine(field('location'))].filter(Boolean).join(' · ');
-    const did = list(field('did'));
-    return [
-        `### ${head}`,
-        ...did.map((d) => `- ${d}`),
-        bullet('Proudest of', oneLine(field('proudest'))),
-    ].filter(Boolean).join('\n');
-}));
-
-const teachingSection = (profile) => section('Teaching (the School)', profile.teaching.map((t) => {
-    const field = reader(t);
-    const title = oneLine(field('title'));
-    if (!title) return null;
-    const details = [
-        oneLine(field('venue')),
-        oneLine(field('audience')) && `for ${oneLine(field('audience'))}`,
-        oneLine(field('courses')),
-        oneLine(field('date')),
-        clean(field('link')),
-    ].filter(Boolean);
-    return `- ${title}${details.length ? ` (${details.join('; ')})` : ''}`;
-}));
-
-const videoSection = (profile) => section('Video work (the Cinema)', profile.video.map((v) => {
-    const field = reader(v);
-    const title = oneLine(field('title'));
-    if (!title) return null;
-    const details = [oneLine(field('role')), list(field('tools')).join(', '), clean(field('link'))].filter(Boolean);
-    return `- ${title}${details.length ? ` (${details.join('; ')})` : ''}`;
-}));
-
-const hobbiesSection = (profile) => section('Hobbies', profile.hobbies.map((h) => {
-    const name = oneLine(h.name);
-    const text = oneLine(h.text);
-    return name && text ? `- ${name}: ${text}` : null;
-}));
-
-const toolsSection = (profile) => section('Tools', [
-    oneLine(profile.tools.summary),
-    ...profile.tools.groups.map((g) => {
-        const field = reader(g);
-        const items = list(field('items'));
-        return oneLine(field('name')) && items.length ? `- ${oneLine(field('name'))}: ${items.join(', ')}` : null;
-    }),
-]);
-
-const clientsSection = (profile) => section('Clients and workplaces', profile.clients.map((c) => (oneLine(c.text) ? `- ${oneLine(c.text)}` : null)));
-
-const testimonialsSection = (profile) => section('Testimonials (shared with permission)', profile.testimonials.map((t) => {
-    if (!t.permission) return null;
-    const field = reader(t);
-    const quote = oneLine(field('quote'));
-    const name = oneLine(field('name'));
-    return quote && name ? `- "${quote}" — ${name}${clean(field('link')) ? ` (${clean(field('link'))})` : ''}` : null;
-}));
-
-// A number only with a real source: 'auto' values are counted elsewhere, and a TODO source drops the stat.
-const numbersSection = (profile) => section('Numbers (owner-supplied, with source)', profile.stats.map((s) => {
-    const field = reader(s);
-    const label = oneLine(field('label'));
-    const value = oneLine(field('value'));
-    const source = oneLine(field('source'));
-    return label && value && value !== 'auto' && source ? `- ${label}: ${value} (source: ${source})` : null;
-}));
-
-const faqSection = (profile) => section('FAQ (owner answers)', profile.faq.map((f) => {
-    const field = reader(f);
-    const q = oneLine(field('q'));
-    const a = oneLine(field('a'));
-    return q && a ? `Q: ${q}\nA: ${a}` : null;
-}));
-
-const projectBlock = (project, building) => {
-    const field = reader(project);
-    const b = building ?? {};
-    const status = clean(b.status ?? field('status'));
-    const meta = [
-        DISTRICT_NAMES[project.district],
-        status && `status ${status}`,
-        project.featured && 'featured',
-    ].filter(Boolean).join(' · ');
-    const builtFor = oneLine(field('builtFor'));
-    const team = field('teamSize');
-    const who = [
-        builtFor && `built for: ${builtFor}`,
-        oneLine(field('role')) && `role: ${oneLine(field('role'))}`,
-        Number.isInteger(team) && `team of ${team}`,
-        dateRange(field('dates')),
-    ].filter(Boolean).join(' · ');
-    const stack = list(field('stack'));
-    const cs = b.caseStudy;
-    const xray = b.xray ? ['ui', 'api', 'data', 'infra'].map((k) => b.xray[k] && `${k.toUpperCase()}: ${oneLine(b.xray[k])}`).filter(Boolean) : [];
-    const effort = field('stats')?.effort;
-    const effortKnown = Number.isInteger(effort) && !(project.demoFields ?? []).includes('stats.effort');
-    return [
-        `### ${oneLine(project.name)} [${project.slug}]`,
-        meta && `- ${meta}`,
-        who && `- ${who}`,
-        stack.length ? `- Stack: ${stack.join(', ')}` : null,
-        bullet('Description (GitHub)', oneLine(b.description)),
-        bullet('Links', links(b)),
-        bullet('GitHub', githubNumbers(b.stats)),
-        effortKnown && `- Effort (owner's 1–10 rating): ${effort}`,
-        cs && bullet('Problem', oneLine(cs.problem)),
-        cs && bullet('Hardest part', oneLine(cs.hardestPart)),
-        cs && bullet('Key decision', oneLine(cs.decision)),
-        cs?.result && `- Result: ${oneLine(cs.result)}${oneLine(cs.resultSource) ? ` (source: ${oneLine(cs.resultSource)})` : ''}`,
-        xray.length ? `- Under the hood: ${xray.join(' · ')}` : null,
-    ].filter(Boolean).join('\n');
-};
-
-const repoLine = (b) => {
-    const details = [
-        oneLine(b.description),
-        b.stack?.length && `stack ${b.stack.join(', ')}`,
-        b.status && `status ${b.status}`,
-        githubNumbers(b.stats),
-        links(b),
-    ].filter(Boolean);
-    return `- ${oneLine(b.name)} [${b.slug}]${details.length ? `: ${details.join(' · ')}` : ''}`;
+    const facts = {
+        commits: Number.isInteger(stats.commits) ? stats.commits : null,
+        stars: Number.isInteger(stats.stars) ? stats.stars : null,
+        lastPush: month(stats.lastPush),
+    };
+    return Object.values(facts).some((v) => v !== null) ? facts : null;
 };
 
 const bySlug = (a, b) => (a.slug < b.slug ? -1 : a.slug > b.slug ? 1 : 0);
 
+const projectFacts = (project, building) => {
+    const field = reader(project);
+    const b = building ?? {};
+    const team = field('teamSize');
+    const effort = field('stats')?.effort;
+    const cs = b.caseStudy;
+    const xray = b.xray ? Object.fromEntries(['ui', 'api', 'data', 'infra'].map((k) => [k, oneLine(b.xray[k])])) : null;
+    return {
+        slug: project.slug,
+        name: oneLine(project.name),
+        district: project.district,
+        status: clean(b.status ?? field('status')),
+        featured: project.featured,
+        builtFor: oneLine(field('builtFor')),
+        role: oneLine(field('role')),
+        teamSize: Number.isInteger(team) ? team : null,
+        dates: dateRange(field('dates')),
+        stack: list(field('stack')),
+        description: oneLine(b.description),
+        live: b.live ?? null,
+        repo: b.repo ?? null,
+        github: githubFacts(b.stats),
+        effort: Number.isInteger(effort) && !(project.demoFields ?? []).includes('stats.effort') ? effort : null,
+        caseStudy: cs ? {
+            problem: oneLine(cs.problem),
+            hardestPart: oneLine(cs.hardestPart),
+            decision: oneLine(cs.decision),
+            result: oneLine(cs.result),
+            resultSource: oneLine(cs.resultSource),
+        } : null,
+        xray: xray && Object.values(xray).some(Boolean) ? xray : null,
+        source: 'content',
+    };
+};
+
+const repoFacts = (b) => ({
+    slug: b.slug,
+    name: oneLine(b.name),
+    district: 'downtown',
+    status: b.status ?? null,
+    description: oneLine(b.description),
+    stack: b.stack ?? [],
+    live: b.live ?? null,
+    repo: b.repo ?? null,
+    github: githubFacts(b.stats),
+    source: 'github',
+});
+
+const AVAILABILITY_KEYS = ['freelance', 'fullTime', 'contract', 'remote'];
+
 // Profile fields the site keeps as demo, in words the guide can use for "I don't know".
 const UNKNOWN_FIELDS = { title: 'a final headline', availability: 'current availability', cv: 'a CV to download', languages: 'spoken languages', email: 'an email address' };
-
-const unknownSection = (profile, sections) => {
-    const items = (profile.demoFields ?? []).map((f) => UNKNOWN_FIELDS[f]).filter(Boolean);
-    if (!sections.testimonials) items.push('client testimonials');
-    if (!sections.video) items.push('video work');
-    if (!sections.numbers) items.push('figures such as users served or projects shipped');
-    items.push('prices beyond the FAQ, private repos, and anything not written in this document');
-    return section('Not known (say you don\'t know and suggest the contact form)', items.map((i) => `- ${i}`));
-};
 
 /**
  * @param {{ profile: object, projects: object[], buildings?: object[] | null }} input
  *   profile / projects: validated content; buildings: buildCity() output (GitHub numbers, cleaned case
- *   studies, discovered repos). Without buildings, content projects are listed without GitHub data.
- * @returns {string} Markdown
+ *   studies, discovered repos). Without buildings, content projects have no GitHub data.
+ * @returns {object} cleaned facts; every string is publishable, missing values are null / empty lists
  */
-export const buildKnowledge = ({ profile, projects, buildings = null }) => {
+export const knowledgeFacts = ({ profile, projects, buildings = null }) => {
+    const field = reader(profile);
     const byBuilding = new Map((buildings ?? []).map((b) => [b.slug, b]));
-    const real = projects.filter((p) => !p.demo).sort(bySlug);
-    const discovered = (buildings ?? []).filter((b) => b.source === 'github').sort(bySlug);
-    const knownSlugs = new Set([...real, ...discovered].map((p) => p.slug));
+    const real = projects.filter((p) => !p.demo).sort(bySlug).map((p) => projectFacts(p, byBuilding.get(p.slug)));
+    const repos = (buildings ?? []).filter((b) => b.source === 'github').sort(bySlug).map(repoFacts);
+    const knownSlugs = new Set([...real, ...repos].map((p) => p.slug));
+    const availability = field('availability');
+    const links = field('links') ?? {};
 
-    const sections = {
-        about: aboutSection(profile),
-        contact: contactSection(profile),
-        services: servicesSection(profile, knownSlugs),
-        projects: section('Projects (buildings in OJ City; [slug] identifies each one)', real.map((p) => projectBlock(p, byBuilding.get(p.slug)))),
-        repos: section('More public repos (buildings in Downtown, from GitHub data only, no write-up)', discovered.map(repoLine)),
-        experience: experienceSection(profile),
-        teaching: teachingSection(profile),
-        video: videoSection(profile),
-        hobbies: hobbiesSection(profile),
-        tools: toolsSection(profile),
-        clients: clientsSection(profile),
-        testimonials: testimonialsSection(profile),
-        numbers: numbersSection(profile),
-        faq: faqSection(profile),
+    const facts = {
+        name: oneLine(field('name')),
+        headline: oneLine(field('title')),
+        location: oneLine(field('location')),
+        roots: oneLine(field('culture')),
+        degree: oneLine(field('degree')),
+        yearsCoding: oneLine(field('yearsCoding')),
+        spokenLanguages: list(field('languages')),
+        bio: oneLine(field('bio')),
+        origin: (clean(field('origin')) ?? '').split(/\n\s*\n/).map(oneLine).filter(Boolean),
+        availability: availability ? Object.fromEntries(AVAILABILITY_KEYS.map((k) => [k, Boolean(availability[k])])) : null,
+        contact: {
+            email: clean(field('email')),
+            github: clean(links.github),
+            linkedin: clean(links.linkedin),
+            x: clean(links.x),
+            youtube: clean(links.youtube),
+            cv: clean(field('cv')),
+        },
+        services: profile.services.map((s) => {
+            const f = reader(s);
+            return { name: oneLine(f('name')), delivered: oneLine(f('delivered')), examples: (f('examples') ?? []).filter((slug) => knownSlugs.has(slug)) };
+        }).filter((s) => s.name),
+        projects: real,
+        repos,
+        experience: profile.experience.map((e) => {
+            const f = reader(e);
+            return { role: oneLine(f('role')), company: oneLine(f('company')), dates: dateRange(f('dates')), location: oneLine(f('location')), did: list(f('did')), proudest: oneLine(f('proudest')) };
+        }).filter((e) => e.role && e.company),
+        teaching: profile.teaching.map((t) => {
+            const f = reader(t);
+            return { title: oneLine(f('title')), venue: oneLine(f('venue')), audience: oneLine(f('audience')), courses: oneLine(f('courses')), date: oneLine(f('date')), link: clean(f('link')) };
+        }).filter((t) => t.title),
+        video: profile.video.map((v) => {
+            const f = reader(v);
+            return { title: oneLine(f('title')), role: oneLine(f('role')), tools: list(f('tools')), link: clean(f('link')) };
+        }).filter((v) => v.title),
+        hobbies: profile.hobbies.map((h) => ({ name: oneLine(h.name), text: oneLine(h.text) })).filter((h) => h.name && h.text),
+        tools: {
+            summary: oneLine(profile.tools.summary),
+            groups: profile.tools.groups.map((g) => {
+                const f = reader(g);
+                return { name: oneLine(f('name')), items: list(f('items')) };
+            }).filter((g) => g.name && g.items.length),
+        },
+        clients: profile.clients.map((c) => oneLine(c.text)).filter(Boolean),
+        testimonials: profile.testimonials.filter((t) => t.permission).map((t) => {
+            const f = reader(t);
+            return { quote: oneLine(f('quote')), name: oneLine(f('name')), link: clean(f('link')) };
+        }).filter((t) => t.quote && t.name),
+        // A number only with a real source: 'auto' values are counted elsewhere, and a TODO source drops the stat.
+        numbers: profile.stats.map((s) => {
+            const f = reader(s);
+            return { label: oneLine(f('label')), value: oneLine(f('value')), source: oneLine(f('source')) };
+        }).filter((s) => s.label && s.value && s.value !== 'auto' && s.source),
+        faq: profile.faq.map((q) => {
+            const f = reader(q);
+            return { q: oneLine(f('q')), a: oneLine(f('a')) };
+        }).filter((q) => q.q && q.a),
     };
-    const name = oneLine(profile.name) ?? 'the owner';
+
+    facts.unknown = (profile.demoFields ?? []).map((f) => UNKNOWN_FIELDS[f]).filter(Boolean);
+    if (!facts.testimonials.length) facts.unknown.push('client testimonials');
+    if (!facts.video.length) facts.unknown.push('video work');
+    if (!facts.numbers.length) facts.unknown.push('figures such as users served or projects shipped');
+    return facts;
+};
+
+// --- Markdown for the AI layer ---
+
+const bullet = (label, value) => (value ? `- ${label}: ${value}` : null);
+const section = (title, lines) => {
+    const body = lines.filter(Boolean);
+    return body.length ? [`## ${title}`, ...body].join('\n') : null;
+};
+const plural = (n, word) => `${n} ${word}${n === 1 ? '' : 's'}`;
+
+export const githubLine = (gh) => {
+    if (!gh) return null;
+    const parts = [];
+    if (gh.commits !== null) parts.push(plural(gh.commits, 'commit'));
+    if (gh.stars !== null) parts.push(plural(gh.stars, 'star'));
+    if (gh.lastPush) parts.push(`last push ${gh.lastPush}`);
+    return parts.join(', ');
+};
+
+const links = (p) => [p.live && `live ${p.live}`, p.repo && `repo ${p.repo}`].filter(Boolean).join(' · ') || null;
+
+const AVAILABILITY = { freelance: 'freelance projects', fullTime: 'full-time roles', contract: 'contracts', remote: 'remote work' };
+
+const projectBlock = (p) => {
+    const meta = [DISTRICT_NAMES[p.district], p.status && `status ${p.status}`, p.featured && 'featured'].filter(Boolean).join(' · ');
+    const who = [
+        p.builtFor && `built for: ${p.builtFor}`,
+        p.role && `role: ${p.role}`,
+        p.teamSize !== null && `team of ${p.teamSize}`,
+        p.dates,
+    ].filter(Boolean).join(' · ');
+    const cs = p.caseStudy;
+    const xray = p.xray ? Object.entries(p.xray).filter(([, v]) => v).map(([k, v]) => `${k.toUpperCase()}: ${v}`) : [];
+    return [
+        `### ${p.name} [${p.slug}]`,
+        meta && `- ${meta}`,
+        who && `- ${who}`,
+        p.stack.length ? `- Stack: ${p.stack.join(', ')}` : null,
+        bullet('Description (GitHub)', p.description),
+        bullet('Links', links(p)),
+        bullet('GitHub', githubLine(p.github)),
+        p.effort !== null && `- Effort (owner's 1–10 rating): ${p.effort}`,
+        cs && bullet('Problem', cs.problem),
+        cs && bullet('Hardest part', cs.hardestPart),
+        cs && bullet('Key decision', cs.decision),
+        cs?.result && `- Result: ${cs.result}${cs.resultSource ? ` (source: ${cs.resultSource})` : ''}`,
+        xray.length ? `- Under the hood: ${xray.join(' · ')}` : null,
+    ].filter(Boolean).join('\n');
+};
+
+const repoLine = (r) => {
+    const details = [r.description, r.stack.length && `stack ${r.stack.join(', ')}`, r.status && `status ${r.status}`, githubLine(r.github), links(r)].filter(Boolean);
+    return `- ${r.name} [${r.slug}]${details.length ? `: ${details.join(' · ')}` : ''}`;
+};
+
+/** knowledgeFacts() → the Markdown doc. */
+export const renderKnowledge = (f) => {
+    const name = f.name ?? 'the owner';
+    const open = f.availability ? Object.keys(AVAILABILITY).filter((k) => f.availability[k]).map((k) => AVAILABILITY[k]) : [];
+    const c = f.contact;
     return [
         `# Knowledge: ${name}`,
         `Everything the guide knows about ${name} and his work. Facts only come from here.`,
-        ...Object.values(sections),
-        unknownSection(profile, sections),
+        section('About', [
+            bullet('Name', f.name),
+            bullet('Headline', f.headline),
+            bullet('Based in', f.location),
+            bullet('Roots', f.roots),
+            bullet('Degree', f.degree),
+            bullet('Years coding', f.yearsCoding),
+            bullet('Spoken languages', f.spokenLanguages.join(', ')),
+            f.bio && `\nBio: ${f.bio}`,
+            f.origin.length ? `\nOrigin story:\n${f.origin.join('\n\n')}` : null,
+        ]),
+        section('Contact and availability', [
+            f.availability && bullet('Open to', open.length ? open.join(', ') : 'nothing at the moment'),
+            bullet('Email', c.email),
+            bullet('GitHub', c.github),
+            bullet('LinkedIn', c.linkedin),
+            bullet('X', c.x),
+            bullet('YouTube', c.youtube),
+            bullet('CV (PDF on this site)', c.cv),
+        ]),
+        section('Services (the Market stalls)', f.services.map((s) =>
+            `- ${s.name}${s.delivered ? `: ${s.delivered}` : ''}${s.examples.length ? ` Examples: ${s.examples.map((x) => `[${x}]`).join(', ')}` : ''}`)),
+        section('Projects (buildings in OJ City; [slug] identifies each one)', f.projects.map(projectBlock)),
+        section('More public repos (buildings in Downtown, from GitHub data only, no write-up)', f.repos.map(repoLine)),
+        section('Experience', f.experience.map((e) => [
+            `### ${[`${e.role}, ${e.company}`, e.dates, e.location].filter(Boolean).join(' · ')}`,
+            ...e.did.map((d) => `- ${d}`),
+            bullet('Proudest of', e.proudest),
+        ].filter(Boolean).join('\n'))),
+        section('Teaching (the School)', f.teaching.map((t) => {
+            const details = [t.venue, t.audience && `for ${t.audience}`, t.courses, t.date, t.link].filter(Boolean);
+            return `- ${t.title}${details.length ? ` (${details.join('; ')})` : ''}`;
+        })),
+        section('Video work (the Cinema)', f.video.map((v) => {
+            const details = [v.role, v.tools.join(', '), v.link].filter(Boolean);
+            return `- ${v.title}${details.length ? ` (${details.join('; ')})` : ''}`;
+        })),
+        section('Hobbies', f.hobbies.map((h) => `- ${h.name}: ${h.text}`)),
+        section('Tools', [f.tools.summary, ...f.tools.groups.map((g) => `- ${g.name}: ${g.items.join(', ')}`)]),
+        section('Clients and workplaces', f.clients.map((t) => `- ${t}`)),
+        section('Testimonials (shared with permission)', f.testimonials.map((t) => `- "${t.quote}" — ${t.name}${t.link ? ` (${t.link})` : ''}`)),
+        section('Numbers (owner-supplied, with source)', f.numbers.map((s) => `- ${s.label}: ${s.value} (source: ${s.source})`)),
+        section('FAQ (owner answers)', f.faq.map((q) => `Q: ${q.q}\nA: ${q.a}`)),
+        section('Not known (say you don\'t know and suggest the contact form)', [
+            ...f.unknown,
+            'prices beyond the FAQ, private repos, and anything not written in this document',
+        ].map((i) => `- ${i}`)),
     ].filter(Boolean).join('\n\n') + '\n';
 };
+
+/** Content + buildings → the Markdown doc (knowledgeFacts + renderKnowledge). */
+export const buildKnowledge = (input) => renderKnowledge(knowledgeFacts(input));

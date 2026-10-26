@@ -17,6 +17,26 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-26 — Chat UI: OJ Guide on the page
+**Tasks:** P4-05 (done)
+**Decisions (owner):** plan approved.
+**Done:**
+- `src/lib/guideChat.js` (pure, 6 tests): SSE reader (events split across chunks, CRLF, bad events skipped), `trimHistory` (last 11, starts with the visitor, length caps, only role + content sent), `answerLines` (lists, https-only links, "Name [slug]" → one chip for cited slugs, everything else text), `mentionsContact`, `askGuide` (busy / unavailable errors, aborts not reported).
+- `/api/chat` sends `citations {items: [{slug, name}]}` after `text`, so pages need no project data (chat route test updated).
+- `useGuideStore` (open, messages, pending, `send`; failed questions stay greyed with a notice and aren't sent again; loads `guideChat.js` on the first question).
+- `src/components/Guide/GuideLauncher.jsx` (button; lazy `GuidePanel.jsx`, preloaded on hover/focus) and `GuidePanel.jsx` (greeting, 4 starters, answers, chips, suggestions, "Open contact form", notices, textarea with Enter / Shift+Enter and a 600 counter, Escape, focus back to the button, `aria-live` log).
+- City: top right (phones `top-24`, below the status line), hidden while a project panel is open; chips → `openProject` (flies there, opens the panel); contact → the contact panel. One-page site: bottom right; chips are labels; contact scrolls to `#contact`.
+- `design_system.md` (OJ Guide section), `architecture.md` (chat UI).
+**Checks:** `npm test` 298/298; lint clean on changed files; build OK. Playwright on the production build (`node server/index.js` :3098): one-page desktop (opens with focus in the box, starters, English + French answers, chips as labels, contact button scrolls to the form, Escape returns focus, history kept, a 502 shows the notice and the next question still works); city desktop ("Tell me about Vital Pulse" → chip → guide closes, button hidden, Vital Pulse's panel opens); Pixel 7 city (Pidgin answer, bottom sheet 412 × 382, button at y 96 below the status line). No console errors except the deliberate 502.
+**Problems / notes:**
+- First load: the guide adds ~1.0 KB gzip (456.6 → 457.6 KB). The main chunk had already grown from the 446 KB measured on 2026-10-23 by earlier work; P0-06 is still open (budget 200 KB).
+- On this machine the one-page site's 3D hero keeps headless Chromium's main thread busy, so clicks there take seconds to be handled; the check uses long timeouts. Not seen in the city.
+- First phone screenshot showed the button over the status line (which wraps there); moved to `top-24` on phones.
+- Screen-reader behaviour was checked by structure only (roles, labels, live region), not with a real screen reader.
+**Next:** P4-04 (guide actions on the client), P4-03b (Groq layer) or P4-06 (eval set).
+
+---
+
 ## 2026-10-24 — Free guide: /api/chat with the built-in answer engine
 **Tasks:** P4-03 (done)
 **Decisions (owner):** no paid AI model. ADR-014 replaces ADR-004: the built-in guide (A) always answers, and an optional Groq free-tier layer (B, P4-03b) goes in front of it later. Groq chosen over Gemini (free-tier messages may be read by Google reviewers) and Cloudflare (~80 answers/day). Plan approved.

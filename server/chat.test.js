@@ -52,11 +52,15 @@ test('POST /api/chat streams the guide\'s answer as SSE, uncompressed, and logs 
         assert.equal(res.headers.get('content-encoding'), null, 'compression must not buffer the stream');
         assert.match(res.headers.get('cache-control'), /no-transform/);
         const list = events(await res.text());
-        assert.deepEqual(list.map((e) => e.event), ['text', 'suggestions', 'done']);
+        assert.deepEqual(list.map((e) => e.event), ['text', 'citations', 'suggestions', 'done']);
         assert.match(list[0].data.delta, /pricing/);
-        assert.equal(list[1].data.items.length, 3);
-        assert.deepEqual(list[2].data, { engine: 'guide' });
-        assert.deepEqual(app.logs, ['[chat] engine=guide intent=pricing lang=en']);
+        assert.deepEqual(list[1].data, { items: [] });
+        assert.equal(list[2].data.items.length, 3);
+        assert.deepEqual(list[3].data, { engine: 'guide' });
+
+        const cited = events(await (await post(app.url, { messages: [{ role: 'user', content: 'Tell me about Vital Pulse' }] })).text());
+        assert.deepEqual(cited[1].data, { items: [{ slug: 'vital-pulse', name: 'Vital Pulse' }] });
+        assert.deepEqual(app.logs, ['[chat] engine=guide intent=pricing lang=en', '[chat] engine=guide intent=project lang=en']);
     } finally {
         await app.close();
     }

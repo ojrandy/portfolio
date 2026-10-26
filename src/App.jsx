@@ -9,6 +9,10 @@ import Contact from "./sections/Contact.jsx";
 import Footer from "./sections/Footer.jsx";
 import LoadingScreen from "./components/LoadingScreen.jsx";
 import CursorGlow from "./components/CursorGlow.jsx";
+import GuideLauncher from "./components/Guide/GuideLauncher.jsx";
+
+// The one-page site has no project panels yet (P5-02), so chips are labels; "contact" scrolls to the form.
+const scrollToContact = () => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
 
 // The 3D city on /?city (unlinked, noindex) until P5-02's mode router. Dev adds the HUD.
 const City = import.meta.env.DEV
@@ -39,6 +43,7 @@ const App = () => {
            <TechStack />
            <Contact />
            <Footer />
+           <GuideLauncher corner="bottom" className="fixed bottom-4 right-4" onContact={scrollToContact} />
        </>
     )
 }

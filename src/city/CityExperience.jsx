@@ -44,6 +44,7 @@ import CityProjectList from '../components/CityProjectList.jsx';
 import ArcadeHub from '../components/ArcadeHub.jsx';
 import SchoolPanel from '../components/SchoolPanel.jsx';
 import ContactPanel from '../components/ContactPanel.jsx';
+import GuideLauncher from '../components/Guide/GuideLauncher.jsx';
 import MarketPanel from '../components/MarketPanel.jsx';
 import CareerPanel from '../components/CareerPanel.jsx';
 import AboutPanel from '../components/AboutPanel.jsx';
@@ -383,6 +384,16 @@ const CityExperience = ({ debug }) => {
                     onProject={(slug) => { setMarketOpen(null); openProject(slug); }}
                     onQuote={(about) => { setMarketOpen(null); setContact({ scored: false, about }); }}
                     onClose={() => setMarketOpen(null)}
+                />
+            )}
+            {/* P4-05: hidden while a project panel is open (it takes the right side); a chip flies to the project. */}
+            {drawn && (
+                <GuideLauncher
+                    // Phones: below the status line (it wraps to two or three lines there).
+                    className="fixed right-4 top-24 sm:top-4"
+                    hidden={Boolean(openProjectData)}
+                    onCite={openProject}
+                    onContact={() => setContact({ scored: false })}
                 />
             )}
             {contact && <ContactPanel contact={CONTACT} scored={contact.scored} about={contact.about} onClose={() => setContact(null)} />}

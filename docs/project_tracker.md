@@ -92,7 +92,7 @@ A real, busy Buea-style city, not just buildings (ADR-013). Rules in design_syst
 - [x] **P4-03** `POST /api/chat` with the built-in guide (ADR-014 option A): SSE, zod-validated, per-IP rate limit, message/length caps; answers from the knowledge in English/French (Pidgin once the owner approves the phrases) (`knowledgeFacts`, `server/lib/guide/` 12 tests, `routes/chat.js` 7 tests; Pidgin approved 2026-10-24; evidence-based stacks in `docs/projects.md`)
 - [ ] **P4-03b** Groq layer (ADR-014 option B): optional, `GROQ_API_KEY` + `GROQ_MODEL`, daily cap `CHAT_DAILY_AI_LIMIT` under the free limit, falls back to the built-in guide; unknown slugs stripped; AI answers labelled
 - [ ] **P4-04** Tools: `fly_to_project`, `open_case_study`, `open_contact`, `switch_mode`, handled on the client
-- [ ] **P4-05** Chat UI: floating guide, suggested questions, citations as chips, works in both modes
+- [x] **P4-05** Chat UI: floating guide, suggested questions, citations as chips, works in both modes (`src/components/Guide/`, `useGuideStore`, `guideChat.js` 6 tests, `citations` SSE event; city + one-page site; +1 KB gzip on first load)
 - [ ] **P4-06** Eval set: 25 questions (recruiter, client, tricky, prompt injection) with expected behaviour; pass ≥ 23
 
 ## Phase 5 — Recruiter Mode & Polish

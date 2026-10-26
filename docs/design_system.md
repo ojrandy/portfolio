@@ -74,6 +74,13 @@ Draft rules; each task refines its section when it's built.
     - Cost: +1 draw call (the roof lights) while it chases; the police car is one more instance. The grid is built on the first chase (9–45 ms), a replan takes under 1 ms.
     - Reduced motion: no chase (a red is only "Red light!").
 
+## OJ Guide (Ask My Portfolio, P4-05)
+- **Button:** "Ask OJ Guide" with a window-gold dot, in the city's control style (mono, mist border, dark glass). City: top right (phones: below the status line, `top-24`, because the status line wraps there); hidden while a project panel is open (it takes the right side). One-page site: bottom right (the nav bar is at the top). It reads "Close guide" while open.
+- **Panel:** not modal (the city stays usable). sm+: 24rem wide, up to 70vh, under the button (city) or above it (one-page). Phones: a bottom sheet, up to 75dvh, like the project panel. Header "OJ Guide" + "Answers from Ojong's portfolio"; Close; Escape closes and focus returns to the button.
+- **Conversation:** greeting + 4 starter questions; the visitor's messages right-aligned on ash; answers as plain text with "- " lines as a list, https links in window gold (new tab), projects as chips (window-gold outline, "Name →"): in the city a chip closes the guide and flies to the project's panel; on the one-page site chips are labels until P5-02. After each answer, its 3 suggested questions as buttons, plus "Open contact form" when the answer points there (city: the contact panel; one-page: scroll to #contact). "…" while waiting. Errors (rate limit, network, server) show as a notice with an ember rule and offer the contact form; the question stays, greyed, and isn't sent again.
+- **Box:** 2-line textarea, Enter sends, Shift+Enter new line, 600-character counter.
+- **Behaviour:** the conversation is kept for the visit (closing keeps it), trimmed to the server's 11-message window. The panel's code loads on the first open (or hover/focus of the button); the button, store and zustand add ~1 KB gzip to the first load. Reduced motion: no smooth scrolling in the log.
+
 ## Building rules (data → shape)
 | Property | Source | Rule |
 |---|---|---|

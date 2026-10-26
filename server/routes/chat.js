@@ -1,6 +1,6 @@
 // POST /api/chat (P4-03, ADR-014): rate limit → body (48 KB) → zod → answer, as a short SSE stream.
 // The built-in guide answers today; P4-03b puts the optional Groq layer in front of it with the same events:
-//   text {delta} · suggestions {items} · done {engine} · error {message, fallback}
+//   text {delta} · citations {items: [{slug, name}]} · suggestions {items} · done {engine} · error {message, fallback}
 import express, { Router } from 'express';
 import { z } from 'zod';
 import { limits } from '../lib/rateLimit.js';
@@ -35,14 +35,16 @@ const sse = (res, event, data) => res.write(`event: ${event}\ndata: ${JSON.strin
  *   city: the /api/city router (its buildings() feeds the knowledge). The rest default to the real content and limits.
  */
 export const createChatRouter = ({ city, profile = loadProfile(), projects = loadProjects(), rateLimits = limits.chat(), log = console } = {}) => {
-    let cached = { key: null, guide: null };
+    let cached = { key: null, guide: null, names: new Map() };
     // Rebuilt only when the facts change (a content deploy or a GitHub refresh).
     const guideFor = async () => {
         const buildings = await city.buildings();
         const facts = knowledgeFacts({ profile, projects, buildings });
         const key = JSON.stringify(facts);
-        if (key !== cached.key) cached = { key, guide: createGuide(facts) };
-        return cached.guide;
+        if (key !== cached.key) {
+            cached = { key, guide: createGuide(facts), names: new Map([...facts.projects, ...facts.repos].map((p) => [p.slug, p.name ?? p.slug])) };
+        }
+        return cached;
     };
 
     const router = Router();
@@ -55,9 +57,11 @@ export const createChatRouter = ({ city, profile = loadProfile(), projects = loa
         });
         res.flushHeaders();
         try {
-            const guide = await guideFor();
+            const { guide, names } = await guideFor();
             const reply = guide.answer(req.valid.body.messages);
             sse(res, 'text', { delta: reply.text });
+            // Project names for the chips, so the page needs no project data of its own.
+            sse(res, 'citations', { items: reply.citations.map((slug) => ({ slug, name: names.get(slug) ?? slug })) });
             sse(res, 'suggestions', { items: reply.suggestions });
             sse(res, 'done', { engine: 'guide' });
             // No message text or IP in the log (docs/security.md rule 6).

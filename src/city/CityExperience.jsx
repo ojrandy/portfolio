@@ -45,6 +45,8 @@ import ArcadeHub from '../components/ArcadeHub.jsx';
 import SchoolPanel from '../components/SchoolPanel.jsx';
 import ContactPanel from '../components/ContactPanel.jsx';
 import GuideLauncher from '../components/Guide/GuideLauncher.jsx';
+import useGuideStore from '../store/useGuideStore.js';
+import { cityGuideActions } from '../lib/guideActions.js';
 import MarketPanel from '../components/MarketPanel.jsx';
 import CareerPanel from '../components/CareerPanel.jsx';
 import AboutPanel from '../components/AboutPanel.jsx';
@@ -154,6 +156,14 @@ const CityExperience = ({ debug }) => {
     const shops = useMemo(() => (layout ? shopfronts(layout) : []), [layout]);
     const shopsBySlug = useMemo(() => shopFaces(shops), [shops]);
     const shopNames = useMemo(() => new Map((data?.projects ?? []).map((p) => [p.slug, p.name])), [data]);
+    // P4-04: the guide flies the camera and opens panels (only to places that are built and buildings that exist).
+    const guideActions = useMemo(() => cityGuideActions({
+        places,
+        names: new Map([...projects].filter(([slug]) => lots.has(slug)).map(([slug, p]) => [slug, p.name])),
+        store: useCityStore.getState(),
+        openContact: () => setContact({ scored: false }),
+        navigate: useGuideStore.getState().leaveTo,
+    }), [places, projects, lots]);
     const highlighted = useMemo(() => [...new Set([hovered, focus].filter(Boolean))], [hovered, focus]);
 
     const bounds = layout?.bounds ?? FALLBACK_BOUNDS;
@@ -394,6 +404,7 @@ const CityExperience = ({ debug }) => {
                     hidden={Boolean(openProjectData)}
                     onCite={openProject}
                     onContact={() => setContact({ scored: false })}
+                    actions={guideActions}
                 />
             )}
             {contact && <ContactPanel contact={CONTACT} scored={contact.scored} about={contact.about} onClose={() => setContact(null)} />}

@@ -17,6 +17,23 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-10-27 — Guide actions + the Groq layer
+**Tasks:** P4-04 (done), P4-03b (done in code; not yet tried against the real Groq)
+**Decisions (owner):** plan approved. Actions run on their own only when the visitor asks ("show me", "take me to", "open"); otherwise they're offered as buttons. Districts are reached by flying the camera, not by taxi. The panel closes while an action runs. Groq answers everything except rule-change attempts and abuse (as ADR-014 says); requests to go somewhere are also kept on the built-in guide so the answer and the action match.
+**Done:**
+- P4-05 committed and pushed (`716fa10`).
+- P4-04: `server/lib/guide/actions.js` (`actionsFor`, EN/FR/Pidgin "take me / show me / open" words, places, modes) → `actions` SSE event; short `goTo` / `switchTo` lines (EN + FR; Pidgin falls back to English, no new unapproved Pidgin) for a bare "take me to the school". Client: `parseActions` allow-list, `src/lib/guideActions.js` (city: `flyTo` / `openProject` / `arrive` / contact panel / simple version; one-page: #work / #contact / `/?city`), `autorun` in `useGuideStore` (only while the panel is open), buttons in `GuidePanel`, conversation carried over a mode switch in sessionStorage.
+- P4-03b: `server/lib/groq.js` (fetch, no SDK; 8 s timeout; daily cap per Buea day saved to `server/.cache/chat-ai-day.json`; `cleanAnswer` strips unknown slugs and markdown, caps at 1,500 chars), `/api/chat` uses it first and falls back to the built-in guide; `GET /api/chat` → `{ ai }`; the panel says messages go to Groq when it's on, and labels AI answers.
+- Docs: architecture (actions, Groq layer, `GET /api/chat`), design_system (actions, AI label), security (actions allow-list, Groq logging), tracker.
+**Checks:** `npm test` 313/313 (guide +2, chat route +4, groq 5, guideChat +1, guideActions 2, guide store 2); lint clean on changed files; build OK. Playwright on the production build (`node server/index.js` :3098): one-page site ("Open the contact form" closes the guide and scrolls #contact to the top; "Show me the 3D city" opens `/?city`); city (the handed-over conversation shows, "Take me to the market" closes the guide and flies there with focus back on the button, "Show me Vital Pulse" flies, "Open Vital Pulse" opens its panel and hides the button, a "take me to the school" answer delayed 4 s and closed before it came moves nothing and is there on reopening, "Open the contact form" closes the guide and opens "Kick off a project"). The only console errors were three.js's DRACO decoder failing to download from its CDN (no internet on this machine during the check; not from this work).
+**Problems / notes:**
+- No `GROQ_API_KEY` locally, so the Groq layer is tested only against a fake. To switch it on: create a Groq account (no payment method), set `GROQ_API_KEY`, `GROQ_MODEL` (a free-tier model from Groq's console) and `CHAT_DAILY_AI_LIMIT` (below the free daily limit; 500 by default) in `.env` / hPanel, then ask a few questions and check the "AI answer" label and the server log (`engine=ai`).
+- The city check found a bug, now fixed and tested: an answer that arrived after the visitor closed the panel still ran its action on the next open.
+- The one-page site's 3D hero keeps headless Chromium's main thread busy on this machine (seen on 2026-10-26 too), so the one-page check ran with WebGL off; the hero then throws "k is not a function" from R3F's renderer setup (no WebGL fallback in the hero yet: Recruiter mode, P5).
+**Next:** set up the Groq key and try it for real; P4-06 (eval set: both engines, plus actions).
+
+---
+
 ## 2026-10-26 — Chat UI: OJ Guide on the page
 **Tasks:** P4-05 (done)
 **Decisions (owner):** plan approved.

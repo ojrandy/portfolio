@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { answerLines, askGuide, createSSEReader, GuideError, mentionsContact, MAX_TURNS, trimHistory } from './guideChat.js';
+import { answerLines, askGuide, parseActions, createSSEReader, GuideError, mentionsContact, MAX_TURNS, trimHistory } from './guideChat.js';
 
 test('SSE reader: events split across chunks, CRLF, several events per chunk', () => {
     const got = [];
@@ -54,12 +54,12 @@ test('askGuide sends the trimmed conversation and reads the stream', async () =>
     let sent;
     const fetchImpl = async (url, options) => {
         sent = { url, body: JSON.parse(options.body) };
-        return sseResponse('event: text\ndata: {"delta":"Hello "}\n\nevent: text\ndata: {"delta":"there"}\n\nevent: citations\ndata: {"items":[{"slug":"a","name":"A"}]}\n\nevent: suggestions\ndata: {"items":["Next?"]}\n\nevent: done\ndata: {"engine":"guide"}\n\n');
+        return sseResponse('event: text\ndata: {"delta":"Hello "}\n\nevent: text\ndata: {"delta":"there"}\n\nevent: citations\ndata: {"items":[{"slug":"a","name":"A"}]}\n\nevent: suggestions\ndata: {"items":["Next?"]}\n\nevent: actions\ndata: {"items":[{"type":"go_to","place":"market","auto":true}]}\n\nevent: done\ndata: {"engine":"guide"}\n\n');
     };
     const reply = await askGuide([{ role: 'user', content: 'Hi', extra: 1 }], { fetchImpl });
     assert.equal(sent.url, '/api/chat');
     assert.deepEqual(sent.body, { messages: [{ role: 'user', content: 'Hi' }] });
-    assert.deepEqual(reply, { text: 'Hello there', suggestions: ['Next?'], citations: [{ slug: 'a', name: 'A' }], engine: 'guide' });
+    assert.deepEqual(reply, { text: 'Hello there', suggestions: ['Next?'], citations: [{ slug: 'a', name: 'A' }], actions: [{ type: 'go_to', place: 'market', auto: true }], engine: 'guide' });
 });
 
 test('askGuide errors: busy (429 message), unavailable (network, 5xx, error event, empty)', async () => {
@@ -79,4 +79,21 @@ test('askGuide errors: busy (429 message), unavailable (network, 5xx, error even
     }
     const aborted = await askGuide([{ role: 'user', content: 'Hi' }], { fetchImpl: async () => { throw new DOMException('stop', 'AbortError'); } }).catch((e) => e);
     assert.equal(aborted.name, 'AbortError', 'an abort is not reported as an error');
+});
+
+test('parseActions keeps known actions with known fields only', () => {
+    assert.deepEqual(parseActions([
+        { type: 'fly_to_project', slug: 'vital-pulse', auto: true, extra: 'x' },
+        { type: 'open_case_study', slug: '../etc', auto: true },
+        { type: 'go_to', place: 'market' },
+        { type: 'go_to', place: 'moon', auto: true },
+        { type: 'switch_mode', mode: 'admin', auto: true },
+        { type: 'run_code', auto: true },
+        null,
+    ]), [
+        { type: 'fly_to_project', slug: 'vital-pulse', auto: true },
+        { type: 'go_to', place: 'market', auto: false },
+    ]);
+    assert.deepEqual(parseActions('nope'), []);
+    assert.equal(parseActions(Array.from({ length: 9 }, () => ({ type: 'open_contact' }))).length, 3);
 });

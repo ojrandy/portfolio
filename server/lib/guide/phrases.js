@@ -80,6 +80,20 @@ const en = {
     clients: (items) => `Clients and workplaces, in Ojong's words:\n${lines(items)}`,
     githubProfile: ({ url, repos }) => `Ojong's GitHub: ${url}. ${repos} of his public repos are buildings in OJ City, next to the projects he has written up.`,
     city: () => 'Each building in OJ City is one of Ojong\'s projects. Downtown has the projects, the Market his services, the Cinema his video work, the Arcade games and easter eggs, the School his teaching, the Pitch is where you get in touch, and the About house tells his story. Take a taxi to any of them.',
+    // P4-04: said when the visitor asks to be taken somewhere and there's nothing more specific to answer.
+    goTo: {
+        downtown: "Here's Downtown: each building is one of Ojong's projects. Click one to open it.",
+        market: "Here's the Market: one stall for each of Ojong's services.",
+        cinema: "Here's the Cinema, where Ojong's video work plays.",
+        arcade: "Here's the Arcade: games and the city's easter eggs.",
+        school: "Here's the School, about Ojong's teaching.",
+        pitch: "Here's the Pitch, where you can get in touch with Ojong.",
+        about: "Here's the About house: Ojong's story.",
+    },
+    switchTo: {
+        city: 'Opening OJ City, the 3D version of the site.',
+        site: 'Opening the simple version of the site: the same content, without 3D.',
+    },
     suggestions: {
         projects: 'What has Ojong built?',
         skill: 'Does he know Flutter?',
@@ -165,6 +179,19 @@ const fr = {
     clients: (items) => `Clients et employeurs, selon ses mots (en anglais) :\n${lines(items)}`,
     githubProfile: ({ url, repos }) => `Le GitHub d'Ojong : ${url}. ${repos} de ses dépôts publics sont des bâtiments d'OJ City, à côté des projets qu'il a décrits.`,
     city: () => "Chaque bâtiment d'OJ City est un projet d'Ojong. Downtown regroupe les projets, le Marché ses services, le Cinéma son travail vidéo, l'Arcade des jeux et des easter eggs, l'École son enseignement, le Terrain sert à le contacter et la Maison « About » raconte son histoire. Prenez un taxi pour y aller.",
+    goTo: {
+        downtown: "Voici Downtown : chaque bâtiment est un projet d'Ojong. Cliquez sur l'un d'eux pour l'ouvrir.",
+        market: "Voici le Marché : un stand pour chacun des services d'Ojong.",
+        cinema: "Voici le Cinéma, où passe le travail vidéo d'Ojong.",
+        arcade: "Voici l'Arcade : des jeux et les easter eggs de la ville.",
+        school: "Voici l'École, consacrée à l'enseignement d'Ojong.",
+        pitch: "Voici le Terrain, pour contacter Ojong.",
+        about: "Voici la Maison « About » : l'histoire d'Ojong.",
+    },
+    switchTo: {
+        city: "J'ouvre OJ City, la version 3D du site.",
+        site: 'J\'ouvre la version simple du site : le même contenu, sans 3D.',
+    },
     suggestions: {
         projects: "Qu'a construit Ojong ?",
         skill: 'Connaît-il Flutter ?',

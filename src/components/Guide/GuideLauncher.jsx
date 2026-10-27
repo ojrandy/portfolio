@@ -8,11 +8,12 @@ const GuidePanel = lazy(loadPanel);
 
 /**
  * @param {{ corner?: 'top' | 'bottom', className?: string, hidden?: boolean,
- *   onCite?: (slug: string) => void, onContact?: () => void }} props
+ *   onCite?: (slug: string) => void, onContact?: () => void, actions?: { label: Function, run: Function } }} props
  *   corner: where the button sits on sm+ screens (the panel opens away from it); className positions the button.
  *   onCite: open a cited project (the city); without it chips are labels. onContact: open the contact form.
+ *   actions: what the page does with the guide's actions (P4-04, src/lib/guideActions.js).
  */
-const GuideLauncher = ({ corner = 'top', className = 'fixed right-4 top-4', hidden = false, onCite, onContact }) => {
+const GuideLauncher = ({ corner = 'top', className = 'fixed right-4 top-4', hidden = false, onCite, onContact, actions }) => {
     const open = useGuideStore((s) => s.open);
     const { toggle, setOpen } = useGuideStore.getState();
     const button = useRef(null);
@@ -42,7 +43,7 @@ const GuideLauncher = ({ corner = 'top', className = 'fixed right-4 top-4', hidd
             </button>
             {open && (
                 <Suspense fallback={null}>
-                    <GuidePanel corner={corner} onCite={onCite} onContact={onContact} onClose={() => setOpen(false)} />
+                    <GuidePanel corner={corner} onCite={onCite} onContact={onContact} actions={actions} onClose={() => setOpen(false)} />
                 </Suspense>
             )}
         </>

@@ -49,11 +49,15 @@ const Answer = ({ text, citations = [], onCite }) => {
 };
 
 /**
- * @param {{ corner: 'top' | 'bottom', onClose: () => void, onCite?: (slug: string) => void, onContact?: () => void }} props
+ * @param {{ corner: 'top' | 'bottom', onClose: () => void, onCite?: (slug: string) => void, onContact?: () => void,
+ *   actions?: { label: (action: object) => string | null, run: (action: object) => void } }} props
+ *   actions: what this page can do with the guide's actions (src/lib/guideActions.js).
  */
-const GuidePanel = ({ corner, onClose, onCite, onContact }) => {
+const GuidePanel = ({ corner, onClose, onCite, onContact, actions: host }) => {
     const messages = useGuideStore((s) => s.messages);
     const pending = useGuideStore((s) => s.pending);
+    const autorun = useGuideStore((s) => s.autorun);
+    const ai = useGuideStore((s) => s.ai);
     const { send } = useGuideStore.getState();
     const [draft, setDraft] = useState('');
     const input = useRef(null);
@@ -61,12 +65,24 @@ const GuidePanel = ({ corner, onClose, onCite, onContact }) => {
 
     useEffect(() => {
         input.current?.focus({ preventScroll: true });
+        useGuideStore.getState().checkAi();
     }, []);
 
     // Keep the newest message in view.
     useEffect(() => {
         log.current?.lastElementChild?.scrollIntoView({ block: 'end', behavior: reducedMotion() ? 'auto' : 'smooth' });
     }, [messages.length, pending]);
+
+    // P4-04: the visitor asked to be taken somewhere: close the panel (focus goes back to the button) and go.
+    useEffect(() => {
+        if (!autorun) return;
+        const { messages: all, clearAutorun } = useGuideStore.getState();
+        clearAutorun();
+        const action = all.find((m) => m.id === autorun)?.actions?.find((a) => a.auto && host?.label(a));
+        if (!action) return;
+        onClose();
+        host.run(action);
+    }, [autorun, host, onClose]);
 
     const ask = (text) => {
         if (!text.trim() || pending) return;
@@ -77,7 +93,12 @@ const GuidePanel = ({ corner, onClose, onCite, onContact }) => {
 
     const lastAnswer = [...messages].reverse().find((m) => m.role === 'assistant' || m.role === 'notice');
     const suggestions = !messages.length ? STARTERS : lastAnswer?.role === 'assistant' ? lastAnswer.suggestions ?? [] : [];
-    const showContact = onContact && lastAnswer && (lastAnswer.role === 'notice' || mentionsContact(lastAnswer.content));
+    // The answer's actions this page can do, as buttons (also to repeat one that already ran).
+    const offered = lastAnswer?.role === 'assistant' && host
+        ? (lastAnswer.actions ?? []).map((a) => ({ action: a, label: host.label(a) })).filter((o) => o.label)
+        : [];
+    const contactOffered = offered.some((o) => o.action.type === 'open_contact');
+    const showContact = onContact && !contactOffered && lastAnswer && (lastAnswer.role === 'notice' || mentionsContact(lastAnswer.content));
     const cite = onCite ? (slug) => { onClose(); onCite(slug); } : undefined;
 
     const place = corner === 'bottom' ? 'sm:bottom-16 sm:top-auto' : 'sm:top-14 sm:bottom-auto';
@@ -94,7 +115,10 @@ const GuidePanel = ({ corner, onClose, onCite, onContact }) => {
             <div className="flex items-center justify-between gap-3 border-b border-mist/15 px-4 py-3">
                 <div>
                     <h2 id="oj-guide-title" className="text-sm font-semibold">OJ Guide</h2>
-                    <p className="font-mono text-[11px] text-mist/60">Answers from Ojong&apos;s portfolio</p>
+                    <p className="font-mono text-[11px] text-mist/60">
+                        {/* ADR-014: with the AI layer on, visitors are told their messages go to Groq. */}
+                        {ai ? 'AI answers via Groq (US): your messages are sent there' : 'Answers from Ojong’s portfolio'}
+                    </p>
                 </div>
                 <button type="button" onClick={onClose} className={BUTTON}>Close</button>
             </div>
@@ -113,6 +137,9 @@ const GuidePanel = ({ corner, onClose, onCite, onContact }) => {
                                 <div className="break-words">
                                     <span className="sr-only">OJ Guide: </span>
                                     <Answer text={m.content} citations={m.citations} onCite={cite} />
+                                    {m.engine === 'ai' && (
+                                        <p className="mt-0.5 font-mono text-[10px] text-mist/45">AI answer · may contain mistakes, check with Ojong</p>
+                                    )}
                                 </div>
                             )}
                             {m.role === 'notice' && (
@@ -127,8 +154,13 @@ const GuidePanel = ({ corner, onClose, onCite, onContact }) => {
                     )}
                 </ol>
 
-                {(suggestions.length > 0 || showContact) && !pending && (
+                {(suggestions.length > 0 || showContact || offered.length > 0) && !pending && (
                     <div className="mt-3 flex flex-wrap gap-2">
+                        {offered.map(({ action, label }) => (
+                            <button key={label} type="button" onClick={() => { onClose(); host.run(action); }} className={`${BUTTON} border-window/50 text-window`}>
+                                {label}<span aria-hidden="true"> →</span>
+                            </button>
+                        ))}
                         {showContact && (
                             <button type="button" onClick={() => { onClose(); onContact(); }} className={`${BUTTON} border-window/50 text-window`}>
                                 Open contact form

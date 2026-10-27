@@ -3,6 +3,7 @@
 // question such as pricing or contact), answers from owner content only, cites projects as [slug], and says it
 // doesn't know otherwise. Pure: the same facts and messages always give the same answer.
 import { DISTRICT_NAMES } from '../knowledge.js';
+import { actionsFor } from './actions.js';
 import { PIDGIN_APPROVED, phrasesFor } from './phrases.js';
 import { detectLanguage, hasPhrase, normalize, sameWord, tokens } from './text.js';
 
@@ -360,7 +361,8 @@ export const createGuide = (facts) => {
     return {
         /**
          * @param {{ role: 'user' | 'assistant', content: string }[]} messages  the conversation, ending with the visitor
-         * @returns {{ text: string, lang: 'en' | 'fr' | 'pcm', detected: string, intent: string, citations: string[], suggestions: string[] }}
+         * @returns {{ text: string, lang: 'en' | 'fr' | 'pcm', detected: string, intent: string, citations: string[], suggestions: string[], actions: object[] }}
+         *   actions: actions.js (what the page may do next)
          */
         answer: (messages) => {
             const detected = languageOf(messages);
@@ -392,10 +394,15 @@ export const createGuide = (facts) => {
                 text = answers[c.intent]?.(P) ?? null;
             } else if (c.kind === 'injection' || c.kind === 'abuse') text = answers[c.kind](P);
 
-            if (!text) {
-                kind = 'unknown';
-                text = P.unknown(contactVia(P));
+            if (!text) kind = 'unknown';
+            const actions = actionsFor(messages.at(-1)?.content ?? '', c);
+            // "Take me to the Market": a short line beats the general city answer or "I don't know".
+            const go = actions.find((a) => a.auto && (a.type === 'go_to' || a.type === 'switch_mode'));
+            if (go && (kind === 'unknown' || kind === 'city')) {
+                kind = 'navigate';
+                text = go.type === 'go_to' ? P.goTo[go.place] : P.switchTo[go.mode];
             }
+            if (!text) text = P.unknown(contactVia(P));
             const citations = [...new Set([...text.matchAll(/\[([a-z0-9-]+)\]/g)].map((m) => m[1]).filter((s) => slugs.has(s)))];
             return {
                 text,
@@ -404,6 +411,7 @@ export const createGuide = (facts) => {
                 intent: kind,
                 citations,
                 suggestions: suggestionsFor(kind === 'intent' ? c.intent : kind, P),
+                actions,
             };
         },
     };

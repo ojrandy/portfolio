@@ -10,9 +10,23 @@ import Footer from "./sections/Footer.jsx";
 import LoadingScreen from "./components/LoadingScreen.jsx";
 import CursorGlow from "./components/CursorGlow.jsx";
 import GuideLauncher from "./components/Guide/GuideLauncher.jsx";
+import useGuideStore from "./store/useGuideStore.js";
+import { siteGuideActions } from "./lib/guideActions.js";
 
 // The one-page site has no project panels yet (P5-02), so chips are labels; "contact" scrolls to the form.
-const scrollToContact = () => document.getElementById("contact")?.scrollIntoView({ behavior: "smooth" });
+const scrollTo = (id) => {
+    const section = document.getElementById(id);
+    const smooth = !window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
+    section?.scrollIntoView({ behavior: smooth ? "smooth" : "auto" });
+    return Boolean(section);
+};
+const scrollToContact = () => scrollTo("contact");
+// P4-04: the guide scrolls to his work or the contact form, or opens the 3D city.
+const guideActions = siteGuideActions({
+    scrollTo,
+    navigate: (url) => useGuideStore.getState().leaveTo(url),
+    hasSection: (id) => Boolean(document.getElementById(id)),
+});
 
 // The 3D city on /?city (unlinked, noindex) until P5-02's mode router. Dev adds the HUD.
 const City = import.meta.env.DEV
@@ -43,7 +57,7 @@ const App = () => {
            <TechStack />
            <Contact />
            <Footer />
-           <GuideLauncher corner="bottom" className="fixed bottom-4 right-4" onContact={scrollToContact} />
+           <GuideLauncher corner="bottom" className="fixed bottom-4 right-4" onContact={scrollToContact} actions={guideActions} />
        </>
     )
 }

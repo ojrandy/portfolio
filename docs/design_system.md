@@ -182,7 +182,14 @@ The look of a "toy diorama": stylised low-poly, nothing perfectly sharp. Made in
 | Extras | crane, beacon, flag | unchanged rules (recent push, live URL, featured) |
 | Glass | one pane per window, its own instanced part | lit-window ratio and night glow (unchanged) |
 
-**Paint (draft, finalised in ART-03):** wall paint = the language accent mixed 35 % with `--paper`, so the colour still says the language but reads as paint. Trim `--paper`. Zinc `--mist` + 30 % `--ash`. Rebar and frames `--ash`. Archived: paint desaturated 70 % (unchanged rule). Paints are vertex colours where the mask `aTint` = 1 (instance colour), everything else keeps its baked colour.
+**Paint (approved by the owner at ART-03):** wall paint = the language accent mixed 35 % with `--paper`, so the colour still says the language but reads as paint. Trim `--paper`. Zinc `--mist` + 30 % `--ash`. Rebar and frames `--ash`. Archived: paint desaturated 70 % (unchanged rule). Paints are vertex colours where the mask `aTint` = 1 (instance colour), everything else keeps its baked colour.
+
+**In the city (ART-03):** the medium footprint is built from the kit; small and large stay boxes until ART-04.
+- Ground floor: door and steps on the first side without a shop; no ground-floor windows (shops cover the street sides).
+- Middle floors: plain or balcony in runs of 2–4 floors of the same kind, seeded by slug; balconies face a street.
+- Roof: flat with clutter; crane, beacon and flag stand on the roof deck.
+- Lit windows: the same panes and rules, placed on the pieces' glass. Hover / focus warms the paint 40 % towards `--window`.
+- Desktop gets the LOD0 pieces, touch devices LOD1; a device whose first quality guess is `low` keeps the boxes. Decided once at start (no shader compiles mid-visit). Switching by distance is left for ART-04 if perf needs it.
 
 **Day and night:** daytime is bright and candy-coloured, like the references; at night the existing mood (dark sky, warm windows, lamps) takes over through the same lighting. No separate night assets.
 

@@ -19,6 +19,18 @@ export const FOOTPRINTS = {
 };
 export const FACES = 4;
 
+// City kit (ART-03, design_system.md "City art"): footprints built from Blender pieces instead of boxes, and the
+// window openings in those pieces (must match art/blender/pieces.py). Other footprints stay boxes until ART-04.
+export const KIT = {
+    widths: { medium: 'w3' },
+    corner: 0.25,
+    windowWidth: 0.42,
+    sillTop: 0.16,
+    lintel: 0.44,
+    inset: 0.03, // glass set back from the wall (LOD0); LOD1 has its glass on the wall
+    roofDeck: 0.03, // the roof's walkable surface above the roof piece's base
+};
+
 export const CRANE_DAYS = 7;
 export const LIT_MAX = 0.9; // pushed today
 export const LIT_MIN = 0.1; // pushed a year or more ago
@@ -118,6 +130,8 @@ export const toBuilding = (project, { now }) => {
         columns,
         accentColor,
         bodyColor,
+        // Kit wall paint (ART-03): the accent as paint, 35 % paper.
+        paintColor: mixHex(accentColor, COLORS.paper, 0.35),
         litWindowRatio: ratio,
         // Index = face * floors * columns + floor * columns + column.
         litWindows: lit,
@@ -128,6 +142,54 @@ export const toBuilding = (project, { now }) => {
         flag: Boolean(project.featured),
         weathered,
     };
+};
+
+/** True when this building is drawn from the city kit. */
+export const usesKit = (building) => Object.hasOwn(KIT.widths, building.footprint);
+
+/** Window centres along a face (x from the face's middle), the same in every kit floor. */
+export const kitWindowCentres = (size, columns) => {
+    const gap = (size - 2 * KIT.corner - columns * KIT.windowWidth) / (columns - 1);
+    const first = -size / 2 + KIT.corner + KIT.windowWidth / 2;
+    return Array.from({ length: columns }, (_, i) => first + i * (KIT.windowWidth + gap));
+};
+
+const RUN_MIN = 2;
+const RUN_SPREAD = 3; // runs of 2–4 floors
+
+/**
+ * The pieces of a kit building, bottom to top: [{ piece, y, rotationY }]. Rotation turns a piece's front (+z) to
+ * face `face` (as in shopfronts.js: 0 +z, 1 +x, 2 −z, 3 −x).
+ * - Ground floor: its door faces the first side without a shop.
+ * - Middle floors: plain or balcony, seeded by slug, the same kind for a run of floors; balconies face a street.
+ * - Roof: not turned, so its clutter keeps clear of the crane, beacon and flag spots.
+ * @param {object} building  from toBuilding
+ * @param {Set<number>} [shopFaces]  faces with a shop
+ */
+export const kitPieces = (building, shopFaces = new Set()) => {
+    const w = KIT.widths[building.footprint];
+    const turn = (face) => (face * Math.PI) / 2;
+    const doorFace = [0, 1, 2, 3].find((face) => !shopFaces.has(face)) ?? 0;
+    const balconyFace = [0, 1, 2, 3].find((face) => shopFaces.has(face)) ?? (doorFace + 2) % FACES;
+
+    const pieces = [{ piece: `floor_ground_${w}`, y: 0, rotationY: turn(doorFace) }];
+    const random = createRandom(`${building.slug}:floors`);
+    let kind = random() < 0.5 ? 'plain' : 'balcony';
+    let left = RUN_MIN + Math.floor(random() * RUN_SPREAD);
+    for (let floor = 1; floor < building.floors; floor++) {
+        if (left === 0) {
+            kind = kind === 'plain' ? 'balcony' : 'plain';
+            left = RUN_MIN + Math.floor(random() * RUN_SPREAD);
+        }
+        left--;
+        pieces.push({
+            piece: `floor_mid_${kind}_${w}`,
+            y: floor * FLOOR_HEIGHT,
+            rotationY: turn(kind === 'balcony' ? balconyFace : doorFace),
+        });
+    }
+    pieces.push({ piece: `roof_flat_${w}`, y: building.height, rotationY: 0 });
+    return pieces;
 };
 
 export const toBuildings = (projects, opts) => projects.map((p) => toBuilding(p, opts));

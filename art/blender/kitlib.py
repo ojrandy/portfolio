@@ -55,6 +55,13 @@ def side_matrix(side):
     return Matrix.Rotation(side * math.pi / 2, 4, 'Z')
 
 
+def _ordered(bm, edges):
+    """Edges in index order: a Python set's order follows memory addresses, so bmesh ops fed from a set could
+    number the new geometry differently from run to run."""
+    bm.edges.index_update()
+    return sorted(edges, key=lambda e: e.index)
+
+
 class Piece:
     """Collects boxes into one bmesh, each with its colour and paint mask, then makes the object."""
 
@@ -63,30 +70,92 @@ class Piece:
         self.bm = bmesh.new()
         self.color = self.bm.loops.layers.float_color.new('Color')
         self.tint = self.bm.verts.layers.float.new('_TINT')
+        self.skip_ao = self.bm.verts.layers.float.new('_SKIP_AO')  # build only: removed before export
 
-    def box(self, center, size, color, tint=False, bevel=0.0, segments=2, only_vertical=False, frame=None):
-        """Add a box. `bevel` rounds its edges (all, or only the vertical ones, which is cheaper)."""
+    def box(self, center, size, color, tint=False, bevel=0.0, segments=2, only_vertical=False, frame=None, grid=0,
+            ao=True):
+        """Add a box. `bevel` rounds its edges (all, or only the vertical ones, which is cheaper). `grid` cuts its
+        top and bottom into a grid, so a big flat face gets enough vertices for the baked AO (no bevel then).
+        `ao=False` leaves it unshaded (AO 1), for big faces too coarse to shade smoothly (LOD1)."""
         before = set(self.bm.faces)
         matrix = (frame or Matrix()) @ Matrix.Translation(Vector(center)) @ Matrix.Diagonal((*size, 1.0))
         bmesh.ops.create_cube(self.bm, size=1.0, matrix=matrix)
         faces = [f for f in self.bm.faces if f not in before]
+        if grid > 0:
+            flat = [e for e in {e for f in faces for e in f.edges}
+                    if abs((e.verts[0].co - e.verts[1].co).normalized().z) < 0.01]
+            bmesh.ops.subdivide_edges(self.bm, edges=_ordered(self.bm, flat), cuts=grid, use_grid_fill=True)
+            faces = [f for f in self.bm.faces if f not in before]
         if bevel > 0:
             edges = {e for f in faces for e in f.edges}
             if only_vertical:
                 edges = {e for e in edges if abs((e.verts[0].co - e.verts[1].co).normalized().z) > 0.99}
             bmesh.ops.bevel(
-                self.bm, geom=list(edges), offset=min(bevel, 0.45 * min(size)), offset_type='OFFSET',
+                self.bm, geom=_ordered(self.bm, edges), offset=min(bevel, 0.45 * min(size)), offset_type='OFFSET',
                 segments=segments, profile=0.5, affect='EDGES', clamp_overlap=True,
             )
             faces = [f for f in self.bm.faces if f not in before]
+        self._paint(faces, color, tint)
+        if not ao:
+            for f in faces:
+                for v in f.verts:
+                    v[self.skip_ao] = 1.0
+        return self
+
+    def cylinder(self, center, radius, height, color, tint=False, segments=10, bevel=0.0, frame=None):
+        """Add an upright cylinder standing on `center` (its base). `bevel` rounds the two cap rims."""
+        before = set(self.bm.faces)
+        matrix = ((frame or Matrix()) @ Matrix.Translation(Vector(center))
+                  @ Matrix.Translation((0, 0, height / 2)) @ Matrix.Diagonal((radius, radius, height, 1.0)))
+        bmesh.ops.create_cone(self.bm, cap_ends=True, cap_tris=False, segments=segments,
+                              radius1=1.0, radius2=1.0, depth=1.0, matrix=matrix)
+        faces = [f for f in self.bm.faces if f not in before]
+        if bevel > 0:
+            rims = [e for e in {e for f in faces for e in f.edges}
+                    if any(len(f.verts) > 4 for f in e.link_faces)]
+            bmesh.ops.bevel(self.bm, geom=_ordered(self.bm, rims), offset=min(bevel, 0.45 * min(radius, height)),
+                            offset_type='OFFSET', segments=2, profile=0.5, affect='EDGES', clamp_overlap=True)
+            faces = [f for f in self.bm.faces if f not in before]
+        self._paint(faces, color, tint)
+        return self
+
+    def _paint(self, faces, color, tint):
         col = rgba(color)
         for f in faces:
             for loop in f.loops:
                 loop[self.color] = col
                 loop.vert[self.tint] = 1.0 if tint else 0.0
-        return self
+
+    def _canonical_order(self):
+        """Vertices by position, faces by their vertices. Bevel can number what it makes differently from run to
+        run (same shape, other order); this keeps the exported file byte-identical. Ties keep insertion order."""
+        def pos(v):
+            return tuple(round(c, 6) for c in v.co)
+
+        def key(v):  # position, then its neighbours' positions (bevel can leave vertices on the same spot)
+            return pos(v), tuple(sorted(pos(e.other_vert(v)) for e in v.link_edges))
+
+        rank = {v: i for i, v in enumerate(sorted(self.bm.verts, key=key))}
+        self.bm.verts.sort(key=lambda v: rank[v])  # bmesh sorts by numbers only
+        self.bm.verts.index_update()
+        # Every face starts at its lowest vertex, so triangulation doesn't depend on where bevel started it.
+        # Rebuilt faces keep their colour (one per face, see _paint).
+        for face in list(self.bm.faces):
+            verts = [loop.vert for loop in face.loops]
+            first = min(range(len(verts)), key=lambda k: verts[k].index)
+            if first == 0:
+                continue
+            color = face.loops[0][self.color]
+            self.bm.faces.remove(face)
+            new = self.bm.faces.new(verts[first:] + verts[:first])
+            for loop in new.loops:
+                loop[self.color] = color
+        rank = {f: i for i, f in enumerate(sorted(self.bm.faces, key=lambda f: tuple(sorted(v.index for v in f.verts))))}
+        self.bm.faces.sort(key=lambda f: rank[f])
+        self.bm.faces.index_update()
 
     def finish(self, material, smooth=True, ground=False):
+        self._canonical_order()
         mesh = bpy.data.meshes.new(self.name)
         self.bm.to_mesh(mesh)
         self.bm.free()
@@ -102,6 +171,12 @@ class Piece:
             mod.keep_sharp = True
         mesh.materials.append(material)
         bake_vertex_ao(obj, ground)
+        skip = mesh.attributes['_SKIP_AO']
+        ao = mesh.attributes['_AO']
+        for i, item in enumerate(skip.data):
+            if item.value > 0.5:
+                ao.data[i].value = 1.0
+        mesh.attributes.remove(skip)
         return obj
 
 
@@ -236,31 +311,36 @@ LIGHTING = {
 }
 
 
-def render_previews(pairs, out_dir, paint_hex):
-    """Each piece and its LOD1 side by side, from the city camera's angle (south-west, 0.45 rad up, 45° fov)."""
+def render_previews(pairs, out_dir, paint_hex, stacks=()):
+    """Each piece and its LOD1 side by side, then each stack (a whole building: [(piece name, z), ...]),
+    from the city camera's angle (south-west, 0.45 rad up, 45° fov)."""
     scene = bpy.context.scene
     mat = preview_material(paint_hex)
+    by_name = {obj.name: obj for pair in pairs for obj in pair}
+    columns = [[(obj, 0.0)] for pair in pairs for obj in pair]
+    for stack in stacks:
+        column = []
+        for name, z in stack:
+            copy = by_name[name].copy()
+            scene.collection.objects.link(copy)
+            column.append((copy, z))
+        columns.append(column)
     spacing = 0.0
-    placed = []
-    for lod0, lod1 in pairs:
-        for obj in (lod0, lod1):
+    views = {'kit': [], 'building': []}
+    for i, column in enumerate(columns):
+        width = max(obj.dimensions.x for obj, _ in column)
+        for obj, z in column:
             obj.data.materials.clear()
             obj.data.materials.append(mat)
-            width = obj.dimensions.x
-            obj.location.x = spacing + width / 2
-            spacing += width + 0.8
-            placed.append(obj)
+            obj.location = (spacing + width / 2, 0, z)
+            views['kit' if i < len(columns) - len(stacks) else 'building'].append(obj)
+        spacing += width + 0.8
 
     bpy.ops.mesh.primitive_plane_add(size=1)
     ground = bpy.context.active_object
     ground.scale = (spacing + 20, 40, 1)
     ground.location = (spacing / 2, 0, -0.001)
     ground.data.materials.append(flat_material('ground', '#B9C1B5'))
-
-    lo = Vector((min(o.location.x - o.dimensions.x / 2 for o in placed), -1.5, 0))
-    hi = Vector((max(o.location.x + o.dimensions.x / 2 for o in placed), 1.5, max(o.dimensions.z for o in placed)))
-    center = (lo + hi) / 2
-    radius = (hi - lo).length / 2
 
     cam_data = bpy.data.cameras.new('preview')
     cam_data.sensor_fit = 'VERTICAL'
@@ -269,9 +349,15 @@ def render_previews(pairs, out_dir, paint_hex):
     scene.collection.objects.link(cam)
     elevation, azimuth = 0.45, math.radians(-45)
     direction = Vector((math.sin(azimuth) * math.cos(elevation), -math.cos(azimuth) * math.cos(elevation), math.sin(elevation)))
-    cam.location = center + direction * (radius / math.sin(math.radians(22.5)) * 1.05)
-    cam.rotation_euler = (-direction).to_track_quat('-Z', 'Y').to_euler()
     scene.camera = cam
+
+    def frame(objs):
+        lo = Vector((min(o.location.x - o.dimensions.x / 2 for o in objs), -1.5, 0))
+        hi = Vector((max(o.location.x + o.dimensions.x / 2 for o in objs), 1.5,
+                     max(o.location.z + o.dimensions.z for o in objs)))
+        radius = (hi - lo).length / 2
+        cam.location = (lo + hi) / 2 + direction * (radius / math.sin(math.radians(22.5)) * 1.05)
+        cam.rotation_euler = (-direction).to_track_quat('-Z', 'Y').to_euler()
 
     sun_data = bpy.data.lights.new('sun', 'SUN')
     sun_data.angle = math.radians(3)
@@ -302,8 +388,12 @@ def render_previews(pairs, out_dir, paint_hex):
         sun_data.energy = light['sun_strength']
         background.inputs['Color'].default_value = rgba(light['sky'])
         background.inputs['Strength'].default_value = light['sky_strength']
-        path = f'{out_dir}/kit_{name}.png'
-        scene.render.filepath = path
-        bpy.ops.render.render(write_still=True)
-        written.append(path)
+        for view, objs in views.items():
+            if not objs:
+                continue
+            frame(objs)
+            path = f'{out_dir}/{view}_{name}.png'
+            scene.render.filepath = path
+            bpy.ops.render.render(write_still=True)
+            written.append(path)
     return written

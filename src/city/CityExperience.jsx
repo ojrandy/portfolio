@@ -128,6 +128,13 @@ const CityExperience = ({ debug }) => {
     const [touch] = useState(() => deviceInfo().touch);
     const share = crowdShare({ touch, tier });
     const [quality, setQuality] = useState(PINNED ?? tier);
+    // City kit (ART-03): decided once from the first guess, like the crowd share: switching while the city runs would
+    // compile new shaders (a freeze on a phone). Lowest quality keeps the boxes; phones get the LOD1 pieces.
+    // ?perf&kit=0 draws boxes, to compare.
+    const [kit] = useState(() => {
+        if ((PINNED ?? tier) === 'low' || (PERF && params.get('kit') === '0')) return null;
+        return touch ? 'lod1' : 'lod0';
+    });
     const viewport = useRef(null);
     const [lighting] = useState(createLighting);
     // Traffic ↔ Pedestrians ↔ Drive: the live traffic, the busy crosswalks, the people, your car, the police car after
@@ -326,6 +333,7 @@ const CityExperience = ({ debug }) => {
                                 xraySlug={xrayActive ? openSlug : null}
                                 xrayLayers={openXRayLayers}
                                 shops={shopsBySlug}
+                                kit={kit}
                             />
                             <Shopfronts shops={shops} names={shopNames} lighting={lighting} hidden={xrayActive ? openSlug : null} />
                             {lots.get(labelSlug) && projects.get(labelSlug) && !(xrayActive && labelSlug === openSlug) && (

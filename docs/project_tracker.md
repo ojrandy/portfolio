@@ -91,7 +91,7 @@ A real, busy Buea-style city, not just buildings (ADR-013). Rules in design_syst
 A Blender-made "toy diorama" look, assembled from the same data (ADR-015). Rules in design_system.md "City art". Owner approved starting ART-01…03 before P4-06 (2026-11-22).
 - [x] **ART-01** ADR-015, style guide, kit spec and budgets (design_system.md "City art"), art pipeline in architecture.md
 - [x] **ART-02** Blender toolchain: `art/blender/*.py` run headless → `public/models/city-kit.glb`, `gltf-transform` (meshopt), `npm run art:build` with budget check + preview renders, `art/SOURCES.md`
-- [ ] **ART-03** Go/no-go: one medium building (3 floor kinds, flat roof with clutter) in the city, window lighting and tint working, `npm run perf` within budget; owner approves the look
+- [x] **ART-03** *(owner approved the look 2026-11-22; fps still to confirm with a clean `npm run perf` run)* Go/no-go: one medium building (3 floor kinds, flat roof with clutter) in the city, window lighting and tint working, `npm run perf` within budget; owner approves the look
 - [ ] **ART-04** Full building kit (3 widths, floor and roof variants, rebar for in-progress, crane / beacon / flag) in the generator; X-Ray, shopfronts and lit windows keep working; boxes stay as the low-quality fallback
 - [ ] **ART-05** Ground: raised kerbs, tiled pavements, grass verges, hedges, crossings
 - [ ] **ART-06** Trees and street props in the kit style

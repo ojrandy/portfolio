@@ -17,6 +17,25 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-11-22 — City art: medium buildings from the kit (ART-03, go/no-go)
+**Tasks:** ART-03 (done: owner approved the look; fps still to confirm with a clean perf run), ART-02 committed (`b362aae`)
+**Decisions (owner):** plan approved; all medium buildings (not just one) use the kit; a plain ground floor with a door is fine for now (shopfront / entrance variants in ART-04). The owner also wants cars and people in the kit style: that's ART-09, after the go/no-go.
+**Done:**
+- Kit (`art/blender/pieces.py`): `floor_ground_w3` (plinth, door + steps), `floor_mid_plain_w3`, `floor_mid_balcony_w3` (slab + railing), `roof_flat_w3` (parapet, deck, stair head, polytank on a stand, dish, AC box), each with LOD1. `kitlib.py`: cylinders, `grid` (enough vertices on big faces for the AO), `ao=False`, a whole-building preview (`art/previews/building_{day,dusk}.png`). Kit 70.6 KB (58 KB before the canonical vertex order, which compresses less well; budget 600).
+- `src/lib/buildings.js`: `KIT`, `usesKit`, `kitWindowCentres`, `kitPieces` (door away from shops, balcony runs of 2–4 facing a street, roof on top), `paintColor`; 5 new tests.
+- `src/city/cityKit.js` (floats + node matrix, shared paint/AO material); `Buildings.jsx` (pieces instanced, lit panes on the pieces' glass, invisible pick boxes, extras on the roof deck, error boundary → boxes); `CityExperience.jsx` (`lod0` desktop / `lod1` touch / boxes when the first guess is `low`, decided once; `?perf&kit=0`); `Sun.jsx` `shadow-normalBias` 0.04.
+- Docs: design_system ("In the city"), architecture, art/README.
+**Checks:** `npm test` 322/322; lint clean on changed files; build OK; `npm run art:build` five runs → same sha256. Playwright on the production build (clear weather forced): day, dusk and phone (LOD1) views of PICKUP App / Learn Contri Talk / Computer Solutions; hover → pointer cursor, click opens the project panel, the open building warms; no console errors (only GPU-stall warnings from screenshots). `npm run perf` vs the same-day baseline: draw calls 42 → 46 desktop (59 → 63 zoomed out), 40 → 44 phone; triangles 66.5k → 177.7k desktop, 63.4k → 79.9k phone; city chunk +1.6 KB gzip; initial JS unchanged.
+**Problems / notes:**
+- fps can't be judged today: the Mac was swapping (≈ 0.5 GB free, load ≈ 10), and the baseline before any change also measured 2–7 fps (it was 56–60 in October). Rerun `npm run perf` with other apps closed before the go/no-go.
+- Kit builds weren't deterministic any more: bevel numbers its output by memory address. Fixed with a canonical order (vertices, faces, each face's first corner) in `Piece.finish`.
+- The roof deck came out black (one big face whose corners sit inside the parapet → AO 0): fixed with a grid; LOD1 deck skips AO. Shadow acne on kit roofs: fixed with a normal bias; faint banding remains on phones (512 shadow map), for ART-08.
+- No medium project has 2+ X-Ray layers yet (demo projects have none; Global Sphere Autos is all `TODO(content)`), so X-Ray on a kit building couldn't be tried; the code removes the X-Rayed building before the kit/box split.
+- Projects with no language (e.g. PICKUP App, private repo) get indigo paint, which reads mauve-grey in the morning sun: a candidate to tune when the owner reviews the paint.
+**Next:** clean `npm run perf` run (other apps closed); ART-04 (full building kit). Cars and people in the kit style stay at ART-09 (owner, 2026-11-22).
+
+---
+
 ## 2026-11-22 — City art: Blender toolchain (ART-02)
 **Tasks:** ART-02 (done)
 **Decisions (owner):** plan approved; the built `public/models/city-kit.glb` is committed so deploys never need Blender.

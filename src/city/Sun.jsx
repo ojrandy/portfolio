@@ -52,8 +52,9 @@ const Sun = ({ shadowMap, lighting, version }) => {
         gl.shadowMap.needsUpdate = true;
     });
 
+    // normalBias stops shadow acne on flat roofs that receive shadows (city kit, ART-03); a texel is ~0.09 units.
     return (
-        <directionalLight ref={light} intensity={0} castShadow
+        <directionalLight ref={light} intensity={0} castShadow shadow-normalBias={0.04}
             shadow-camera-left={-45} shadow-camera-right={45} shadow-camera-top={45} shadow-camera-bottom={-45} shadow-camera-far={130} />
     );
 };

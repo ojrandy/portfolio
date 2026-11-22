@@ -28,7 +28,7 @@ def main():
 
     if args.previews:
         os.makedirs(args.previews, exist_ok=True)
-        for path in kitlib.render_previews(pairs, args.previews, PREVIEW_PAINT):
+        for path in kitlib.render_previews(pairs, args.previews, PREVIEW_PAINT, pieces.PREVIEW_STACKS):
             print(f'[art] preview {path}')
 
 

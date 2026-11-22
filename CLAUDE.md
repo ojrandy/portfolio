@@ -52,6 +52,8 @@ npm run preview   # preview the built frontend (Vite only, no API)
 npm run dev:server  # Express API on :3001 (development mode, restarts on change, loads .env)
 npm run dev:all     # Vite + Express together; Vite proxies /api → :3001
 npm start           # production: Express serves dist/ + /api (Hostinger start command)
+npm run art:build   # Blender scripts → public/models/city-kit.glb + budget check + previews (needs Blender 4.5 LTS)
+npm run art:check   # budget check of the committed kit only
 npm run perf        # after a build: fps, draw calls and chunk sizes vs the budget (desktop + emulated phone)
 ```
 

@@ -207,11 +207,13 @@ art/blender/*.py  --(Blender 4.5 LTS, background)-->  art/build/city-kit.raw.glb
                   --(gltf-transform: dedup, weld, meshopt)-->  public/models/city-kit.glb (committed)
                   --(budget check)-->  fails the build step if a piece or the file is over budget
 ```
-- One command, `npm run art:build`; Blender is found at `BLENDER_PATH` or `/Applications/Blender.app/Contents/MacOS/Blender`. Hostinger never runs Blender: the built `.glb` is committed, so `npm run build` and deploys don't need it.
+- One command, `npm run art:build` (`-- --no-previews` skips the renders; `npm run art:check` checks the committed kit without Blender); Blender is found at `BLENDER_PATH` or `/Applications/Blender.app/Contents/MacOS/Blender`. Hostinger never runs Blender: the built `.glb` is committed, so `npm run build` and deploys don't need it.
 - Scripts run with `--factory-startup` (no user add-ons or settings) and are deterministic: the same script makes the same file.
 - Each piece is a named node (`floor_mid_plain_w3`, `roof_flat_w2`…) with vertex colours (`COLOR_0`), the paint mask and baked AO as custom attributes (`_TINT`, `_AO`, which three.js loads as `_tint` / `_ao`), and an `LOD1` sibling.
 - Browser: the kit loads with the lazy 3D chunk (`useGLTF` with the meshopt decoder bundled locally, never a CDN). `src/lib/buildings.js` stays pure: it gains a `pieces` list per building (piece name + transform); `Buildings.jsx` draws one `InstancedMesh` per piece. The tint and AO go through an `onBeforeCompile` patch like `makeTintable` (`src/city/vehicleGeometry.js`).
 - Licences: everything in `art/` is made by our scripts or is CC0 with its source in `art/SOURCES.md`. Reference images are not committed.
+- Built in ART-02: `art/blender/build_kit.py` (entry), `pieces.py` (pieces), `kitlib.py` (boxes with bevels, paint mask, vertex AO by ray casting with fixed directions, export, previews); `scripts/art-build.mjs`; budget rules in `scripts/lib/artBudget.js` (tested). Two runs give a byte-identical `.glb`.
+- Meshopt quantization puts each piece's scale/offset on its node: the browser must apply the node matrix when it takes a piece's geometry (ART-03). Attributes arrive as `color` (vec4), `_tint`, `_ao` (normalized 0..1).
 - Optional: a Blender MCP connector for live work in an open Blender. Not needed by the pipeline.
 
 ## Deployment (Hostinger Node.js hosting)

@@ -17,6 +17,23 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-11-22 — City art: Blender toolchain (ART-02)
+**Tasks:** ART-02 (done)
+**Decisions (owner):** plan approved; the built `public/models/city-kit.glb` is committed so deploys never need Blender.
+**Done:**
+- ART-01 docs committed (`f218ea6`).
+- `art/blender/`: `build_kit.py` (entry, args after `--`), `pieces.py` (one test piece, `test_floor_w3`: medium 2.2 footprint, 3 window columns; bevelled bands and corner columns, piers, glass set back 0.03, paper sills and trim; LOD1 = wall box + trim + flat panes), `kitlib.py` (box builder with bevels, all or vertical-only; `Color` / `_TINT` / `_AO` attributes; weighted normals; vertex AO by ray casting 64 fixed directions against the piece and the ground, best of each face normal; glTF export; EEVEE day + dusk previews from the city camera's angle, wall painted TypeScript blue + 35 % paper).
+- `scripts/art-build.mjs` → `npm run art:build` (Blender `--background --factory-startup` → `art/build/city-kit.raw.glb` → gltf-transform dedup, weld, prune, meshopt → `public/models/city-kit.glb` → budget check) and `npm run art:check`. `scripts/lib/artBudget.js` (LOD0 ≤ 1,500 / LOD1 ≤ 300 triangles, file ≤ 600 KB, required attributes, every piece has its LOD1, lower_snake_case names). Dev deps: `@gltf-transform/core`, `/functions`, `/extensions`, `meshoptimizer`.
+- `art/README.md`, `art/SOURCES.md`; `art/build/` and `art/previews/` git-ignored; commands in CLAUDE.md; architecture "Art pipeline" updated.
+**Checks:** `npm run art:build` ~6 s (EEVEE previews ~13 s on the first render); kit 15.1 KB, `test_floor_w3` 1,008 triangles, LOD1 168, all attributes present. Two runs → byte-identical raw and final `.glb`. Budget check fails as expected with lowered limits. three.js `GLTFLoader` + the local meshopt decoder loads it (base at y = 0, 2.24 wide with the trim). `npm test` 317/317 (+4); lint clean on new files; `npm run build` OK (kit copied to `dist/models/`).
+**Problems / notes:**
+- First render showed a smeared roof: the wall's top was coplanar with the trim's, and per-vertex AO bled across the big face. Fixed (walls stop inside the trim; AO keeps the least-occluded face direction).
+- Quantization puts each piece's scale/offset on its glTF node: ART-03 must apply the node matrix when instancing.
+- Budget is tight once balconies and clutter arrive: bevelling only visible (vertical) edges on piers and columns kept this piece at 1,008 triangles.
+**Next:** ART-03 (one real medium building in the city; go/no-go on the look).
+
+---
+
 ## 2026-11-22 — City art: plan and tools (Phase 3-C)
 **Tasks:** ART-01 (done; docs only)
 **Decisions (owner):** ADR-015. The city should look like stylised low-poly "toy diorama" renders (two reference images, style only). Recommended option D approved: a Blender-made modular kit stacked by the existing building rules, plus a shared look; AI 3D generators only for one-off landmarks if ever needed. Claude does the Blender work; free tools only; Buea-flavoured buildings; bright by day, today's mood at night. ART-01…03 before P4-06.

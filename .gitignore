@@ -35,3 +35,8 @@ server/.cache/
 server/knowledge/
 
 .mcp.json
+
+# City kit (ART-02): Blender output before optimising, and review renders
+art/build/
+art/previews/
+__pycache__/

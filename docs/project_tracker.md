@@ -12,6 +12,7 @@ Each task ID matches a prompt in `/prompt.md`. Commit messages start with the ta
 | 2 | Live Buea | 2 | [x] |
 | 3 | Content, Districts & X-Ray | 3 | [~] |
 | 3-B | Interactive City | 3–4 | [~] |
+| 3-C | City Art (ADR-015) | — | [~] |
 | 4 | Ask My Portfolio (AI) | 4 | [ ] |
 | 5 | Recruiter Mode & Polish | 5 | [ ] |
 | 6 | Hardening & Launch | 6 | [ ] |
@@ -85,6 +86,20 @@ A real, busy Buea-style city, not just buildings (ADR-013). Rules in design_syst
 
 **Done when:** traffic, people and the market make the city feel lived-in at every Buea time and weather, clicks on them do something, and `npm run perf` still passes on desktop and phone.
 **Needs from the owner:** list of services for the market stalls (+ prices if wanted) and the Pidgin call-out lines, in `docs/projects.md`.
+
+## Phase 3-C — City Art
+A Blender-made "toy diorama" look, assembled from the same data (ADR-015). Rules in design_system.md "City art". Owner approved starting ART-01…03 before P4-06 (2026-11-22).
+- [x] **ART-01** ADR-015, style guide, kit spec and budgets (design_system.md "City art"), art pipeline in architecture.md
+- [ ] **ART-02** Blender toolchain: `art/blender/*.py` run headless → `public/models/city-kit.glb`, `gltf-transform` (meshopt), `npm run art:build` with budget check + preview renders, `art/SOURCES.md`
+- [ ] **ART-03** Go/no-go: one medium building (3 floor kinds, flat roof with clutter) in the city, window lighting and tint working, `npm run perf` within budget; owner approves the look
+- [ ] **ART-04** Full building kit (3 widths, floor and roof variants, rebar for in-progress, crane / beacon / flag) in the generator; X-Ray, shopfronts and lit windows keep working; boxes stay as the low-quality fallback
+- [ ] **ART-05** Ground: raised kerbs, tiled pavements, grass verges, hedges, crossings
+- [ ] **ART-06** Trees and street props in the kit style
+- [ ] **ART-07** Landmarks: School, Cinema, About house, Arcade cabinet, fuel station, market stalls
+- [ ] **ART-08** Look per quality level: tone mapping, soft shadows, screen-space AO and tilt-shift on desktop high only
+- [ ] **ART-09** *(optional)* Vehicles and people in the kit style
+
+**Done when:** the city has the approved look at every Buea time and weather, all data rules still show, and `npm run perf` passes on desktop and phone.
 
 ## Phase 4 — Ask My Portfolio (AI)
 - [x] **P4-01** Knowledge builder: content → compact knowledge doc used as the cached system context (`server/lib/knowledge.js` 7 tests, `npm run knowledge:build`, `router.buildings()`; ~3.7k tokens today)

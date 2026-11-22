@@ -17,6 +17,21 @@ Newest entry at the top. One entry per working session.
 
 ---
 
+## 2026-11-22 — City art: plan and tools (Phase 3-C)
+**Tasks:** ART-01 (done; docs only)
+**Decisions (owner):** ADR-015. The city should look like stylised low-poly "toy diorama" renders (two reference images, style only). Recommended option D approved: a Blender-made modular kit stacked by the existing building rules, plus a shared look; AI 3D generators only for one-off landmarks if ever needed. Claude does the Blender work; free tools only; Buea-flavoured buildings; bright by day, today's mood at night. ART-01…03 before P4-06.
+**Done:**
+- Installed Blender 4.5.16 LTS in /Applications (official build, SHA-256 checked, notarised by the Blender Foundation). The Mac is Intel, and Blender 5.0+ is Apple Silicon only.
+- Checked the headless pipeline: a background script modelled a bevelled block, rendered it with EEVEE (11.5 s at 256 px) and Cycles, and exported `.glb`.
+- Installed `uv` 0.13.9 in `~/.local/bin` (official installer, PATH not changed), needed for the optional Blender MCP connector.
+- Docs: ADR-015; tracker Phase 3-C (ART-01…09); design_system "City art" (look rules, kit pieces, paint, budgets, review loop); architecture "Art pipeline" + `art/` folder.
+**Problems / notes:**
+- Installing the community Blender MCP add-on (`mcp-for-blender` 2.3.1) was blocked by Claude Code's permission check (a third-party tool that runs code in Blender). It is optional; the owner can install it (see the session reply), with `DISABLE_TELEMETRY=true`.
+- The design uses vertex colours + baked AO, no textures, following the existing vehicle/prop style, so no KTX2 step.
+**Next:** ART-02 (toolchain + `npm run art:build`), then ART-03 (one building, go/no-go).
+
+---
+
 ## 2026-10-27 — Guide actions + the Groq layer
 **Tasks:** P4-04 (done), P4-03b (done in code; not yet tried against the real Groq)
 **Decisions (owner):** plan approved. Actions run on their own only when the visitor asks ("show me", "take me to", "open"); otherwise they're offered as buttons. Districts are reached by flying the camera, not by taxi. The panel closes while an action runs. Groq answers everything except rule-change attempts and abuse (as ADR-014 says); requests to go somewhere are also kept on the built-in guide so the answer and the action match.

@@ -33,3 +33,5 @@ server/.cache/
 
 # AI knowledge doc: review copy from `npm run knowledge:build`; the server builds it in memory
 server/knowledge/
+
+.mcp.json

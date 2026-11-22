@@ -35,6 +35,7 @@ One Node.js process on Hostinger serves both the built frontend and the API. All
 │  ├─ validate-content.js
 │  ├─ capture-previews.js    Playwright → public/previews/
 │  └─ build-knowledge.js     content → server/knowledge/knowledge.md (review copy of what the AI knows)
+├─ art/                     city art source (ADR-015): blender/*.py kit scripts, SOURCES.md; previews/ git-ignored
 ├─ shared/                  pure code used by both server and browser (solar.js: sun times + position)
 ├─ server/
 │  ├─ index.js               Express app: static + /api, listens on process.env.PORT
@@ -198,6 +199,20 @@ The server runs in production mode unless `NODE_ENV=development` (secure by defa
 - Debug override (P2-06, dev only): `/?city&time=HH:MM&weather=clear|cloudy|fog|rain|storm`. `parsePreviewOverride(URLSearchParams)` in `src/lib/dayNight.js` (pure, tested) → `{ minutes, weather }` (null when missing or invalid); `CityPreview.jsx` starts the HUD time slider at `minutes` and returns `weather: { kind, label }` from `debug()`, which `CityExperience` uses instead of /api/buea's weather for the scene and the status line. `CityPreview` is only loaded in dev (`import.meta.env.DEV` in `App.jsx`), so production ignores the params.
 - R3F gotcha: pass `args` for `shaderMaterial` (or any object with object args) through `useMemo`. A new args object on re-render makes R3F rebuild the material, which frees and recompiles its shader. Sky and mist did this on every hover/focus change until P1-08.
 - Line endings: `.gitattributes` forces LF on every checkout (`content:check` and its test compare generated JSON byte for byte).
+
+## Art pipeline (Phase 3-C, ADR-015)
+Planned in ART-01, built in ART-02.
+```
+art/blender/*.py  --(Blender 4.5 LTS, background)-->  art/build/city-kit.raw.glb + art/previews/*.png
+                  --(gltf-transform: dedup, weld, meshopt)-->  public/models/city-kit.glb (committed)
+                  --(budget check)-->  fails the build step if a piece or the file is over budget
+```
+- One command, `npm run art:build`; Blender is found at `BLENDER_PATH` or `/Applications/Blender.app/Contents/MacOS/Blender`. Hostinger never runs Blender: the built `.glb` is committed, so `npm run build` and deploys don't need it.
+- Scripts run with `--factory-startup` (no user add-ons or settings) and are deterministic: the same script makes the same file.
+- Each piece is a named node (`floor_mid_plain_w3`, `roof_flat_w2`…) with vertex colours (`COLOR_0`), the paint mask and baked AO as custom attributes (`_TINT`, `_AO`, which three.js loads as `_tint` / `_ao`), and an `LOD1` sibling.
+- Browser: the kit loads with the lazy 3D chunk (`useGLTF` with the meshopt decoder bundled locally, never a CDN). `src/lib/buildings.js` stays pure: it gains a `pieces` list per building (piece name + transform); `Buildings.jsx` draws one `InstancedMesh` per piece. The tint and AO go through an `onBeforeCompile` patch like `makeTintable` (`src/city/vehicleGeometry.js`).
+- Licences: everything in `art/` is made by our scripts or is CC0 with its source in `art/SOURCES.md`. Reference images are not committed.
+- Optional: a Blender MCP connector for live work in an open Blender. Not needed by the pipeline.
 
 ## Deployment (Hostinger Node.js hosting)
 > Confirm each step in hPanel during P0-05; Hostinger's UI changes over time.

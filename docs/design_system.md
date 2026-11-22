@@ -162,6 +162,38 @@ Placement is **deterministic** (seeded by slug), so the city looks the same for 
 - Body = `--ash` mixed 12 % with the accent; roof cap = accent. Weathered (archived): accent desaturated 70 %, body 80 %, lit windows dimmed. Projects without GitHub data have no language, so they use `--indigo`.
 - Rendering: one `InstancedMesh` per part (bodies, roofs, windows, cranes, flags, beacons), so 6 draw calls for any number of buildings.
 
+## City art (Phase 3-C, ADR-015)
+The look of a "toy diorama": stylised low-poly, nothing perfectly sharp. Made in Blender by scripts, stacked in the browser by the building rules above (which don't change).
+
+**What makes the look (every piece follows these):**
+- Soft edges: every outer edge bevelled (0.03–0.05, 2 segments, weighted normals, smooth shading). This, more than detail, is what stops it looking "perfect 3D".
+- Layered facades: a band between floors, windows set back 0.03 with a frame and a sill, a thick roof rim (parapet) with an inset roof.
+- Clutter where people look: rooftops (polytank, satellite dish, solar panel, AC box), street level (awnings, shutters, steps at doors, balcony railings).
+- Colour: walls in bright paints, trim in paper, zinc roofs in grey. Few colours per piece; no image textures.
+- Light: soft contact shadows baked into the vertices (AO); warm windows at dusk and night (unchanged rules).
+- Buea, not anywhere: painted concrete-block walls, corrugated zinc roofs, black polytanks, shop shutters, balconies, bare rebar on an unfinished top floor. Real local building forms only; no cultural motifs (ADR-009).
+
+**Kit pieces (ART-04; ART-03 starts with the medium width):** each in three widths matching the footprints (1.6 / 2.2 / 3.0, 2 / 3 / 4 window columns), floor height 0.6, origin at the floor's centre on its base, facing +z.
+| Piece | Variants | Chosen by |
+|---|---|---|
+| Ground floor | shopfront (awning, shutter, fascia slot for the existing name atlas), plain entrance with steps | street-facing sides get the shopfront (P3B-08) |
+| Middle floor | plain windows, balcony row, arched windows | count from commits (unchanged); variant seeded by slug, the same kind for a run of floors |
+| Top | flat roof with rim + clutter, zinc pitched roof, unfinished floor with rebar | rebar = status in-progress; otherwise seeded by slug |
+| Extras | crane, beacon, flag | unchanged rules (recent push, live URL, featured) |
+| Glass | one pane per window, its own instanced part | lit-window ratio and night glow (unchanged) |
+
+**Paint (draft, finalised in ART-03):** wall paint = the language accent mixed 35 % with `--paper`, so the colour still says the language but reads as paint. Trim `--paper`. Zinc `--mist` + 30 % `--ash`. Rebar and frames `--ash`. Archived: paint desaturated 70 % (unchanged rule). Paints are vertex colours where the mask `aTint` = 1 (instance colour), everything else keeps its baked colour.
+
+**Day and night:** daytime is bright and candy-coloured, like the references; at night the existing mood (dark sky, warm windows, lamps) takes over through the same lighting. No separate night assets.
+
+**Budgets (checked by `npm run art:build` and `npm run perf`):**
+- Piece: ≤ 1,500 triangles (LOD0), ≤ 300 (LOD1, used past ~60 units and on phones).
+- Kit file `public/models/city-kit.glb` ≤ 600 KB after meshopt; loaded with the lazy 3D chunk.
+- Buildings ≤ 15 draw calls; the whole city stays < 100 (desktop and phone).
+- Lowest quality level, or if the kit fails to load: today's box buildings.
+
+**Review loop:** every piece change renders preview PNGs (`art/previews/`, git-ignored) from the city camera's angle, day and dusk. The owner approves the look before a piece goes into the city.
+
 ## Colour tokens (draft, finalise in P1)
 | Token | Hex | Use |
 |---|---|---|
